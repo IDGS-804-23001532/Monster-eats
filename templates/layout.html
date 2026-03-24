@@ -23,8 +23,7 @@
     <aside id="logo-sidebar"
         class="fixed top-0 left-0 z-40 w-64 h-full transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar">
-        <div
-            class="h-full px-3 py-4 overflow-y-auto bg-neutral-primary-soft dark:bg-gray-800 border-e border-default dark:border-gray-700">
+       <div class="h-full px-3 py-4 overflow-y-auto bg-[#1F2937] text-white">
             <a href="#" class="flex items-center ps-2.5 mb-5">
                 <img src="{{url_for('static', filename='img/monster_logo.png')}}"
                     class="h-10 w-auto object-contain me-3" alt="Monster Eats Logo" />
@@ -33,7 +32,7 @@
             </a>
             <ul class="space-y-2 font-medium">
                 <li>
-                    <a href="#"
+                    <a href="{{url_for('dashboard.index')}}"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
                         <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -71,7 +70,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{url_for('inventario.index')}}"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
                         <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -83,7 +82,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{url_for('compras.index')}}"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
                         <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -183,7 +182,7 @@
         </div>
     </aside>
 
-    <main class="sm:ml-64 p-4 min-h-screen transition-colors duration-200">
+    <main class="sm:ml-64 p-4 min-h-screen transition-colors duration-200 dark:bg-gray-800 border-e border-default dark:border-gray-700">
         {% block content %}
 
         {% endblock %}

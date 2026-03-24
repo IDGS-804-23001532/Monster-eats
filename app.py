@@ -15,8 +15,10 @@ def index():
 
 from compras.routes import  compras
 from dashboard.routes import dashboard
+from inventario.routes import inventario
 app.register_blueprint(compras)
 app.register_blueprint(dashboard)
+app.register_blueprint(inventario)
 
 
 

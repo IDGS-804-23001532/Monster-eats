@@ -1,0 +1,59 @@
+{% extends 'layout.html' %} {% block content %}
+
+<div
+  class="flex justify-between items-center w-full mb-6"
+  style="margin-top: 5rem; margin-left: 7rem"
+>
+  <form class="flex items-center gap-6">
+    <label for="simple-search" class="sr-only">Search</label>
+    <div class="relative">
+      <input
+        type="text"
+        id="simple-search"
+        class="focus:outline-none w-[600px] h-12 ps-8"
+        style="
+          background-color: #3b4252;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 9999px;
+          color: #e2e8f0;
+          font-weight: 600;
+        "
+        placeholder="Buscar"
+      />
+    </div>
+    <div>
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center shrink-0 text-white bg-[#FF6B00] hover:bg-[#FF6B00] focus:outline-none"
+        style="
+          margin-left: 2rem;
+          border-radius: 50%;
+          width: 3rem;
+          height: 3rem;
+          border: 3px solid #3b4252;
+          flex-shrink: 0;
+        "
+      >
+        <svg
+          class="w-5 h-5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-width="2"
+            d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+          />
+        </svg>
+        <span class="sr-only">Icon description</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
