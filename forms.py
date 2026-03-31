@@ -10,9 +10,7 @@ class LoginForm(Form):
 
     password = PasswordField('Password', [
         validators.DataRequired(message='El password es requerido'),
-        validators.Length(min=8, message='El password debe tener al menos 8 carácteres'),
-        validators.regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
-               message='La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.')
+        validators.Length(min=8, message='El password debe tener al menos 8 carácteres')
     ])
 
 class RegisterForm(Form):

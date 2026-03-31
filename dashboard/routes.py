@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, url_for, redirect
 
-dashboard = Blueprint('dashboard',__name__)
+from . import dashboard
 
 @dashboard.route('/dashboard')
 def index():
