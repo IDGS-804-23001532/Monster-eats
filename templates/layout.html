@@ -32,6 +32,7 @@
                     Eats</span>
             </a>
             <ul class="space-y-2 font-medium">
+                {% if current_user.has_role('gerente') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -106,6 +107,9 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Recetas</span>
                     </a>
                 </li>
+                {% endif %}
+
+                {% if current_user.has_role('cocina') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -132,6 +136,9 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Inventario producción</span>
                     </a>
                 </li>
+                {% endif %}
+
+                {% if current_user.has_role('cliente') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -144,6 +151,9 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Solicitud producción</span>
                     </a>
                 </li>
+                {% endif %}
+
+                {% if current_user.has_role('gerente') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -156,6 +166,9 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Costo y utilidad</span>
                     </a>
                 </li>
+                {% endif %}
+
+                {% if current_user.has_role('caja') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -168,8 +181,9 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Venta</span>
                     </a>
                 </li>
+                {% endif %}
                 <li>
-                    <a href="#"
+                    <a href="/logout"
                         class="flex items-center px-2 py-2 text-white bg-[#FF6B00] hover:brightness-90 rounded-base transition-all duration-200 group">
                         <svg class="shrink-0 w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -183,7 +197,7 @@
         </div>
     </aside>
 
-    <main class="sm:ml-64 p-4 min-h-screen transition-colors duration-200">
+    <main class="opacity-0 sm:ml-64 p-4 min-h-screen transition-colors duration-200">
         {% block content %}
 
         {% endblock %}
@@ -192,6 +206,20 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" 
+            integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer"></script>
 
-</html>
+    <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Anima el <main> deslizando hacia arriba suavemente
+            MonsterAnimations.animatePageEntry();
+            
+            // Si alguna pantalla arroja un error/éxito (flash), también lo animamos
+            MonsterAnimations.animateFlashMessages();
+        });
+    </script>
+</body>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
+    <title>Demasiadas Peticiones - Monster Eats</title>
+</head>
+<body>
+    <div class="w-full min-h-screen flex items-center justify-center relative bg-cover bg-no-repeat overflow-hidden bg-[position:center_10%] md:bg-[position:center_25%]" 
+         style="background-image: url('{{ url_for('static', filename='img/background.png') }}');">
+
+        <div class="absolute inset-0 bg-black/70 z-0"></div>
+        <div class="absolute inset-0 z-0 scale-[1.05] pointer-events-none bg-inherit bg-cover bg-[position:inherit]" style="background-image: inherit;"></div>
+
+        <div class="w-full max-w-[480px] relative z-10 px-4 text-center text-white">
+            <div class="login-box rounded-[28px] bg-red-900/20 backdrop-blur-xl border border-red-500/30 shadow-2xl px-7 py-10">
+                
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <h1 class="text-4xl font-extrabold mb-2 text-red-400">Error 429</h1>
+                <h2 class="text-2xl font-bold mb-4">¡Woah, más despacio monstruo!</h2>
+                
+                <p class="text-white/80 mb-6">
+                    Hemos detectado una actividad inusual en tu conexión. Por tu seguridad y la del sistema, te hemos pausado temporalmente.
+                </p>
+                
+                <div class="bg-black/40 rounded-lg p-3 inline-block mb-8 border border-white/10">
+                    <p class="text-sm font-mono text-red-300">Límite excedido: {{ error_description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

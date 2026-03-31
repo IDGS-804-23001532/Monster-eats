@@ -1,45 +1,9 @@
 {
-  "name": "proyecto",
-  "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
   },
   "dependencies": {
-    "deepmerge": "^4.3.1",
-    "detect-libc": "^2.1.2",
-    "enhanced-resolve": "^5.20.1",
-    "estree-walker": "^2.0.2",
-    "flowbite": "^4.0.1",
-    "flowbite-datepicker": "^2.0.0",
-    "function-bind": "^1.1.2",
-    "graceful-fs": "^4.2.11",
-    "hasown": "^2.0.2",
-    "is-core-module": "^2.16.1",
-    "is-extglob": "^2.1.1",
-    "is-glob": "^4.0.3",
-    "is-module": "^1.0.0",
-    "jiti": "^2.6.1",
-    "lightningcss": "^1.31.1",
-    "lightningcss-win32-x64-msvc": "^1.31.1",
-    "magic-string": "^0.30.21",
-    "mini-svg-data-uri": "^1.4.4",
-    "mri": "^1.2.0",
-    "nanoid": "^3.3.11",
-    "node-addon-api": "^7.1.1",
-    "path-parse": "^1.0.7",
-    "picocolors": "^1.1.1",
-    "picomatch": "^4.0.3",
-    "postcss": "^8.5.8",
-    "resolve": "^1.22.11",
-    "source-map-js": "^1.2.1",
-    "supports-preserve-symlinks-flag": "^1.0.0",
-    "tailwindcss": "^4.2.1",
-    "tapable": "^2.3.0"
-  },
-  "devDependencies": {}
+    "flowbite": "^4.0.1"
+  }
 }
