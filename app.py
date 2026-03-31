@@ -4,6 +4,7 @@ from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
 from auth import auth
+from dashboard import dashboard
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
@@ -44,14 +45,11 @@ def unauthorized():
 
 csrf = CSRFProtect()
 app.register_blueprint(auth)
-
-
-
+app.register_blueprint(dashboard)
 
 @app.route("/")
-@login_required
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
