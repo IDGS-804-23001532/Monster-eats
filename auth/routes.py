@@ -66,7 +66,7 @@ def login():
                 db.session.commit()
                 logging.info(f'Inicio de sesion exisoto de {email}')
                 login_user(usuario, remember = remember)
-                return redirect(url_for('dashboard.index'))
+                return redirect(url_for('index'))
             else:
                 logging.warning(f'Intento de inicio de sesión sin datos sin coincidir {email}')
                 flash('El correo y/o contraseña son incorrectos', 'error')
