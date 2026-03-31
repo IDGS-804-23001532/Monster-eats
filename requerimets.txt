@@ -29,3 +29,4 @@ flask-security
 flask-Admin
 flask-marshmallow
 bcrypt
+Flask-Limiter

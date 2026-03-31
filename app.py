@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash
-import forms
+from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
@@ -10,6 +10,9 @@ from flask_security.decorators import roles_required
 from datetime import timedelta
 
 app = Flask(__name__)
+
+limiter.init_app(app)
+
 app.config.from_object(DevelopmentConfig)
 
 # Salt 
@@ -58,6 +61,10 @@ def page_not_found(e):
 @app.errorhandler(500)
 def interval_server_error(e):
     return render_template('500.html'), 500
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template('429.html', error_description=e.description), 429
 
 if __name__ == '__main__':
     csrf.init_app(app)

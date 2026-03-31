@@ -19,17 +19,23 @@
     <div class="absolute inset-0 z-0 scale-[1.05] pointer-events-none bg-inherit bg-cover bg-[position:inherit]" style="background-image: inherit;"></div>
 
         <div class="w-[400px] relative z-10">
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="mb-4 space-y-2 flash_container">
-                {% for message in messages %}
-                <div class="rounded-xl bg-red-500/20 border border-red-400/30 text-red-100 px-4 py-3">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-4 space-y-2 flash_container">
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                    <div class="rounded-xl bg-green-500/20 border border-green-400/30 text-green-100 px-4 py-3 text-center">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="rounded-xl bg-red-500/20 border border-red-400/30 text-red-100 px-4 py-3 text-center">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
             <form action="{{url_for('auth.login')}}" method="POST" novalidate>
                 {{ form.csrf_token }}
@@ -93,6 +99,12 @@
                     {% for error in form.password.errors %}
                     <p class="anim-item text-red-300 text-sm mb-2 ml-2">{{ error }}</p>
                     {% endfor %}
+
+                    <div class="anim-item text-center text-sm text-white/80 mt-2 mb-6">
+                        <p>
+                        Aun no tienes cuenta, <a href="{{ url_for('auth.register') }}" class="text-orange-500 hover:text-orange-400 font-semibold transition-colors underline decoration-transparent hover:decoration-orange-400">registrate</a>
+                        </p>
+                    </div>
 
                     <button
                         class="anim-item w-full rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 transition">
