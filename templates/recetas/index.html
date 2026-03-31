@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="p-4 transition-colors duration-200">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-heading dark:text-white">Recetario Maestro</h1>
+        <button class="px-4 py-2 text-white bg-[#FF6B00] rounded-base font-semibold">Nueva Ficha Técnica</button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-neutral-primary-soft dark:bg-gray-800 border border-default dark:border-gray-700 rounded-base shadow p-5">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-heading dark:text-white">Monster Burger XL</h3>
+                <span class="text-xs text-gray-400">SKU: REC-001</span>
+            </div>
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between text-sm text-gray-500 border-b dark:border-gray-700 pb-1">
+                    <span>Costo de Insumos:</span>
+                    <span class="font-semibold">$45.50</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-500 border-b dark:border-gray-700 pb-1">
+                    <span>Precio de Venta:</span>
+                    <span class="font-semibold">$149.00</span>
+                </div>
+                <div class="flex justify-between text-sm text-green-500">
+                    <span>Utilidad Sugerida:</span>
+                    <span class="font-bold">69.4%</span>
+                </div>
+            </div>
+            <button class="w-full py-2 bg-neutral-secondary-soft dark:bg-gray-700 text-heading dark:text-white rounded-base text-sm hover:bg-neutral-tertiary transition-colors">
+                Ver Detalle de Ingredientes
+            </button>
+        </div>
+
+        <div class="bg-neutral-primary-soft dark:bg-gray-800 border border-default dark:border-gray-700 rounded-base shadow p-5 opacity-80">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-heading dark:text-white">Papas Monster Fuego</h3>
+                <span class="text-xs text-gray-400">SKU: REC-042</span>
+            </div>
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between text-sm text-gray-500 border-b dark:border-gray-700 pb-1">
+                    <span>Costo de Insumos:</span>
+                    <span class="font-semibold">$22.00</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-500 border-b dark:border-gray-700 pb-1">
+                    <span>Precio de Venta:</span>
+                    <span class="font-semibold">$65.00</span>
+                </div>
+                <div class="flex justify-between text-sm text-green-500">
+                    <span>Utilidad Sugerida:</span>
+                    <span class="font-bold">66.1%</span>
+                </div>
+            </div>
+            <button class="w-full py-2 bg-neutral-secondary-soft dark:bg-gray-700 text-heading dark:text-white rounded-base text-sm hover:bg-neutral-tertiary transition-colors">
+                Ver Detalle de Ingredientes
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
