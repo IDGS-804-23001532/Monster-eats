@@ -3,8 +3,11 @@ from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
+
 from auth import auth
 from dashboard import dashboard
+from proveedores import proveedor
+
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
@@ -44,10 +47,14 @@ def unauthorized():
     return redirect(url_for('auth.login'))
 
 csrf = CSRFProtect()
+
+# Rutas Blueprint
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
+app.register_blueprint(proveedor)
 
 @app.route("/")
+@login_required
 def index():
     return render_template('index.html')
 
