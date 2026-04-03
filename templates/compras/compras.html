@@ -1,4 +1,138 @@
-{% extends 'layout.html' %}
-{% block content %}
-    <h1>Compras</h1>
+{% extends 'layout.html' %} {% block content %}
+
+<div class="w-full flex justify-start mt-20 pl-10">
+  <form class="flex items-center gap-4 w-full max-w-full justify-start">
+    <!-- Input -->
+    <div class="flex justify-end">
+      <label for="simple-search" class="sr-only">Buscar</label>
+      <input
+        type="text"
+        id="simple-search"
+        placeholder="Buscar"
+        class="w-[400px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-3 mx-2 my-5 bg-[#3b4252] text-white placeholder-white"
+      />
+    </div>
+
+    <!-- Botón -->
+    <button
+      type="button"
+      onclick="buscar()"
+      class="flex items-center justify-center w-12 h-12 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
+    >
+      <svg
+        class="w-5 h-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-width="2"
+          d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+        />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      onclick="nuevaCompra()"
+      class="flex items-center justify-center w-[200px] h-[50px] rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white ml-117"
+    >
+      <svg
+        class="w-6 h-6 text-gray-800 dark:text-white"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 12h14m-7 7V5"
+        />
+      </svg>
+      Nueva compra
+    </button>
+  </form>
+</div>
+
+<div
+  class="w-[1168px] ml-auto mr-10 bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mb-10 overflow-hidden"
+>
+  <table class="w-full text-sm text-left rtl:text-right text-body">
+    <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
+      <tr class="divide-x divide-[#ffffff]">
+        <th scope="col" class="px-6 py-3 font-medium text-white">Fecha</th>
+        <th scope="col" class="px-6 py-3 font-medium text-white">Proveedor</th>
+        <th scope="col" class="px-6 py-3 font-medium text-white">Total</th>
+        <th scope="col" class="px-6 py-3 font-medium text-white">Estado</th>
+        <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="odd:bg-[#0B1D33] text-white even:bg-[#1E2939] border-b border-[#ffffff] divide-x divide-[#ffffff]"
+      >
+        <th
+          scope="row"
+          class="px-6 py-4 font-medium text-white whitespace-nowrap"
+        >
+          Apple MacBook Pro 17"
+        </th>
+        <td class="px-6 py-4">Silver</td>
+        <td class="px-6 py-4">Laptop</td>
+        <td class="px-6 py-4">$2999</td>
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              title="Ver Detalle"
+              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] hover:brightness-110 transition"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="2.5"
+                  d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              title="Eliminar"
+              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#B22222] hover:brightness-110 transition"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M9 15L4 10l5-5M4 10h10c2.76 0 5 2.24 5 5v4"
+                />
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 {% endblock %}
