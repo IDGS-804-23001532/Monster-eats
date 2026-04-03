@@ -4,6 +4,8 @@ from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
 from auth import auth
+from inventario.routes import inventario
+from compras.routes import compras 
 from dashboard import dashboard
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
@@ -46,17 +48,25 @@ def unauthorized():
 csrf = CSRFProtect()
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
+app.register_blueprint(inventario)
+app.register_blueprint(compras)
 
 @app.route("/")
 def index():
-    return render_template("dashboard/dashboard.html")
+    return render_template('index.html')
 
-from compras.routes import  compras
-from dashboard.routes import dashboard
-app.register_blueprint(compras)
-app.register_blueprint(dashboard)
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
+# Diego: Para que funcione esta parte, desactiva el debug a False (Modo desarrollador False)
+@app.errorhandler(500)
+def interval_server_error(e):
+    return render_template('500.html'), 500
 
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template('429.html', error_description=e.description), 429
 
 if __name__ == '__main__':
     csrf.init_app(app)

@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, request, url_for, redirect
 
 
-compras = Blueprint('compras',__name__)
-
+from . import compras
 
 @compras.route('/compras')
 def index():
-    return render_template('compras/compras.html')
+    return render_template('compras/index.html')
