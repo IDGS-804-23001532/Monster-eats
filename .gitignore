@@ -1,2 +1,10 @@
 .env
+migrations
+static/
+venv/
+venv
+__pycache__/
+node_modules/
 *.pyc
+package-lock.json
+package.jsonS
