@@ -1,6 +1,7 @@
 from wtforms import Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, HiddenField, IntegerField, TextAreaField, SubmitField
 from wtforms import validators
+from wtforms.validators import DataRequired, NumberRange
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -47,3 +48,13 @@ class RegisterForm(Form):
         validators.regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
                message='La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.')
     ])
+    
+class AjusteStockForm(Form):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad (sumar/restar)', validators=[
+        DataRequired(message="Ingresa un número válido")
+    ])
+    motivo = TextAreaField('Motivo del ajuste', validators=[
+        DataRequired(message="El motivo es obligatorio para la auditoría")
+    ])
+    submit = SubmitField('Guardar Ajuste')
