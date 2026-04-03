@@ -43,7 +43,9 @@
       class="fixed top-0 left-0 z-40 w-64 h-full transition-transform -translate-x-full sm:translate-x-0"
       aria-label="Sidebar"
     >
-      <div class="h-full px-3 py-4 overflow-y-auto bg-[#0B1D33] text-white">
+      <div
+        class="h-full px-3 py-4 overflow-y-auto bg-neutral-primary-soft dark:bg-gray-800 border-e border-default dark:border-gray-700"
+      >
         <a href="#" class="flex items-center ps-2.5 mb-5">
           <img
             src="{{url_for('static', filename='img/monster_logo.png')}}"
@@ -58,7 +60,7 @@
         <ul class="space-y-2 font-medium">
           <li>
             <a
-              href="{{url_for('dashboard.index')}}"
+              href="#"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -139,7 +141,7 @@
           </li>
           <li>
             <a
-              href="{{url_for('inventario.index')}}"
+              href="#"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -164,7 +166,7 @@
           </li>
           <li>
             <a
-              href="{{url_for('compras.index')}}"
+              href="#"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -383,9 +385,7 @@
       </div>
     </aside>
 
-    <main
-      class="sm:ml-64 p-4 min-h-screen transition-colors duration-200 dark:bg-gray-800 border-e border-default dark:border-gray-700"
-    >
+    <main class="sm:ml-64 p-4 min-h-screen transition-colors duration-200">
       {% block content %} {% endblock %}
     </main>
 
