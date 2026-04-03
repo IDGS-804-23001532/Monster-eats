@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6 p-2 lg:p-6">
+
+    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col items-center text-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monster Burguer</h3>
+            <span
+                class="px-3 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full mb-4">Hamburguesas</span>
+
+            <div class="w-24 h-24 mb-4 flex items-center justify-center text-6xl drop-shadow-lg">🍔</div>
+
+            <div class="text-xl font-bold text-gray-900 dark:text-white mb-4">$55.5</div>
+            <button
+                class="w-full px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors shadow-sm">
+                Agregar
+            </button>
+        </div>
+
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col items-center text-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monster Burguer</h3>
+            <span
+                class="px-3 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full mb-4">Hot
+                dogs</span>
+
+            <div class="w-24 h-24 mb-4 flex items-center justify-center text-6xl drop-shadow-lg">🌭</div>
+
+            <div class="text-xl font-bold text-gray-900 dark:text-white mb-4">$60.5</div>
+            <button
+                class="w-full px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors shadow-sm">
+                Agregar
+            </button>
+        </div>
+
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col items-center text-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monster Burguer</h3>
+            <span
+                class="px-3 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full mb-4">Papas
+                Fritas</span>
+
+            <div class="w-24 h-24 mb-4 flex items-center justify-center text-6xl drop-shadow-lg">🍟</div>
+
+            <div class="text-xl font-bold text-gray-900 dark:text-white mb-4">$60.5</div>
+            <button
+                class="w-full px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors shadow-sm">
+                Agregar
+            </button>
+        </div>
+
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col items-center text-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monster Burguer</h3>
+            <span
+                class="px-3 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full mb-4">Bebidas</span>
+
+            <div class="w-24 h-24 mb-4 flex items-center justify-center text-6xl drop-shadow-lg">🥤</div>
+
+            <div class="text-xl font-bold text-gray-900 dark:text-white mb-4">$32</div>
+            <button
+                class="w-full px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors shadow-sm">
+                Agregar
+            </button>
+        </div>
+
+    </div>
+
+    <div class="w-full lg:w-[320px] shrink-0">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6 sticky top-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-5">Carrito</h2>
+
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Productos</h3>
+                <div class="flex justify-between items-center text-gray-900 dark:text-white font-medium mb-2">
+                    <span class="text-sm">Monster Burguer x1</span>
+                    <span class="font-bold">$55.5</span>
+                </div>
+            </div>
+
+            <hr class="border-gray-200 dark:border-gray-700 my-5">
+
+            <div class="mb-6">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Total:</h3>
+
+                <label for="metodo_pago"
+                    class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Método de pago</label>
+                <select id="metodo_pago"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500">
+                    <option value="efectivo" selected>Efectivo</option>
+                    <option value="tarjeta">Tarjeta</option>
+                    <option value="transferencia">Transferencia</option>
+                </select>
+            </div>
+
+            <button data-modal-target="modalConfirmacion" data-modal-toggle="modalConfirmacion" type="button"
+                class="w-full px-4 py-3 text-sm font-bold text-white bg-orange-500 rounded-full hover:bg-orange-600 shadow-md shadow-orange-500/30 transition-colors">
+                Completar Venta
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div id="modalConfirmacion" tabindex="-1"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/70 backdrop-blur-sm">
+    <div class="relative p-4 w-full max-w-sm max-h-full">
+        <div
+            class="relative bg-white rounded-3xl shadow-xl dark:bg-[#1e293b] p-8 text-center border border-gray-200 dark:border-gray-700">
+
+            <svg class="mx-auto mb-4 text-white w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+
+            <h3 class="mb-8 text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                Estas seguro querer<br>finalizar esta<br>compra?
+            </h3>
+
+            <div class="flex justify-center gap-4">
+                <button type="button"
+                    class="text-white bg-[#c82828] hover:bg-red-700 font-bold rounded-full text-sm px-6 py-2.5 text-center transition-colors flex-1 shadow-lg shadow-red-900/20">
+                    Si, estoy<br>seguro
+                </button>
+                <button data-modal-hide="modalConfirmacion" type="button"
+                    class="text-white bg-orange-500 hover:bg-orange-600 font-bold rounded-full text-sm px-6 py-2.5 text-center transition-colors flex-1 shadow-lg shadow-orange-500/30">
+                    No,<br>cancelar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
