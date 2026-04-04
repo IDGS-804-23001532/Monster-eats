@@ -40,10 +40,10 @@
       data-modal-target="nuevoInsumo"
       data-modal-toggle="nuevoInsumo"
       type="button"
-      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
+      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white "
     >
       <svg
-        class="w-5 h-5 text-white mr-2"
+        class="w-6 h-6 text-gray-800 dark:text-white mr-2"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -53,11 +53,13 @@
       >
         <path
           stroke="currentColor"
+          stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
+          d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
       </svg>
+
       Nuevo Insumo
     </button>
 
@@ -184,14 +186,14 @@
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
     <!-- Modal content -->
-    <div
-      class="relative bg-[#1F2937] border  rounded-base shadow-sm p-4 md:p-6 "
-    >
+    <div class="relative bg-[#1F2937] border rounded-base shadow-sm p-4 md:p-6">
       <!-- Modal header -->
       <div
         class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
       >
-        <h3 class="text-lg font-medium text-white bold w-full text-center ">Nuevo Insumo</h3>
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Nuevo Insumo
+        </h3>
         <button
           type="button"
           class="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
@@ -411,7 +413,7 @@
             >
             <select
               id="category"
-              class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
+              class="block w-full bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
             >
               <option selected="">Select category</option>
               <option value="TV">TV/Monitors</option>

@@ -7,6 +7,7 @@ from auth import auth
 from inventario.routes import inventario
 from compras.routes import compras 
 from dashboard import dashboard
+from insumos.routes import insumos
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
@@ -50,6 +51,7 @@ app.register_blueprint(auth)
 app.register_blueprint(dashboard)
 app.register_blueprint(inventario)
 app.register_blueprint(compras)
+app.register_blueprint(insumos)
 
 @app.route("/")
 def index():

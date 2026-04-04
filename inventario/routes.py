@@ -1,6 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, Blueprint, request
 
-inventario = Blueprint('inventario', __name__)
+from . import inventario
+
+
 
 @inventario.route('/inventario')
 def index():
