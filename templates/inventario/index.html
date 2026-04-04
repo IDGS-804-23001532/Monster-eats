@@ -1,4 +1,5 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %} {% from "macros/_macros.html" import camposNuevos %}
+{% block content %}
 
 <div class="w-[1168px] ml-auto mr-10 flex justify-between items-center mt-20">
   <form class="flex items-center gap-2">
@@ -184,14 +185,14 @@
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
     <!-- Modal content -->
-    <div
-      class="relative bg-[#1F2937] border  rounded-base shadow-sm p-4 md:p-6 "
-    >
+    <div class="relative bg-[#1F2937] border rounded-base shadow-sm p-4 md:p-6">
       <!-- Modal header -->
       <div
         class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
       >
-        <h3 class="text-lg font-medium text-white bold w-full text-center ">Nuevo Insumo</h3>
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Nuevo Insumo
+        </h3>
         <button
           type="button"
           class="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
@@ -218,67 +219,38 @@
         </button>
       </div>
       <!-- Modal body -->
-      <form action="#">
+      <form action="{{ url_for('insumos.nuevo_insumo') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
           <div class="col-span-2">
-            <label
-              for="name"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Name</label
-            >
-            <input
-              type="text"
-              name="name"
-              id="name"
-              class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
-              placeholder="Type product name"
-              required=""
-            />
+            {{ camposNuevos(create_form.nombre, class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Nombre del insumo") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            <label
-              for="price"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Price</label
-            >
-            <input
-              type="number"
-              name="price"
-              id="price"
-              class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
-              placeholder="$2999"
-              required=""
-            />
+            {{ camposNuevos(create_form.costo_unitario, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Precio") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            <label
-              for="category"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Category</label
-            >
-            <select
-              id="category"
-              class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
-            >
-              <option selected="">Select category</option>
-              <option value="TV">TV/Monitors</option>
-              <option value="PC">PC</option>
-              <option value="GA">Gaming/Console</option>
-              <option value="PH">Phones</option>
-            </select>
+            <div class="relative">
+              {{ camposNuevos(create_form.id_unidad_medida, class_="block w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10 cursor-pointer") }}
+              <div
+                class="pointer-events-none absolute bottom-0 right-0 top-6 flex items-center px-3 text-white"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+            </div>
           </div>
           <div class="col-span-2">
-            <label
-              for="description"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Product Description</label
-            >
-            <textarea
-              id="description"
-              rows="4"
-              class="block bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full p-3.5 shadow-xs placeholder:text-body"
-              placeholder="Write product description here"
-            ></textarea>
+            {{ camposNuevos(create_form.porcentaje_merma, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Porcentaje de merma") }}
           </div>
         </div>
         <div
@@ -286,7 +258,7 @@
         >
           <button
             type="submit"
-            class="inline-flex items-center text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+            class="inline-flex items-center text-white bg-[#FF6B00] hover:bg-orange-600 box-border border border-transparent focus:ring-4 focus:ring-orange-900 shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5 focus:outline-none"
           >
             <svg
               class="w-4 h-4 me-1.5 -ms-0.5"
@@ -305,14 +277,14 @@
                 d="M5 12h14m-7 7V5"
               />
             </svg>
-            Add new product
+            Guardar
           </button>
           <button
-            data-modal-hide="crud-modal"
+            data-modal-hide="nuevoInsumo"
             type="button"
-            class="text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+            class="text-white bg-[#B22222] hover:brightness-110 box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5 focus:outline-none"
           >
-            Cancel
+            Cancelar
           </button>
         </div>
       </form>
@@ -330,28 +302,28 @@
 
 <!-- Main modal -->
 <div
-  id="nuevoInsumo"
+  id="historialMovimientosModal"
   tabindex="-1"
   aria-hidden="true"
   class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
-  <div class="relative p-4 w-full max-w-md max-h-full">
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
     <!-- Modal content -->
     <div
-      class="relative bg-neutral-primary-soft border border-default rounded-base shadow-sm p-4 md:p-6"
+      class="relative bg-[#1F2937] border border-default rounded-base shadow-sm p-4 md:p-6"
     >
       <!-- Modal header -->
       <div
         class="flex items-center justify-between border-b border-default pb-4 md:pb-5"
       >
-        <h3 class="text-lg font-medium text-heading">Nuevo Insumo</h3>
+        <h3 class="text-lg font-medium text-white">Historial de Movimientos</h3>
         <button
           type="button"
           class="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
-          data-modal-hide="nuevoInsumo"
+          data-modal-hide="historialMovimientosModal"
         >
           <svg
-            class="w-5 h-5"
+            class="w-5 h-5 text-white"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -371,107 +343,16 @@
         </button>
       </div>
       <!-- Modal body -->
-      <form action="#">
-        <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
-          <div class="col-span-2">
-            <label
-              for="name"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Name</label
-            >
-            <input
-              type="text"
-              name="name"
-              id="name"
-              class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
-              placeholder="Type product name"
-              required=""
-            />
-          </div>
-          <div class="col-span-2 sm:col-span-1">
-            <label
-              for="price"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Price</label
-            >
-            <input
-              type="number"
-              name="price"
-              id="price"
-              class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
-              placeholder="$2999"
-              required=""
-            />
-          </div>
-          <div class="col-span-2 sm:col-span-1">
-            <label
-              for="category"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Category</label
-            >
-            <select
-              id="category"
-              class="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand px-3 py-2.5 shadow-xs placeholder:text-body"
-            >
-              <option selected="">Select category</option>
-              <option value="TV">TV/Monitors</option>
-              <option value="PC">PC</option>
-              <option value="GA">Gaming/Console</option>
-              <option value="PH">Phones</option>
-            </select>
-          </div>
-          <div class="col-span-2">
-            <label
-              for="description"
-              class="block mb-2.5 text-sm font-medium text-heading"
-              >Product Description</label
-            >
-            <textarea
-              id="description"
-              rows="4"
-              class="block bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full p-3.5 shadow-xs placeholder:text-body"
-              placeholder="Write product description here"
-            ></textarea>
-          </div>
-        </div>
-        <div
-          class="flex items-center space-x-4 border-t border-default pt-4 md:pt-6"
-        >
-          <button
-            type="submit"
-            class="inline-flex items-center text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
-          >
-            <svg
-              class="w-4 h-4 me-1.5 -ms-0.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 12h14m-7 7V5"
-              />
-            </svg>
-            Add new product
-          </button>
-          <button
-            data-modal-hide="crud-modal"
-            type="button"
-            class="text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+      <div class="p-4 md:p-5">
+        <p class="text-white">Aquí se mostrará el historial de movimientos.</p>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- ***************************  *******************************************  -->
+<!-- ***************************  Fin del modal para Ver historial de movimientos  *******************************************  -->
+<!-- **********************************************************************  -->
 
 <!-- ***************************  *******************************************  -->
 <!-- ***************************  Fin del modal para Ver historial de movimientos  *******************************************  -->

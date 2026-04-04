@@ -16,7 +16,7 @@ from datetime import timedelta
 app = Flask(__name__)
 
 limiter.init_app(app)
-
+csrf = CSRFProtect()
 app.config.from_object(DevelopmentConfig)
 
 # Salt 
