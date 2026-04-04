@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from auth import auth
 from dashboard import dashboard
 from proveedores import proveedor
+from ventas import venta
 
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
@@ -52,6 +53,7 @@ csrf = CSRFProtect()
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
 app.register_blueprint(proveedor)
+app.register_blueprint(venta)
 
 @app.route("/")
 @login_required

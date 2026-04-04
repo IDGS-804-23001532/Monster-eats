@@ -43,7 +43,7 @@ def proveedores():
     # Ahora vamos a poner una opcion por defecto al inicio
     create_form.categoria_proveedor.choices.insert(0, (0, 'Selecciona una categoria'))
 
-    if request.method == 'POST' and create_form.validate():
+    if request.method == 'POST':
         # Tomamos el id seleccionado de la categoria
         id_categoria_seleccionada = create_form.categoria_proveedor.data
         

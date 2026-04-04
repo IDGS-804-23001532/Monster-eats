@@ -1,5 +1,5 @@
 from wtforms import Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
 from wtforms import validators
 
 class LoginForm(Form):
@@ -93,3 +93,24 @@ class ProveedorForm(Form):
     categoria_proveedor = SelectField('Categoria del proveedor', [
         validators.DataRequired(message= 'Debes seleccionar una categoría')
     ], coerce = int)
+
+class VentasForm(Form):
+    metodo_pago = SelectField('Método de pago', [
+        validators.DataRequired(message='Debes seleccionar un método de pago')
+    ], coerce=str)
+
+    numero_cuenta = StringField(
+        'Número de cuenta', [
+            validators.Optional()
+        ])
+
+    pin = IntegerField(
+        'PIN tarjeta', [
+            validators.Optional()
+        ])
+
+    monto_recibido = FloatField(
+        'Monto recibido',[
+            validators.Optional(),
+            validators.NumberRange(min=0.01, message='Debe ingresar un monto recibido válido')
+        ])
