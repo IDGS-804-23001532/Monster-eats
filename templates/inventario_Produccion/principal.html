@@ -67,51 +67,67 @@
                     </td>
                 </tr>
 
+                {% set mostrar_modal = form.errors and request.form.get('id_producto')|string == prod.id_producto|string
+                %}
+
                 <div id="modalAjuste-{{ prod.id_producto }}" tabindex="-1" aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                    class="{% if mostrar_modal %}flex bg-gray-900/50 dark:bg-gray-900/80{% else %}hidden{% endif %} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+
                     <div class="relative p-4 w-full max-w-md max-h-full">
-                        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                        <div
+                            class="relative bg-white rounded-lg shadow dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
                             <div
-                                class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                                class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-700">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                     Ajuste Manual: {{ prod.nombre }}
                                 </h3>
                                 <button type="button"
                                     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                                     data-modal-hide="modalAjuste-{{ prod.id_producto }}">
-                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                        fill="none" viewBox="0 0 14 14">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                            stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                    </svg>
-                                    <span class="sr-only">Close modal</span>
+                                    Cerrar
                                 </button>
                             </div>
+
                             <div class="p-4 md:p-5">
-                                <form action="{{ url_for('inventario_produccion.ajustar_stock') }}" method="POST"
-                                    class="space-y-4">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="id_producto" value="{{ prod.id_producto }}">
+                                <form action="{{ url_for('inventario_produccion.principal') }}" method="POST"
+                                    class="space-y-4" novalidate>
+                                    {{ form.csrf_token }}
+
+                                    {{ form.id_producto(value=prod.id_producto) }}
 
                                     <div>
-                                        <label
-                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad
-                                            a sumar/restar</label>
-                                        <input type="number" name="cantidad" required placeholder="Ej: -5 o 10"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                                        {{ form.cantidad.label(class="block mb-2 text-sm font-medium text-gray-900
+                                        dark:text-gray-300") }}
+                                        {{ form.cantidad(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm
+                                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                        dark:text-white", placeholder="Ej: -5 o 10") }}
+
+                                        {% if form.cantidad.errors %}
+                                        {% for error in form.cantidad.errors %}
+                                        <span class="text-xs text-red-600 mt-1 block">{{ error }}</span>
+                                        {% endfor %}
+                                        {% endif %}
                                     </div>
 
                                     <div>
-                                        <label
-                                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Motivo
-                                            del ajuste</label>
-                                        <textarea name="motivo" required placeholder="¿Por qué cambia el stock?"
-                                            rows="3"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"></textarea>
+                                        {{ form.motivo.label(class="block mb-2 text-sm font-medium text-gray-900
+                                        dark:text-gray-300") }}
+                                        {{ form.motivo(rows="3", class="bg-gray-50 border border-gray-300 text-gray-900
+                                        text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                        dark:text-white", placeholder="Motivo del cambio") }}
+
+                                        {% if form.motivo.errors %}
+                                        {% for error in form.motivo.errors %}
+                                        <span class="text-xs text-red-600 mt-1 block">{{ error }}</span>
+                                        {% endfor %}
+                                        {% endif %}
                                     </div>
 
                                     <button type="submit"
-                                        class="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-sm">
+                                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-sm">
                                         Guardar Ajuste
                                     </button>
                                 </form>
@@ -121,8 +137,9 @@
                 </div>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 italic">No hay productos en inventario
-                        físico actualmente.</td>
+                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 italic dark:text-gray-400">
+                        No hay productos registrados.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
