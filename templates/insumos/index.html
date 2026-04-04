@@ -1,22 +1,27 @@
 {% extends 'layout.html' %} {% block content %}
 
 <div class="w-[1168px] ml-auto mr-10 flex justify-between items-center mt-20">
-  <form class="flex items-center gap-2">
+  <form
+    action="{{ url_for('insumos.index') }}"    
+    method="GET"
+    class="flex items-center gap-2"
+  >
     <!-- Input -->
     <div class="relative">
       <label for="simple-search" class="sr-only">Buscar</label>
       <input
         type="text"
+        name="search_query"
+        value="{{ search_query }}"
         id="simple-search"
-        placeholder="Buscar"
-        class="w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-white"
+        placeholder="Buscar insumo..."
+        class="w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-gray-400"
       />
     </div>
 
     <!-- Botón -->
     <button
-      type="button"
-      onclick="buscar()"
+      type="submit"
       class="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
     >
       <svg
@@ -37,10 +42,20 @@
 
   <div class="flex gap-4">
     <button
+      type="button"
+      onclick="window.location.href='/limpiar_busqueda'"
+      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#101828] border-2 border-[#101828] hover:bg-orange-600 transition text-white ml-39"
+    >
+      Limpiar Busqueda
+    </button>
+
+    </div>
+      <div class="flex gap-4">
+    <button
       data-modal-target="nuevoInsumo"
       data-modal-toggle="nuevoInsumo"
       type="button"
-      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white "
+      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
     >
       <svg
         class="w-6 h-6 text-gray-800 dark:text-white mr-2"
@@ -65,7 +80,8 @@
 
     <button
       type="button"
-      onclick="historialMovimientos()"
+      data-modal-target="historialMovimientos"
+      data-modal-toggle="historialMovimientos"
       class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
     >
       <svg
@@ -84,7 +100,7 @@
           d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
         />
       </svg>
-      Ver historial de Movimientos
+      Historial de Movimientos
     </button>
   </div>
 </div>
@@ -96,18 +112,19 @@
     <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
       <tr class="divide-x divide-[#ffffff]">
         <th scope="col" class="px-6 py-3 font-medium text-white">Insumo</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Stock</th>
         <th scope="col" class="px-6 py-3 font-medium text-white">
-          Nivel minimo
+          Unidad de medida
         </th>
         <th scope="col" class="px-6 py-3 font-medium text-white">
           Costo Unario
         </th>
         <th scope="col" class="px-6 py-3 font-medium text-white">Merma</th>
+        <th scope="col" class="px-6 py-3 frot-medium text-white">Estado</th>
         <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
       </tr>
     </thead>
     <tbody>
+      {% for insumo in insumos %}
       <tr
         class="odd:bg-[#0B1D33] text-white even:bg-[#1E2939] border-b border-[#ffffff] divide-x divide-[#ffffff]"
       >
@@ -115,12 +132,26 @@
           scope="row"
           class="px-6 py-4 font-medium text-white whitespace-nowrap"
         >
-          Apple MacBook Pro 17"
+          {{insumo.nombre}}
         </th>
-        <td class="px-6 py-4">Silver</td>
-        <td class="px-6 py-4">100</td>
-        <td class="px-6 py-4">$2999</td>
-        <td class="px-6 py-4">$2999</td>
+        <td class="px-6 py-4">
+          {{insumo.unidad_medida.nombre}} ({{insumo.unidad_medida.abreviatura}})
+        </td>
+        <td class="px-6 py-4">${{insumo.costo_unitario}}</td>
+        <td class="px-6 py-4">{{insumo.porcentaje_merma}}%</td>
+        <td class="px-6 py-4">
+          {% if insumo.activo %}
+          <span
+            class="bg-green-500/20 text-[#00B40C] font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-green-500/30"
+            >Disponible</span
+          >
+          {% else %}
+          <span
+            class="bg-red-500/20 text-red-500 font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-red-500/30"
+            >No disponible</span
+          >
+          {% endif %}
+        </td>
         <td class="px-6 py-4">
           <div class="flex items-center gap-3">
             <button
@@ -169,11 +200,11 @@
           </div>
         </td>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>
 
-<!-- ***************************  *******************************************  -->
 <!-- ***************************  Modal para añadir nuevo insumo  *******************************************  -->
 <!-- **********************************************************************  -->
 

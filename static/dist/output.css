@@ -1350,8 +1350,20 @@
   .ml-4 {
     margin-left: calc(var(--spacing) * 4);
   }
+  .ml-20 {
+    margin-left: calc(var(--spacing) * 20);
+  }
   .ml-30 {
     margin-left: calc(var(--spacing) * 30);
+  }
+  .ml-35 {
+    margin-left: calc(var(--spacing) * 35);
+  }
+  .ml-39 {
+    margin-left: calc(var(--spacing) * 39);
+  }
+  .ml-50 {
+    margin-left: calc(var(--spacing) * 50);
   }
   .ml-100 {
     margin-left: calc(var(--spacing) * 100);
@@ -1992,6 +2004,15 @@
       stroke: var(--color-default) !important;
     }
   }
+  .border-\[\#\#101828\] {
+    border-color: ##101828;
+  }
+  .border-\[\#3b4252\] {
+    border-color: #3b4252;
+  }
+  .border-\[\#101828\] {
+    border-color: #101828;
+  }
   .border-\[\#374151\] {
     border-color: #374151;
   }
@@ -2026,6 +2047,12 @@
     border-color: color-mix(in srgb, oklch(79.2% 0.209 151.711) 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       border-color: color-mix(in oklab, var(--color-green-400) 30%, transparent);
+    }
+  }
+  .border-green-500\/30 {
+    border-color: color-mix(in srgb, oklch(72.3% 0.219 149.579) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-green-500) 30%, transparent);
     }
   }
   .border-orange-500 {
@@ -2104,6 +2131,9 @@
       background-color: var(--color-neutral-secondary-medium);
     }
   }
+  .bg-\[\#\#101828\] {
+    background-color: ##101828;
+  }
   .bg-\[\#0B1D33\] {
     background-color: #0B1D33;
   }
@@ -2136,6 +2166,9 @@
   }
   .bg-\[\#FF6B00\] {
     background-color: #FF6B00;
+  }
+  .bg-\[\#\] {
+    background-color: #;
   }
   .bg-\[\#f97316\] {
     background-color: #f97316;
@@ -2696,6 +2729,9 @@
       color: var(--color-heading);
     }
   }
+  .text-\[\#00B40C\] {
+    color: #00B40C;
+  }
   .text-\[\#4b5563\] {
     color: #4b5563;
   }
@@ -2740,6 +2776,9 @@
   }
   .text-green-100 {
     color: var(--color-green-100);
+  }
+  .text-green-500 {
+    color: var(--color-green-500);
   }
   .text-heading {
     color: var(--color-heading);
@@ -2789,6 +2828,11 @@
   .antialiased {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  .placeholder-gray-400 {
+    &::placeholder {
+      color: var(--color-gray-400);
+    }
   }
   .placeholder-white {
     &::placeholder {

@@ -122,6 +122,9 @@ class Insumo(db.Model):
     porcentaje_merma = db.Column(db.Numeric(5, 2), nullable=False, default=0.00)
     activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
+    # Relaciones
+    unidad_medida = db.relationship('UnidadMedida', backref='insumos', lazy=True)
+
     __table_args__ = (
         CheckConstraint('costo_unitario >= 0', name='chk_insumos_costo_unitario'),
         # CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
