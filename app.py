@@ -8,6 +8,9 @@ from auth import auth
 from dashboard import dashboard
 from proveedores import proveedor
 from ventas import venta
+from inventario_Produccion.routes import inventario_produccion
+from solicitud_Produccion.routes import solicitud_produccion
+from costo_Utilidad.routes import costo_utilidad
 
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
@@ -54,6 +57,9 @@ app.register_blueprint(auth)
 app.register_blueprint(dashboard)
 app.register_blueprint(proveedor)
 app.register_blueprint(venta)
+app.register_blueprint(inventario_produccion)
+app.register_blueprint(solicitud_produccion)
+app.register_blueprint(costo_utilidad)
 
 @app.route("/")
 @login_required
