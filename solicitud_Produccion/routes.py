@@ -30,7 +30,7 @@ def principal():
 
 @solicitud_produccion.route('/agregar/<int:id_producto>', methods=['POST'])
 @login_required
-@roles_accepted('Cliente', 'Cajero')
+@roles_accepted('Cliente', 'Cajero', 'Cocina')
 def agregar_carrito(id_producto):
     producto = Producto.query.get_or_404(id_producto)
     cantidad = int(request.form.get('cantidad', 1))
@@ -55,7 +55,7 @@ def agregar_carrito(id_producto):
 
 @solicitud_produccion.route('/confirmar', methods=['POST'])
 @login_required
-@roles_accepted('Cliente', 'Cajero')
+@roles_accepted('Cliente', 'Cajero', 'Cocina')
 def confirmar_pedido():
     carrito = session.get('carrito', {})
     metodo_pago = request.form.get('metodo_pago', 'Efectivo')
