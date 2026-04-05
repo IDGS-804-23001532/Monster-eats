@@ -1,15 +1,13 @@
 {% macro camposNuevos(field) %}
-  <h2 class="font-bold text-gray-800 dark:text-white text-white">{{ field.label }}</h2>
+  <label for="{{ field.id }}" class="block mb-2 text-sm font-medium text-slate-300">{{ field.label }}</label>
   
   <dd>{{ field(**kwargs) | safe }}</dd>
 
   {% if field.errors %}
-    <ul>
+    <ul class="mt-1">
       {% for error in field.errors %}
-        <li style="color: red;">{{ error }}</li>
+        <li class="text-red-500 text-xs font-semibold">{{ error }}</li>
       {% endfor %}
     </ul>
   {% endif %}
 {% endmacro %}
-
-

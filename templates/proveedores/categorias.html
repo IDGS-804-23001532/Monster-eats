@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="w-full mt-2">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+
+        <button id="button-animate" data-modal-target="modal-agregar-categoria" data-modal-toggle="modal-agregar-categoria" type="button" class="btn-animate-modal inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-500/50 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5">
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Agregar Categoría
+        </button>
+
+    </div>
+
+    <div class="relative overflow-x-auto rounded-xl border border-slate-700 shadow-xl bg-slate-900 max-w-4xl mx-auto">
+        <table class="w-full text-sm text-center text-slate-300">
+            <thead class="text-xs uppercase bg-slate-800 text-white border-b border-slate-700">
+                <tr>
+                    <th scope="col" class="px-6 py-4 font-bold text-left">Nombre de la Categoría</th>
+                    <th scope="col" class="px-6 py-4 font-bold w-48">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for cp in categoria_proveedor %}
+                <tr class="anim-item bg-transparent hover:bg-slate-800/50 transition-colors border-b border-slate-700 last:border-0">
+                    
+                    <td class="px-6 py-4 font-bold text-white text-left">
+                        {{cp.nombre}}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-center gap-3">
+                            <button data-modal-target="modal-actualizar-{{ cp.id_categoria_proveedor }}" data-modal-toggle="modal-actualizar-{{ cp.id_categoria_proveedor }}" type="button" class="btn-animate-modal w-9 h-9 inline-flex items-center justify-center text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-500/50 rounded-full transition-colors shadow-lg">
+                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
+                                </svg>
+                            </button>
+
+                            <button data-modal-target="modal-eliminar-{{ cp.id_categoria_proveedor }}" data-modal-toggle="modal-eliminar-{{ cp.id_categoria_proveedor }}" type="button" class="btn-animate-modal w-9 h-9 inline-flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-500/50 rounded-full transition-colors shadow-lg">
+                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 
+
+{% block modals %}
+    {% include 'proveedores/agregar_categoria.html' %}
+
+    {% for cp in categoria_proveedor %}
+        {% include 'proveedores/actualizar_categoria.html' %}
+        {% include 'proveedores/eliminar_categoria.html' %}
+    {% endfor %}
+{% endblock %}

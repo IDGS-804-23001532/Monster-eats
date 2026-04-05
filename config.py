@@ -8,5 +8,5 @@ class Config():
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/monster_eats_db'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://Gerente:Moster&EatsDUCA$@localhost/monster_eats_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

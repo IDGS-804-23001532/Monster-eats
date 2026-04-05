@@ -1,0 +1,24 @@
+<div id="modal-eliminar-{{ prov.id_proveedor }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl">
+            
+            <form action="{{ url_for('proveedor.eliminar_proveedor', id=prov.id_proveedor) }}" method="POST">
+                {{ form.csrf_token }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="p-6 text-center">
+                    <svg class="mx-auto mb-4 text-slate-400 w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-slate-300">¿Estás seguro de que deseas eliminar la categoría <span class="font-bold text-white">"{{ prov.nombre_empresa }}"</span>?</h3>
+                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2 shadow-lg shadow-red-500/20">
+                        Sí, estoy seguro
+                    </button>
+                    <button data-modal-hide="modal-eliminar-{{ prov.id_proveedor }}" type="button" class="text-slate-300 bg-transparent hover:bg-slate-800 border border-slate-600 focus:ring-4 focus:outline-none focus:ring-slate-700 rounded-lg text-sm font-medium px-5 py-2.5">
+                        No, cancelar
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

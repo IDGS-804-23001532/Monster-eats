@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="w-full mt-2">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+
+        <form action="{{ url_for('proveedor.proveedores') }}" method="GET" class="flex items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <input type="text" name="q" placeholder="Buscar empresa o RFC" value="{{ request.args.get('q', '') }}"
+                        class="bg-slate-800 border border-slate-600 text-white text-sm rounded-full focus:ring-2 focus:ring-orange-500 focus:border-transparent block w-64 md:w-80 px-5 py-2.5 placeholder-slate-400 outline-none transition-all shadow-sm">
+                </div>
+                
+                <button type="submit" class="w-10 h-10 inline-flex items-center justify-center text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-500/50 rounded-full transition-colors shadow-md">
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                    <span class="sr-only">Buscar</span>
+                </button>
+
+                {% if request.args.get('q') %}
+                <a href="{{ url_for('proveedor.proveedores') }}" class="text-sm font-medium text-slate-400 hover:text-orange-500 transition-colors ml-2">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <button  data-modal-target="modal-agregar-proveedor" data-modal-toggle="modal-agregar-proveedor" type="button" class="btn-animate-modal inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-500/50 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5">
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Agregar Proveedor
+        </button>
+
+    </div>
+
+    <div class="relative overflow-x-auto rounded-xl border border-slate-700 shadow-xl bg-slate-900">
+        <table class="w-full text-sm text-center text-slate-300">
+            <thead class="text-xs uppercase bg-slate-800 text-white border-b border-slate-700">
+                <tr>
+                    <th scope="col" class="px-6 py-4 font-bold">Empresa</th>
+                    <th scope="col" class="px-6 py-4 font-bold">Contacto</th>
+                    <th scope="col" class="px-6 py-4 font-bold">Teléfono</th>
+                    <th scope="col" class="px-6 py-4 font-bold">Correo</th>
+                    <th scope="col" class="px-6 py-4 font-bold">Categoría</th>
+                    <th scope="col" class="px-6 py-4 font-bold">RFC</th>
+                    <th scope="col" class="px-6 py-4 font-bold">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if proveedores %}
+                {% for prov in proveedores %}
+                <tr class="bg-transparent hover:bg-slate-800/50 transition-colors border-b border-slate-700 last:border-0">
+                    
+                    <td class="px-6 py-4 font-bold text-white">
+                        {{prov.nombre_empresa}}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ prov.contacto_completo }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ prov.telefono }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ prov.email }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ prov.nombre_categoria }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ prov.rfc }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-center gap-3">
+                            
+                            <button data-modal-target="modal-actualizar-{{ prov.id_proveedor }}" data-modal-toggle="modal-actualizar-{{ prov.id_proveedor }}" type="button" class="btn-animate-modal w-9 h-9 inline-flex items-center justify-center text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-500/50 rounded-full transition-colors shadow-lg">
+                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
+                                </svg>
+                            </button>
+
+                            <button data-modal-target="modal-eliminar-{{ prov.id_proveedor }}" data-modal-toggle="modal-eliminar-{{ prov.id_proveedor }}" type="button" class="btn-animate-modal w-9 h-9 inline-flex items-center justify-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-500/50 rounded-full transition-colors shadow-lg">
+                                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="py-8 px-4 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <p class="text-slate-400 text-base font-medium">
+                                No hay proveedores registrados
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 
+{% block modals %}
+    {% include 'proveedores/agregar_proveedor.html' %}
+
+    {% for prov in proveedores %}
+        {% include 'proveedores/actualizar_proveedor.html' %}
+        {% include 'proveedores/eliminar_proveedor.html' %}
+    {% endfor %}
+{% endblock %}
