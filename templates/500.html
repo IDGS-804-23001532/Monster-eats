@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 500 - Monster Eats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+</head>
+<body class="bg-[#1d2a3d] min-h-screen flex items-center justify-center p-4">
+
+    <div class="flex flex-col items-center justify-center text-center max-w-lg gap-6">
+        
+        <img src="{{ url_for('static', filename='img/conos.png') }}" alt="Conos de construcción" class="w-48" />
+
+        <h1 class="text-9xl font-extrabold text-[#FF6B00] tracking-tight">
+            500
+        </h1>
+        
+        <h2 class="text-3xl font-bold text-white">
+            Error Interno del Servidor
+        </h2>
+        
+        <p class="text-neutral-300 text-lg leading-relaxed">
+            Nuestros cocineros monstruosos tuvieron un pequeño percance técnico en la cocina principal.
+            <br>
+            ¡Estamos trabajando para solucionarlo, vuelve pronto!
+        </p>
+
+    </div>
+</body>
+</html>

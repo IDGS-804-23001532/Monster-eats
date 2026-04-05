@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="p-4 sm:ml-64 mt-14">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 p-6 bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-white">Ingredientes: {{ producto.nombre }}</h3>
+                <button data-modal-target="ingrediente-modal" data-modal-toggle="ingrediente-modal" class="block text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5">
+                    Añadir Insumo
+                </button>
+            </div>
+            
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for i in ingredientes %}
+                <li class="py-3 sm:py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate dark:text-white">{{ i.insumo }}</p>
+                            <p class="text-sm text-gray-500 truncate dark:text-gray-400">{{ i.cantidad_requerida }} {{ i.unidad }}</p>
+                        </div>
+                        <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                            ${{ "{:.2f}".format(i.costo_ingrediente) }}
+                        </div>
+                        <a href="{{ url_for('recetas.eliminar_ingrediente', id_prod=producto.id_producto, id_ins=i.id_insumo) }}" class="text-red-500 hover:text-red-700">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        </a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="p-6 bg-gray-900/80 rounded-2xl border border-blue-500/50 shadow-blue-500/20 shadow-lg">
+            <h4 class="text-lg font-bold text-blue-400 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Explosión de Insumos
+            </h4>
+            <form action="{{ url_for('recetas.simular') }}" method="POST">
+                <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-300">Cantidad a Producir</label>
+                    <input type="number" name="cantidad_simular" class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 20" required>
+                </div>
+                <button type="submit" class="w-full text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    Calcular Lote
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="ingrediente-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full">
+    <div class="relative w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <form action="{{ url_for('recetas.guardar_ingrediente') }}" method="POST">
+                <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Añadir/Editar Insumo</h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="ingrediente-modal">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selecciona Insumo</label>
+                        <select name="id_insumo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                            {% for ins in insumos %}
+                            <option value="{{ ins.id_insumo }}">{{ ins.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad Requerida</label>
+                        <input type="number" step="0.0001" name="cantidad" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                    </div>
+                </div>
+                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

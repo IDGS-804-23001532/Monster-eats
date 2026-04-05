@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Monster eats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#111827] flex items-center justify-center min-h-screen text-[#d1d5db] font-sans antialiased p-4">
+
+    <div class="bg-[#1f2937] p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center border border-[#374151]">
+
+        <div class="flex items-center justify-center gap-4 mb-10">
+            <img src="https://i.imgur.com/u7r3X2w.png" alt="Monster eats Samurai Monster Logo Icon" class="h-16 w-auto"> 
+
+            <div class="text-left">
+                <p class="text-3xl font-bold tracking-tight text-white">Monster<span class="text-white/80"> eats</span></p>
+                <p class="text-xs font-medium text-[#9ca3af] uppercase tracking-wider">Dashboard de Alimentación</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <h1 class="text-9xl font-black text-white tracking-tighter">404</h1>
+            
+            <p class="text-2xl font-semibold text-[#f97316] tracking-tight">¡Ups! No pudimos alimentar a tu monstruo.</p>
+            
+            <p class="text-md text-[#9ca3af] max-w-sm mx-auto">
+                Parece que tu monstruo feeder se extravió en el laberinto. No pudimos encontrar el festín de datos que estabas buscando en esta dirección.
+            </p>
+        </div>
+
+        <div class="mt-12">
+            <a href="{{url_for('security.login')}}" class="inline-flex items-center justify-center gap-2 bg-[#f97316] text-white font-semibold py-3 px-10 rounded-xl shadow-md transition hover:bg-[#c2410c] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:ring-offset-2 focus:ring-offset-[#1f2937]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span>Volver a Inicio</span>
+            </a>
+        </div>
+
+        <p class="text-xs text-[#4b5563] mt-16 font-mono">ID de solicitud: 4c330fbe-0a81-4357-bb03-b09e02316e6e</p>
+
+    </div>
+
+</body>
+</html>
