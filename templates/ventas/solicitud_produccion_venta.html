@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="w-full px-4 md:px-8 space-y-6 text-white font-sans mt-4 relative">
+
+    <div>
+        <h2 class="text-3xl font-extrabold tracking-wide">Solicitar Producción</h2>
+        <p class="text-gray-400 text-sm mt-1">Levanta pedidos de stock a la cocina</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        {% for prod in productos %}
+        <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <h3 class="text-2xl font-bold mb-1">{{ prod.nombre_producto }}</h3>
+                <span class="inline-block bg-slate-600/60 text-gray-300 text-xs font-semibold px-3 py-1 rounded-full mb-5">
+                    {{ prod.categoria }}
+                </span>
+
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-gray-300 font-medium">Stock Actual</span>
+                    <span class="font-bold text-white">{{ prod.stock_actual }} und</span>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-300 font-medium">Stock Mínimo</span>
+                    <span class="font-bold text-white">{{ prod.stock_minimo }} und</span>
+                </div>
+
+                {% if prod.stock_actual > prod.stock_minimo %}
+                    <span class="inline-block bg-green-600 text-white text-xs font-bold px-4 py-1 rounded-full mb-6">Alto</span>
+                {% else %}
+                    <span class="inline-block bg-red-600 text-white text-xs font-bold px-4 py-1 rounded-full mb-6">Bajo</span>
+                {% endif %}
+            </div>
+
+            <button onclick="abrirModalSolicitud({{ prod.id_producto }}, '{{ prod.nombre_producto }}')" class="w-full bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold py-2.5 rounded-3xl transition-colors shadow-md">
+                Solicitar Stock
+            </button>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% include 'ventas/_modal_solicitud_produccion.html' %}
+
+<script>
+    const modalSol = document.getElementById('modalSolicitud');
+    
+    function abrirModalSolicitud(idProducto, nombreProducto) {
+        // Asignamos el ID al campo oculto (value)
+        document.getElementById('modal_id_producto').value = idProducto;
+        
+        // Asignamos el nombre al texto plano (textContent en lugar de value)
+        document.getElementById('visual_nombre_producto').textContent = nombreProducto;
+        
+        // Mostramos modal
+        modalSol.classList.remove('hidden');
+    }
+
+    function cerrarModalSolicitud() {
+        modalSol.classList.add('hidden');
+    }
+
+    window.onclick = function(event) {
+        if (event.target === modalSol) {
+            cerrarModalSolicitud();
+        }
+    }
+</script>
+{% endblock %}

@@ -5,14 +5,17 @@ from models import db
 from models import Venta, DetalleVenta, MetodoPago
 from extensions import limiter
 import forms
-import json, uuid
+import pymysql
+from datetime import datetime
 from sanitizador import Sanitizador
 from flask_security import login_required, current_user
-from flask_security.decorators import roles_required
+from flask_security.decorators import roles_required, roles_accepted
 
 
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
+@roles_required('Cajero')
+@limiter.limit('8 per minute') # 8 request por minuto
 def ventas():
     create_form = forms.VentasForm(request.form)
 
@@ -79,7 +82,7 @@ def ventas():
             if accion == 'completar':
                 if create_form.validate():
 
-                    db.session.execute(
+                    result = db.session.execute(
                         db.text("""
                             CALL sp_venta_completar(
                                 :id_usuario,
@@ -95,6 +98,10 @@ def ventas():
                             'monto_recibido': create_form.monto_recibido.data
                         }
                     )
+
+                    # Obtenemos el id de la venta
+                    row = result.fetchone()
+                    id_venta = row[0] if row else None
                     db.session.commit()
 
                     metodo_nombre = next(
@@ -111,7 +118,7 @@ def ventas():
                     else:
                         flash('Cobro con tarjeta procesado correctamente.', 'success')
 
-                    return redirect(url_for('venta.ventas'))
+                    return redirect(url_for('venta.ventas', imprimir_id = id_venta))
 
         except (OperationalError, DBAPIError) as e:
             db.session.rollback()
@@ -168,3 +175,280 @@ def ventas():
         }
 
     return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen)
+
+@venta.route('/ticket/<int:id_venta>')
+@login_required
+@roles_required('Cajero')
+@limiter.limit('8 per minute') # 8 request por minuto
+def ver_ticket(id_venta):
+    # Usamos las vistas que creamos en el Paso 1 para que el código quede limpísimo
+    cabecera = db.session.execute(
+        db.text("SELECT * FROM vw_ticket_cabecera WHERE id_venta = :id"), 
+        {'id': id_venta}
+    ).mappings().first()
+    
+    detalles = db.session.execute(
+        db.text("SELECT * FROM vw_ticket_detalle WHERE id_venta = :id"), 
+        {'id': id_venta}
+    ).mappings().all()
+
+    if not cabecera:
+        flash('Ticket no encontrado.', 'error')
+        return redirect(url_for('venta.ventas'))
+
+    return render_template('ventas/ticket_print.html', cabecera=cabecera, detalles=detalles)
+
+@venta.route('/historial', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Cajero', 'Gerente')
+@limiter.limit('8 per minute') # 8 request por minuto
+def historial():
+    create_form = forms.FiltroFechaForm(request.args)
+
+    # Validamos si hay fecha
+    if create_form.validate() and create_form.fecha.data:
+        fecha_filtro = create_form.fecha.data
+
+        query = db.text('SELECT * FROM vw_historial_caja WHERE DATE(fecha_movimiento) = :fecha ORDER BY fecha_movimiento DESC')
+
+        movimientos = db.session.execute(query, 
+                                         {'fecha': fecha_filtro}
+                                        ).mappings().all()
+    else:
+        # Consulta por defecto si noy hay filtro
+        movimientos = db.session.execute(
+            db.text('SELECT * FROM vw_historial_caja ORDER BY fecha_movimiento DESC LIMIT 100')
+        ).mappings().all()
+
+    return render_template('ventas/historial.html', movimientos = movimientos, form = create_form)
+
+@venta.route('/CorteCaja', methods=['GET', 'POST'])
+@login_required
+@roles_required('Cajero')
+@limiter.limit('8 per minute') # 8 request por minuto
+def corte_caja():
+    form = forms.Form()
+    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+    fecha_vista = datetime.now().strftime('%d/%m/%Y')
+    id_cajero = current_user.id_usuario 
+
+    if request.method == 'POST':
+        try:
+            connection = db.engine.raw_connection()
+            cursor = connection.cursor(pymysql.cursors.DictCursor)
+            
+            cursor.callproc('sp_guardar_corte_caja', [fecha_hoy, id_cajero])
+            connection.commit() 
+            
+            rs_retiro = cursor.fetchone()
+            monto_retirado = float(rs_retiro['monto_retirado']) if rs_retiro else 0.0
+            
+            if monto_retirado > 0:
+                flash(f'Corte de caja realizado. Se retiró ${monto_retirado:.2f} en efectivo.', 'success')
+            else:
+                flash('Corte realizado. No hubo efectivo que retirar el día de hoy.', 'info')
+                
+        except Exception as e:
+            if 'connection' in locals():
+                connection.rollback()
+            
+            # El código de error 1644 en MySQL representa el SQLSTATE 45000 (SIGNAL personalizado)
+            if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
+                # Mostramos el mensaje exacto que definimos en el SIGNAL del SP
+                flash(f'{e.args[1]}', 'error')
+            else:
+                # Error interno genérico para cualquier otra falla técnica
+                print(f'Error técnico detectado: {e}')
+                flash('Hubó un error interno, que se comunique con el técnico.', 'error')
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'connection' in locals():
+                connection.close()
+            
+        return redirect(url_for('venta.corte_caja'))
+
+    # Lógica GET 
+    resumen = {
+        'total_ventas': 0, 'total_efectivo': 0.0,
+        'total_tarjeta': 0.0, 'transacciones_tarjeta': 0,
+        'total_ingresos': 0.0 
+    }
+    detalle = []
+
+    try:
+        connection = db.engine.raw_connection()
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor.callproc('sp_resumen_corte_caja', [fecha_hoy, id_cajero])
+        rs1 = cursor.fetchone()
+        if rs1 and rs1.get('total_ventas') is not None:
+            resumen = rs1
+        cursor.nextset()
+        detalle = cursor.fetchall()
+    except Exception as e:
+        print(f'Error al visualizar datos: {e}') 
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'connection' in locals():
+            connection.close()
+
+    return render_template('ventas/corte_caja.html', resumen=resumen, detalle=detalle, fecha_vista=fecha_vista, form=form)
+
+@venta.route('/salidaCaja', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Cajero', 'Gerente')
+@limiter.limit('8 per minute') # 8 request por minuto
+def salida_caja():
+    create_form = forms.SalidaEfectivoForm(request.form)
+    motivo = create_form.motivo.data
+    monto = create_form.monto.data
+
+    if request.method == 'POST' and create_form.validate():
+        id_cajero = current_user.id_usuario
+
+        try:
+            connection = db.engine.raw_connection()
+            cursor = connection.cursor()
+
+
+            # Llamamos al sp pasandole los 3 parametros del orden correcto
+            cursor.callproc('sp_registrar_salida_efectivo', [id_cajero, monto, motivo])
+
+            # Configuramos la transaccion
+            connection.commit()
+
+            # Si todo salio bien
+            flash('Salida registrada correctamente', 'success')
+            return redirect(url_for('venta.salida_caja'))
+        
+        except Exception as e:
+            # Si hay error, deshacemos cualquier cambio a medias
+            if 'connection' in locals():
+                connection.rollback()
+
+            # Capturamos especificamente los errores controlados por el SP
+            if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
+                # Mostramos error
+                flash(f'{e.args[1]}', 'error')
+            else:
+                # Error interno
+                print(f'Error tecnico al registrar salida: {e}')
+                flash('Hubo un error interno, comunicate con el técnico', 'error')
+        finally:
+            # Cerramos cursores de manera segura
+            if 'cursor' in locals():
+                cursor.close()
+            if 'connection' in locals():
+                connection.close()
+
+    # Traemos las salidas de la vista
+    salidas_hoy = db.session.execute(
+        db.text('SELECT * FROM vw_salidas_efectivo WHERE DATE(fecha_hora) = CURRENT_DATE()')
+    ).mappings().all()
+
+    # Calculamos la suma total de las salidas de hoy
+    total_salidas_monto = sum(salida['monto'] for salida in salidas_hoy)
+
+    return render_template('ventas/salidas_efectivo.html', form = create_form, salidas = salidas_hoy, total_hoy = total_salidas_monto)
+
+@venta.route('/solicitudProduccionVenta', methods=['GET', 'POST'])
+@login_required
+@roles_required('Cajero')
+@limiter.limit('8 per minute') # 8 request por minuto
+def solicitud_produccion_venta():
+    create_form = forms.SolicitudProduccionVentasForm(request.form)
+
+    if request.method == 'POST' and create_form.validate():
+        id_producto = create_form.id_producto.data
+        cantidad = create_form.cantidad.data
+        id_usuario = current_user.id_usuario
+
+        try:
+            connection = db.engine.raw_connection()
+            cursor = connection.cursor()
+
+            # Mandamos los datos al SP
+            cursor.callproc('sp_registrar_solicitud_produccion', [id_usuario, id_producto, cantidad])
+            connection.commit()
+
+            flash('Solicitud de producción enviada con éxito', 'success')
+            return redirect(url_for('venta.solicitud_produccion_venta'))
+        
+        except Exception as e:
+            if 'connection' in locals():
+                connection.rollback()
+            
+            if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
+                flash(f'{e.args[1]}', 'error')
+            else:
+                print(f'Error tecnico al solicitar produccion: {e}')
+                flash('Hubo un error interno, comunicate con el técnico', 'error')
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+
+            if 'connection' in locals():
+                connection.close()
+
+    productos = db.session.execute(
+        db.text('SELECT * FROM vw_productos_produccion')
+    ).mappings().all()
+
+
+    return render_template('ventas/solicitud_produccion_venta.html', form = create_form, productos = productos)
+
+
+@venta.route('/utilidad_diaria', methods=['GET', 'POST'])
+@login_required
+@roles_required('Gerente')
+@limiter.limit('8 per minute') # 8 request por minuto
+def utilidad_diaria():
+    # Inicializamos el formulario con los parámetros GET de la URL
+    form = forms.FiltroFechaForm(request.args)
+
+    # Validamos si el usuario seleccionó una fecha válida
+    if form.validate() and form.fecha.data:
+        fecha_consulta = form.fecha.data
+    else:
+        # Si no hay filtro, por defecto usamos la fecha de hoy
+        fecha_consulta = datetime.now().date()
+
+    # Formateamos la fecha para hacerla bonita en la vista XD
+    fecha_vista = fecha_consulta.strftime('%d/%m/%Y')
+
+    # Consultamos la vista para la fecha determinada (hoy o la filtrada)
+    datos_hoy = db.session.execute(
+        db.text('SELECT * FROM vw_utilidad_diaria WHERE fecha = :fecha'),
+        {'fecha': fecha_consulta}
+    ).mappings().first()
+
+    # Valores por defecto en caso de que sea un nuevo dia sin actividad
+    estadisticas = {
+        'transacciones_ventas': 0,
+        'total_ventas': 0.0,
+        'costo_produccion': 0.0,
+        'registros_salidas': 0,
+        'total_salidas': 0.0,
+        'margen_utilidad': 0.0
+    }
+
+    if datos_hoy:
+        # Usamos "or 0" por si la base de datos devuelve None en algún campo vacío
+        ventas = float(datos_hoy['total_ventas'] or 0)
+        costos = float(datos_hoy['costo_produccion'] or 0)
+        salidas = float(datos_hoy['total_salidas'] or 0)
+
+        estadisticas['transacciones_ventas'] = datos_hoy['transacciones_ventas'] or 0
+        estadisticas['total_ventas'] = ventas
+        estadisticas['costo_produccion'] = costos
+        estadisticas['registros_salidas'] = datos_hoy['registros_salidas'] or 0
+        estadisticas['total_salidas'] = salidas
+
+        # Calculo del margen de Utilidad
+        utilidad_neta = ventas - costos - salidas
+
+        if ventas > 0:
+            estadisticas['margen_utilidad'] = (utilidad_neta / ventas) * 100
+
+    return render_template('ventas/utilidad_diaria_venta.html', estadisticas=estadisticas, fecha_vista=fecha_vista, form=form)

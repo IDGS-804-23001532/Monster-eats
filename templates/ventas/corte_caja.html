@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-5 text-white font-sans mt-4">
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5 flex justify-between items-center">
+        <div>
+            <h2 class="text-xl font-bold tracking-wide">Corte de Caja</h2>
+            <p class="text-gray-400 text-sm mt-1">{{ fecha_vista }}</p>
+        </div>
+        <div class="text-right">
+            <p class="text-gray-300 text-sm">Total de Ventas</p>
+            <p class="text-2xl font-bold text-[#ff6b00]">{{ resumen.total_ventas }}</p>
+        </div>
+    </div>
+
+    <div class="flex gap-5 w-full md:w-[60%]">
+        <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5 w-1/2 flex flex-col justify-center">
+            <h3 class="text-lg font-bold">Efectivo</h3>
+            <p class="text-gray-300 mt-1">${{ "%.2f"|format(resumen.total_efectivo) }}</p>
+        </div>
+        <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5 w-1/2 flex flex-col justify-center">
+            <h3 class="text-lg font-bold">Tarjeta</h3>
+            <p class="text-gray-400 text-xs">Transacciones: {{ resumen.transacciones_tarjeta }}</p>
+            <p class="text-gray-300 mt-1">${{ "%.2f"|format(resumen.total_tarjeta) }}</p>
+        </div>
+    </div>
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5 flex justify-between items-center">
+        <div>
+            <h3 class="text-lg font-bold">Total Ingresos del Dia</h3>
+            <p class="text-xl font-bold mt-1">${{ "%.2f"|format(resumen.total_ingresos) }}</p>
+        </div>
+        
+        <form action="{{ url_for('venta.corte_caja') }}" method="POST" class="m-0">
+            {{ form.csrf_token }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold py-2 px-5 rounded-3xl transition-colors">
+                Realizar Corte Caja
+            </button>
+        </form>
+    </div>
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-5">
+        <h3 class="text-lg font-bold mb-4">Detalle de Ventas del Dia</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-500 text-gray-100">
+                        <th class="pb-2 font-semibold">Venta</th>
+                        <th class="pb-2 font-semibold">Fecha/Hora</th>
+                        <th class="pb-2 font-semibold">Método</th>
+                        <th class="pb-2 font-semibold">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in detalle %}
+                    <tr class="border-b border-slate-700/50 text-gray-300 hover:bg-slate-700/20">
+                        <td class="py-3">#{{ item.venta }}</td>
+                        <td class="py-3">{{ item.fecha_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="py-3">{{ item.metodo }}</td>
+                        <td class="py-3 font-medium">${{ "%.2f"|format(item.total) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="py-6 text-center text-gray-500 italic">No hay ventas registradas para este cajero hoy.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

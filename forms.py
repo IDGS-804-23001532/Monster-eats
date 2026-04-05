@@ -1,5 +1,5 @@
 from wtforms import Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField, DecimalField, HiddenField, SubmitField
 from wtforms import validators
 
 class LoginForm(Form):
@@ -114,3 +114,35 @@ class VentasForm(Form):
             validators.Optional(),
             validators.NumberRange(min=0.01, message='Debe ingresar un monto recibido válido')
         ])
+    
+class SalidaEfectivoForm(Form):
+    monto = DecimalField('Monto a retirar', [
+        validators.DataRequired(message='El monto es obligatorio'),
+        validators.NumberRange(min=0.10, message='El monto debe ser mayor a cero')
+    ])
+
+    motivo = StringField('Motivo de la salida', [
+        validators.DataRequired('Debes especificar el motivo'),
+        validators.Length(min=5, max=255, message='El motivo debe tener entre 5 a 255 caracteres')
+    ])
+
+class SolicitudProduccionVentasForm(Form):
+    id_producto = HiddenField('id_producto', [
+        validators.DataRequired()
+    ])
+
+    cantidad = IntegerField('Cantidad a solicitar', [
+        validators.DataRequired(message= 'La cantidad es requerida'),
+        validators.NumberRange(min=1, message='Debes solicitar al menos 1 unidad')
+    ])
+
+class FiltroFechaForm(Form):
+    class Meta:
+        csrf = False # Lo desactivamos por que es un formulario de búsqueda
+    
+    fecha = DateField('Fecha', [
+        validators.Optional()
+    ])
+
+    submit = SubmitField('Filtrar')
+

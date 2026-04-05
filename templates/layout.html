@@ -186,18 +186,82 @@
                 </li>
                 {% endif %}
 
-                {% if current_user.has_role('Cajero') %}
+                {% if current_user.has_role('Cajero') or current_user.has_role('Gerente') %}
                 <li>
-                    <a href="{{ url_for('venta.ventas') }}"
-                        class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
+                    <button type="button"
+                        class="flex items-center w-full px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group transition duration-75"
+                        aria-controls="dropdown-ventas"
+                        onclick="document.getElementById('dropdown-ventas').classList.toggle('hidden')">
+                        
                         <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                             viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15.56 2.44a2 2 0 0 0-1.41-.58H4.5a2 2 0 0 0-2 2v9.65a2 2 0 0 0 .59 1.41l8.59 8.59a2 2 0 0 0 2.83 0l6.59-6.59a2 2 0 0 0 0-2.83l-8.59-8.59ZM9.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
                         </svg>
-                        <span class="flex-1 ms-3 whitespace-nowrap">Venta</span>
-                    </a>
+                        
+                        <span class="flex-1 ms-3 text-left whitespace-nowrap">Ventas</span>
+                        
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white" 
+                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <ul id="dropdown-ventas" class="hidden py-1 mt-1 space-y-1">
+                        {% if current_user.has_role('Cajero') %}
+                        <li>
+                            <a href="{{ url_for('venta.ventas') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Nueva Venta
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if current_user.has_role('Cajero') or current_user.has_role('Gerente')%}
+                        <li>
+                            <a href="{{ url_for('venta.historial') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Historial
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if current_user.has_role('Cajero') %}
+                        <li>
+                            <a href="{{ url_for('venta.corte_caja') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Corte de caja
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if current_user.has_role('Cajero') or current_user.has_role('Gerente') %}
+                        <li>
+                            <a href="{{ url_for('venta.salida_caja') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Salidas efectivo
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if current_user.has_role('Cajero') %}
+                        <li>
+                            <a href="{{ url_for('venta.solicitud_produccion_venta') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Solicitar producción
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if current_user.has_role('Gerente') %}
+                        <li>
+                            <a href="{{ url_for('venta.utilidad_diaria') }}"
+                                class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75">
+                                Utilidad diaria
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
                 </li>
                 {% endif %}
                 <li>
