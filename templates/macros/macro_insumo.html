@@ -2,7 +2,7 @@
 <!-- este macro se utiliza para renderizar los campos de los formularios de insumos -->
   <label for="{{ field.id }}" class="block mb-2.5 text-sm font-medium text-white">{{ field.label }}</label>
   
-  <dd>{{ field(**kwargs) | safe }}</dd>
+  <div>{{ field(**kwargs) | safe }}</div>
 
   {% if field.errors %}
     <ul class="mt-1">

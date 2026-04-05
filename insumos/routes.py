@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, url_for, redirect
+from flask import Blueprint, render_template, request, url_for, redirect, flash
 from models import Insumo, UnidadMedida, db
 from forms import CreateInsumoForm, EditInsumoForm
 from . import insumos
@@ -143,5 +143,46 @@ def editar_insumo():
                          create_form=create_form, 
                          edit_form=edit_form,
                          show_modal='editInsumoModal')
+
+#Eliminar un insumo
+@insumos.route('/eliminar_insumo', methods=['GET', 'POST'])
+def eliminar():
+    unidades_medida = UnidadMedida.query.all()
+    choices = [(um.id_unidad_medida, um.nombre) for um in unidades_medida]
     
-   
+    if request.method == 'GET':
+        id_insumo = request.args.get('id')
+        insumo = Insumo.query.get(id_insumo)
+        
+        if not insumo:
+            flash('Insumo no encontrado', 'error')
+            return redirect(url_for('insumos.index'))
+        
+        # Renderizamos la página con el modal de eliminar abierto
+        search_query = request.args.get('search_query', '')
+        insumos_list = Insumo.query.all()
+        create_form = CreateInsumoForm()
+        create_form.id_unidad_medida.choices = choices
+        edit_form = EditInsumoForm()
+        edit_form.id_unidad_medida.choices = choices
+        return render_template('insumos/index.html',
+                             insumos=insumos_list,
+                             search_query=search_query,
+                             unidades_medida=unidades_medida,
+                             create_form=create_form,
+                             edit_form=edit_form,
+                             delete_insumo=insumo,
+                             show_modal='eliminarInsumoModal')
+    
+    if request.method == 'POST':
+        id_insumo = request.form.get('id_insumo')
+        insumo = Insumo.query.get(id_insumo)
+        if not insumo:
+            flash('Insumo no encontrado para eliminar', 'error')
+            return redirect(url_for('insumos.index'))
+        
+        db.session.delete(insumo)
+        db.session.commit()
+        flash('Insumo eliminado correctamente', 'success')
+        return redirect(url_for('insumos.index'))
+

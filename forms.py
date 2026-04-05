@@ -80,6 +80,10 @@ class EditInsumoForm(CreateInsumoForm):
         validators.Optional()
     ], choices=[(1, 'Activo'), (0, 'Inactivo')], coerce=int)
 
+class EliminarInsumoForm(Form):
+    id_insumo = StringField('ID Insumo', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
 
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [
