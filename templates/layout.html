@@ -109,7 +109,7 @@
                 </li>
                 {% endif %}
 
-                {% if current_user.has_role('cocina') %}
+                {% if current_user.has_role('Cocina') %}
                 <li>
                     <a href="#"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
@@ -125,7 +125,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="/inventario-produccion"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
                         <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -136,11 +136,23 @@
                         <span class="flex-1 ms-3 whitespace-nowrap">Inventario producción</span>
                     </a>
                 </li>
+                <li>
+                    <a href="/solicitud-produccion"
+                        class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
+                        <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
+                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 8h8M7 12h10M7 16h10M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" />
+                        </svg>
+                        <span class="flex-1 ms-3 whitespace-nowrap">Solicitud producción</span>
+                    </a>
+                </li>
                 {% endif %}
 
-                {% if current_user.has_role('cliente') %}
+                {% if current_user.has_role('Cliente') %}
                 <li>
-                    <a href="#"
+                    <a href="/costo-utilidad"
                         class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
                         <svg class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -206,10 +218,9 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" 
-            integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" 
-            crossorigin="anonymous" 
-            referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+        integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
 
@@ -217,7 +228,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Anima el <main> deslizando hacia arriba suavemente
             MonsterAnimations.animatePageEntry();
-            
+
             // Si alguna pantalla arroja un error/éxito (flash), también lo animamos
             MonsterAnimations.animateFlashMessages();
         });

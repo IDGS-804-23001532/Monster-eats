@@ -1,80 +1,76 @@
 from flask import Blueprint, render_template, request, flash, redirect, session, url_for
-from models import db, InventarioProducto, Producto, Combo, MovimientoInventarioProducto
+from models import db, Producto, Combo, InventarioProducto
 from datetime import datetime
 from forms import AjusteStockForm, CrearComboForm, VincularComboForm
+from sqlalchemy import text
+from flask_security import login_required, roles_accepted, current_user
+from collections import namedtuple
 
 inventario_produccion = Blueprint('inventario_produccion', __name__, url_prefix='/inventario-produccion')
 
+# Creamos estructuras inmutables (Hashables) para engañar a WTForms y Jinja
+InvMock = namedtuple('InvMock', ['stock_actual'])
+ProdMock = namedtuple('ProdMock', ['id_producto', 'nombre', 'precio_venta'])
+
 @inventario_produccion.route('/', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Cocina') # REGLA: Sólo el Cocina puede visualizar esto
 def principal():
     form = AjusteStockForm() 
     
     if request.method == 'POST':
-        print("\n--- INICIANDO PROCESO DE AJUSTE ---")
-        print("Datos recibidos:", request.form)
-        
         if form.validate_on_submit():
-            print("WTForms: Datos correctos.")
             id_prod = form.id_producto.data
             cantidad_ajuste = form.cantidad.data
             motivo = form.motivo.data
             
             try:
-                inv = InventarioProducto.query.filter_by(id_producto=id_prod).first()
+                # Obtenemos el usuario autenticado actualmente
+                user_id = current_user.id_usuario
                 
-                if inv:
-                    if inv.stock_actual + cantidad_ajuste < 0:
-                        print("Error detectado: El stock quedaría en negativo.")
-                        flash('No puedes restar más unidades de las que tienes disponibles.', 'error')
-                        return redirect(url_for('inventario_produccion.principal'))
-
-                    stock_anterior = inv.stock_actual
-                    inv.stock_actual += cantidad_ajuste
-                    
-                    from models import Usuario
-                    usuario_db = Usuario.query.first()
-                    user_id = usuario_db.id_usuario if usuario_db else 1
-                    
-                    movimiento = MovimientoInventarioProducto(
-                        id_producto=id_prod,
-                        tipo_movimiento='AJUSTE_MANUAL',
-                        cantidad=abs(cantidad_ajuste),
-                        stock_anterior=stock_anterior,
-                        stock_nuevo=inv.stock_actual,
-                        motivo=motivo,
-                        id_usuario=user_id, 
-                        fecha_movimiento=datetime.now()
-                    )
-                    db.session.add(movimiento)
-                    db.session.commit()
-                    
-                    print("ÉXITO: Ajuste guardado en la Base de Datos.")
-                    flash('Cambio guardado de forma correcta.', 'success')
-                    return redirect(url_for('inventario_produccion.principal'))
-                else:
-                     print("Error: Producto no encontrado.")
-                     flash('No se encontro el producto.', 'error')
-                     return redirect(url_for('inventario_produccion.principal'))
-                     
+                # Ejecutamos el Stored Procedure
+                db.session.execute(
+                    text("CALL sp_ajustar_stock_producto(:p_id, :p_cant, :p_motivo, :p_usr)"),
+                    {'p_id': id_prod, 'p_cant': cantidad_ajuste, 'p_motivo': motivo, 'p_usr': user_id}
+                )
+                db.session.commit()
+                flash('Cambio guardado de forma correcta.', 'success')
+                
             except Exception as e:
                 db.session.rollback()
-                print(f"CRÍTICO - ERROR DE BASE DE DATOS: {str(e)}")
-                flash('Fallo al intentar guardar en BD.', 'error')
-                return redirect(url_for('inventario_produccion.principal'))
+                error_msg = str(e)
+                # Manejamos el error específico del Stored Procedure
+                if "Error_Stock_Negativo" in error_msg:
+                    flash('No puedes restar más unidades de las que tienes disponibles.', 'error')
+                else:
+                    flash('Fallo al intentar guardar en BD.', 'error')
+                    
+            return redirect(url_for('inventario_produccion.principal'))
 
-        else:
-            print("WTForms RECHAZÓ EL FORMULARIO. Errores:", form.errors)
-
-    productos_stock = db.session.query(InventarioProducto, Producto)\
-        .join(Producto, InventarioProducto.id_producto == Producto.id_producto)\
-        .filter(~Producto.nombre.ilike('%combo%'))\
-        .all()
+    productos_stock = []
+    try:
+        # Obtenemos los datos desde la Vista SQL de forma directa
+        query = text("SELECT id_producto, nombre, precio_venta, stock_actual FROM vw_inventario_productos")
+        # Usamos fetchall() directo para que devuelva tuplas puras en lugar de diccionarios
+        resultados = db.session.execute(query).fetchall()
+        
+        for r in resultados:
+            # Construimos nuestros objetos inmutables apuntando al índice (0=id, 1=nombre, 2=precio, 3=stock)
+            inv = InvMock(stock_actual=r[3])
+            prod = ProdMock(id_producto=r[0], nombre=r[1], precio_venta=r[2])
+            productos_stock.append((inv, prod))
+            
+    except Exception as e:
+        print(f"CRÍTICO EN GET: {e}")
+        flash('Asegúrate de haber ejecutado las Vistas y SPs en la base de datos.', 'error')
 
     return render_template('inventario_Produccion/principal.html', 
                            productos_stock=productos_stock, 
                            form=form)
 
 @inventario_produccion.route('/combos')
+@login_required
+@roles_accepted('Cocina')
 def combos_dinamicos():
     combos_padres = Producto.query.filter(Producto.nombre.ilike('%combo%'), Producto.activo == 1).all()
 
@@ -110,6 +106,8 @@ def combos_dinamicos():
     return render_template('inventario_Produccion/combosDinamicos.html', combos_data=combos_data)
 
 @inventario_produccion.route('/gestionar_combos', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('Cocina')
 def gestionar_combos():
     form_crear = CrearComboForm()
     form_vincular = VincularComboForm()
@@ -120,23 +118,19 @@ def gestionar_combos():
     posibles_ingredientes = Producto.query.filter(~Producto.nombre.ilike('%combo%'), Producto.activo==1).all()
     form_vincular.id_hijo.choices = [(0, 'Elige un producto...')] + [(p.id_producto, p.nombre) for p in posibles_ingredientes]
 
-    # Preparamos la sesión
     if 'combo_temp' not in session:
         session['combo_temp'] = {'id_padre': None, 'nombre': '', 'precio': '', 'ingredientes': []}
 
     if request.method == 'POST':
         action = request.form.get('action')
 
-        # ACCIÓN 1: FIJAR DATOS
         if action == 'guardar_datos_generales':
             if form_crear.validate_on_submit():
                 session['combo_temp']['nombre'] = form_crear.nombre_combo.data
                 session['combo_temp']['precio'] = float(form_crear.precio_combo.data)
                 session.modified = True
                 return redirect(url_for('inventario_produccion.gestionar_combos'))
-            # Si falla la validación, el código sigue hacia abajo y pinta los errores en el HTML.
 
-        # ACCIÓN 2: AÑADIR INGREDIENTE
         elif action == 'agregar_ingrediente':
             if form_vincular.validate_on_submit():
                 id_hijo = form_vincular.id_hijo.data
@@ -159,9 +153,7 @@ def gestionar_combos():
                         session['combo_temp'] = combo_temp 
                         session.modified = True
                         return redirect(url_for('inventario_produccion.gestionar_combos'))
-            # Si falla, sigue hacia abajo y pinta los errores en la caja de "Añadir".
 
-        # ACCIÓN 3: FINALIZAR EL COMBO COMPLETO
         elif action == 'finalizar_combo':
             temp = session['combo_temp']
             nombre = temp.get('nombre')
@@ -171,7 +163,6 @@ def gestionar_combos():
 
             hay_errores = False
 
-            # Validamos que se haya hecho el Paso 1 (AQUÍ ESTÁ LA CORRECCIÓN)
             if not nombre:
                 form_crear.nombre_combo.errors = ['Falta fijar el nombre del paquete.']
                 hay_errores = True
@@ -179,7 +170,6 @@ def gestionar_combos():
                 form_crear.precio_combo.errors = ['Falta fijar el precio.']
                 hay_errores = True
                 
-            # Validamos que haya al menos 2 ingredientes
             if total_piezas < 2:
                 flash('La receta debe contener al menos 2 productos físicos.', 'error_receta')
                 hay_errores = True
@@ -210,9 +200,7 @@ def gestionar_combos():
                 except Exception as e:
                     db.session.rollback()
                     flash('Error en la base de datos.', 'error_receta')
-            # Si hay errores, no hace redirect, solo renderiza la plantilla mostrando todas las alertas.
 
-        # Cargar editar, activar/desactivar, eliminar y cancelar
         elif action == 'cargar_para_editar':
             id_padre = int(request.form.get('id_padre'))
             prod_padre = Producto.query.get(id_padre)
@@ -240,7 +228,6 @@ def gestionar_combos():
             session.pop('combo_temp', None)
             return redirect(url_for('inventario_produccion.gestionar_combos'))
 
-    # PREPARAR LA VISTA (Para GET o POST fallido)
     if request.method == 'GET' and session['combo_temp']['nombre']:
         form_crear.nombre_combo.data = session['combo_temp']['nombre']
         form_crear.precio_combo.data = session['combo_temp']['precio']
@@ -259,6 +246,8 @@ def gestionar_combos():
                            combo_temp=session['combo_temp'])
 
 @inventario_produccion.route('/eliminar_hijo_combo/<int:id_padre>/<int:id_hijo>', methods=['POST'])
+@login_required
+@roles_accepted('Cocina')
 def eliminar_hijo_combo(id_padre, id_hijo):
     try:
         Combo.query.filter_by(id_producto_padre=id_padre, id_producto_hijo=id_hijo).delete()
