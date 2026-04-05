@@ -45,5 +45,40 @@ const MonsterAnimations = {
                 { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
             );
         }
+    },
+
+    animateModals: function() {
+        // Escuchamos todos los clics que ocurran en el documento
+        document.addEventListener('click', (event) => {
+            // Buscamos si el clic fue en un botón con id="button-animate" o dentro de él
+            const button = event.target.closest('.btn-animate-modal');
+            
+            if (button) {
+                // Leemos a qué modal quiere abrir este botón
+                const modalId = button.getAttribute('data-modal-target');
+                if (modalId) {
+                    // Buscamos la "caja interna" de ese modal específico para animarla
+                    const modalBox = document.querySelector(`#${modalId} > div > div`);
+                    
+                    if (modalBox) {
+                        // Le damos la animación de rebote y opacidad
+                        gsap.fromTo(modalBox, 
+                            { 
+                                opacity: 0, 
+                                y: -40,
+                                scale: 0.95 
+                            }, 
+                            { 
+                                opacity: 1, 
+                                y: 0, 
+                                scale: 1, 
+                                duration: 0.4, 
+                                ease: "back.out(1.2)" 
+                            }
+                        );
+                    }
+                }
+            }
+        });
     }
 }
