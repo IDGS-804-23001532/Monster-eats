@@ -1,24 +1,31 @@
-{% extends 'layout.html' %} {% from "macros/_macros.html" import camposNuevos %}
-{% block content %}
+{% extends 'layout.html' %} {% from "macros/macro_insumo.html" import
+camposNuevos %} {% block content %}
 
-<div class="w-[1168px] ml-auto mr-10 flex justify-between items-center mt-20">
-  <form class="flex items-center gap-2">
+<div
+  class="w-full max-w-[1168px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center mt-10 md:mt-20 gap-6 px-4 xl:px-0"
+>
+  <form
+    action="{{ url_for('insumos.index') }}"
+    method="GET"
+    class="flex flex-nowrap items-center gap-2 w-full lg:w-auto"
+  >
     <!-- Input -->
-    <div class="relative">
+    <div class="relative flex-1 sm:flex-none">
       <label for="simple-search" class="sr-only">Buscar</label>
       <input
         type="text"
+        name="search_query"
+        value="{{ search_query }}"
         id="simple-search"
-        placeholder="Buscar"
-        class="w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-white"
+        placeholder="Buscar insumo..."
+        class="w-full sm:w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-gray-400"
       />
     </div>
 
     <!-- Botón -->
     <button
-      type="button"
-      onclick="buscar()"
-      class="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
+      type="submit"
+      class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
     >
       <svg
         class="w-5 h-5 text-white"
@@ -36,15 +43,24 @@
     </button>
   </form>
 
-  <div class="flex gap-4">
+  <div
+    class="flex flex-col sm:flex-row flex-wrap gap-4 w-full lg:w-auto justify-start lg:justify-end"
+  >
+    <button
+      type="button"
+      onclick="window.location.href = '/limpiar_busqueda'"
+      class="w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#101828] border-2 border-[#101828] hover:bg-orange-600 transition text-white whitespace-nowrap"
+    >
+      Limpiar Busqueda
+    </button>
     <button
       data-modal-target="nuevoInsumo"
       data-modal-toggle="nuevoInsumo"
       type="button"
-      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
+      class="btn-animate-modal w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
     >
       <svg
-        class="w-5 h-5 text-white mr-2"
+        class="w-6 h-6 text-gray-800 dark:text-white mr-2"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -54,18 +70,21 @@
       >
         <path
           stroke="currentColor"
+          stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
+          d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
       </svg>
+
       Nuevo Insumo
     </button>
 
     <button
       type="button"
-      onclick="historialMovimientos()"
-      class="flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
+      data-modal-target="historialMovimientos"
+      data-modal-toggle="historialMovimientos"
+      class="btn-animate-modal w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white whitespace-nowrap"
     >
       <svg
         class="w-5 h-5 text-white mr-2"
@@ -83,96 +102,123 @@
           d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
         />
       </svg>
-      Ver historial de Movimientos
+      Historial de Movimientos
     </button>
   </div>
 </div>
 
-<div
-  class="w-[1168px] ml-auto mr-10 bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mt-6 mb-10 overflow-hidden"
->
-  <table class="w-full text-sm text-left rtl:text-right text-body">
-    <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
-      <tr class="divide-x divide-[#ffffff]">
-        <th scope="col" class="px-6 py-3 font-medium text-white">Insumo</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Stock</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">
-          Nivel minimo
-        </th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">
-          Costo Unario
-        </th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Merma</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        class="odd:bg-[#0B1D33] text-white even:bg-[#1E2939] border-b border-[#ffffff] divide-x divide-[#ffffff]"
-      >
-        <th
-          scope="row"
-          class="px-6 py-4 font-medium text-white whitespace-nowrap"
+<div class="px-4 xl:px-0">
+  <div
+    class="table-container w-full max-w-[1168px] mx-auto bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mt-6 mb-10 overflow-x-auto"
+  >
+    <table
+      class="mobile-cards w-full text-sm text-left rtl:text-right text-body whitespace-nowrap"
+    >
+      <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
+        <tr class="divide-x divide-[#ffffff]">
+          <th scope="col" class="px-6 py-3 font-medium text-white">Insumo</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Unidad de medida
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Costo Unario
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Merma</th>
+          <th scope="col" class="px-6 py-3 frot-medium text-white">Estado</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for insumo in insumos %}
+        <tr
+          class="odd:bg-[#0B1D33] text-white even:bg-[#0B1D33] border-b border-[#ffffff] divide-x divide-[#ffffff]"
         >
-          Apple MacBook Pro 17"
-        </th>
-        <td class="px-6 py-4">Silver</td>
-        <td class="px-6 py-4">100</td>
-        <td class="px-6 py-4">$2999</td>
-        <td class="px-6 py-4">$2999</td>
-        <td class="px-6 py-4">
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              title="Ver Detalle"
-              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] hover:brightness-110 transition"
+          <th
+            scope="row"
+            class="px-6 py-4 font-semibold text-white whitespace-nowrap text-lg md:text-sm"
+          >
+            {{insumo.nombre}}
+          </th>
+          <td data-label="Unidad:" class="px-6 py-4">
+            {{insumo.unidad_medida.nombre}}
+            ({{insumo.unidad_medida.abreviatura}})
+          </td>
+          <td data-label="Costo:" class="px-6 py-4">
+            ${{insumo.costo_unitario}}
+          </td>
+          <td data-label="Merma:" class="px-6 py-4">
+            {{insumo.porcentaje_merma}}%
+          </td>
+          <td data-label="Estado:" class="px-6 py-4">
+            {% if insumo.activo %}
+            <span
+              class="bg-green-500/20 text-[#00B40C] font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-green-500/30"
+              >Disponible</span
             >
-              <svg
-                class="w-6 h-6 text-gray-800 dark:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              title="Eliminar"
-              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#B22222] hover:brightness-110 transition"
+            {% else %}
+            <span
+              class="bg-red-500/20 text-red-500 font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-red-500/30"
+              >No disponible</span
             >
-              <svg
-                class="w-5 h-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+            {% endif %}
+          </td>
+          <td class="px-6 py-4">
+            <div
+              class="flex items-center justify-center md:justify-start gap-5 md:gap-3"
+            >
+              <a
+                href="{{ url_for('insumos.editar_insumo', id=insumo.id_insumo) }}"
+                title="Editar"
+                class="flex items-center justify-center w-12 h-12 md:w-10 md:h-10 rounded-full bg-[#FF6B00] hover:brightness-110 transition shadow-lg md:shadow-none"
               >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M9 15L4 10l5-5M4 10h10c2.76 0 5 2.24 5 5v4"
-                />
-              </svg>
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+                <svg
+                  class="w-7 h-7 md:w-6 md:h-6 text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"
+                  />
+                </svg>
+              </a>
+              <a
+                href="{{ url_for('insumos.eliminar', id=insumo.id_insumo) }}"
+                title="Eliminar"
+                class="flex items-center justify-center w-12 h-12 md:w-10 md:h-10 rounded-full bg-[#B22222] hover:brightness-110 transition shadow-lg md:shadow-none"
+              >
+                <svg
+                  class="w-6 h-6 md:w-5 md:h-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"
+                  />
+                </svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<!-- ***************************  *******************************************  -->
+{% endblock %} {% block modals %}
 <!-- ***************************  Modal para añadir nuevo insumo  *******************************************  -->
 <!-- **********************************************************************  -->
 
@@ -219,49 +265,50 @@
         </button>
       </div>
       <!-- Modal body -->
-      <form action="{{ url_for('insumos.nuevo_insumo') }}" method="POST">
+      <form
+        action="{{ url_for('insumos.nuevo_insumo') }}"
+        method="POST"
+        novalidate
+      >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
           <div class="col-span-2">
-            {{ camposNuevos(create_form.nombre, class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Nombre del insumo") }}
+            {{ camposNuevos(create_form.nombre, class_="bg-[#394E6D] text-white
+            text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00]
+            block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300",
+            placeholder="Nombre del insumo") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            {{ camposNuevos(create_form.costo_unitario, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Precio") }}
+            {{ camposNuevos(create_form.costo_unitario, type="number",
+            step="any", class_="bg-[#394E6D] text-white text-sm rounded-base
+            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
+            shadow-xs placeholder:text-gray-300", placeholder="Precio") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
             <div class="relative">
-              {{ camposNuevos(create_form.id_unidad_medida, class_="block w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10 cursor-pointer") }}
-              <div
-                class="pointer-events-none absolute bottom-0 right-0 top-6 flex items-center px-3 text-white"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-              </div>
+              {{ camposNuevos(create_form.id_unidad_medida, class_="block w-full
+              bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs
+              focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10
+              cursor-pointer") }}
             </div>
           </div>
           <div class="col-span-2">
-            {{ camposNuevos(create_form.porcentaje_merma, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Porcentaje de merma") }}
+            {{ camposNuevos(create_form.porcentaje_merma, type="number",
+            step="any", class_="bg-[#394E6D] text-white text-sm rounded-base
+            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
+            shadow-xs placeholder:text-gray-300", placeholder= "Porcentaje de
+            merma") }}
           </div>
         </div>
         <div
-          class="flex items-center space-x-4 border-t border-default pt-4 md:pt-6"
+          class="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-gray-600 pt-4 md:pt-6 mt-4"
         >
           <button
             type="submit"
-            class="inline-flex items-center text-white bg-[#FF6B00] hover:bg-orange-600 box-border border border-transparent focus:ring-4 focus:ring-orange-900 shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5 focus:outline-none"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#FF6B00] hover:brightness-110 transition focus:ring-4 focus:ring-orange-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
           >
             <svg
-              class="w-4 h-4 me-1.5 -ms-0.5"
+              class="w-5 h-5 text-white mr-2"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -274,7 +321,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M5 12h14m-7 7V5"
+                d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
             Guardar
@@ -282,8 +329,25 @@
           <button
             data-modal-hide="nuevoInsumo"
             type="button"
-            class="text-white bg-[#B22222] hover:brightness-110 box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5 focus:outline-none"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition focus:ring-4 focus:ring-red-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
           >
+            <svg
+              class="w-5 h-5 text-white mr-2"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18 17.94 6M18 18 6.06 6"
+              />
+            </svg>
             Cancelar
           </button>
         </div>
@@ -294,6 +358,119 @@
 
 <!-- ***************************  *******************************************  -->
 <!-- ***************************  Fin del modal para añadir nuevo insumo  *******************************************  -->
+<!-- **********************************************************************  -->
+
+<!-- ***************************  Modal para editar insumo  *******************************************  -->
+<!-- **********************************************************************  -->
+
+<!-- Edit modal -->
+<div
+  id="editInsumoModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <!-- Modal content -->
+    <div class="relative bg-[#1F2937] border rounded-base shadow-sm p-4 md:p-6">
+      <!-- Modal header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Editar Insumo
+        </h3>
+        <button
+          type="button"
+          class="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
+          data-modal-hide="editInsumoModal"
+        >
+          <svg
+            class="w-5 h-5 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18 17.94 6M18 18 6.06 6"
+            />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <form
+        action="{{ url_for('insumos.editar_insumo') }}"
+        method="POST"
+        novalidate
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        {{ edit_form.id_insumo(id="edit_id_insumo", type="hidden") }}
+        <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
+          <div class="col-span-2">
+            {{ camposNuevos(edit_form.nombre, id="edit_nombre",
+            class_="bg-[#394E6D] text-white text-sm rounded-base
+            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
+            shadow-xs placeholder:text-gray-300") }}
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            {{ camposNuevos(edit_form.costo_unitario, id="edit_costo",
+            type="number", step="any", class_="bg-[#394E6D] text-white text-sm
+            rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block
+            w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300") }}
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <div class="relative">
+              {{ camposNuevos(edit_form.id_unidad_medida, id="edit_unidad",
+              class_="block w-full bg-[#394E6D] text-white text-sm rounded-base
+              px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00]
+              appearance-none pr-10 cursor-pointer") }}
+            </div>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            {{ camposNuevos(edit_form.porcentaje_merma, id="edit_merma",
+            type="number", step="any", class_="bg-[#394E6D] text-white text-sm
+            rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block
+            w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300") }}
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            {{ camposNuevos(edit_form.activo, id="edit_activo", class_="block
+            w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5
+            shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00]
+            appearance-none pr-10 cursor-pointer") }}
+          </div>
+        </div>
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-gray-600 pt-4 md:pt-6 mt-4"
+        >
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#FF6B00] hover:brightness-110 transition focus:ring-4 focus:ring-orange-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            Actualizar
+          </button>
+          <button
+            data-modal-hide="editInsumoModal"
+            type="button"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition focus:ring-4 focus:ring-red-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ***************************  *******************************************  -->
+<!-- ***************************  Fin del modal para editar insumo  *******************************************  -->
 <!-- **********************************************************************  -->
 
 <!-- ***************************  *******************************************  -->
@@ -355,7 +532,139 @@
 <!-- **********************************************************************  -->
 
 <!-- ***************************  *******************************************  -->
-<!-- ***************************  Fin del modal para Ver historial de movimientos  *******************************************  -->
+<!-- ***************************  Modal para Eliminar insumo  *******************************************  -->
 <!-- **********************************************************************  -->
 
-{% endblock %}
+<!-- Main modal -->
+<div
+  id="eliminarInsumoModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <!-- Modal content -->
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-6"
+    >
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+        data-modal-hide="eliminarInsumoModal"
+      >
+        <svg
+          class="w-4 h-4"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+          />
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+
+      <!-- Warning Icon -->
+      <div class="flex justify-center mb-4">
+        <div
+          class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center"
+        >
+          <svg
+            class="w-9 h-9 text-[#B22222]"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Confirmation text -->
+      <h3 class="text-lg font-semibold text-white text-center mb-2">
+        ¿Eliminar insumo?
+      </h3>
+      <p class="text-gray-400 text-sm text-center mb-6">
+        Estás a punto de eliminar
+        <span class="text-[#FF6B00] font-semibold"
+          >{{ delete_insumo.nombre if delete_insumo else '' }}</span
+        >. Esta acción no se puede deshacer.
+      </p>
+
+      <!-- Form with hidden fields -->
+      <form action="{{ url_for('insumos.eliminar') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input
+          type="hidden"
+          name="id_insumo"
+          value="{{ delete_insumo.id_insumo if delete_insumo else '' }}"
+        />
+
+        <div class="flex items-center justify-center gap-3">
+          <button
+            data-modal-hide="eliminarInsumoModal"
+            type="button"
+            class="flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition focus:ring-4 focus:ring-gray-700 font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition focus:ring-4 focus:ring-red-900 font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            <svg
+              class="w-4 h-4 mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"
+              />
+            </svg>
+            Eliminar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ***************************  *******************************************  -->
+<!-- ***************************  Fin del modal para Eliminar insumo  *******************************************  -->
+<!-- **********************************************************************  -->
+
+{% if show_modal %}
+<button
+  id="autoOpenModalBtn"
+  data-modal-target="{{ show_modal }}"
+  data-modal-toggle="{{ show_modal }}"
+  class="btn-animate-modal hidden"
+></button>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(() => {
+      const btn = document.getElementById("autoOpenModalBtn");
+      if (btn) btn.click();
+    }, 100);
+  });
+</script>
+{% endif %} {% endblock %}
