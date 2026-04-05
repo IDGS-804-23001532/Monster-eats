@@ -1,7 +1,7 @@
 {% macro camposNuevos(field) %}
-  <h2 class="font-bold text-gray-800">{{ field.label }}</h2>
+  <label class="block mb-2 text-sm font-medium text-slate-300">{{ field.label }}</label>
   
-  <dd>{{ field(**kwargs) | safe }}</dd>
+  <dd>{{ field(**kwargs) }}</dd>
 
   {% if field.errors %}
     <ul>

@@ -5,16 +5,16 @@ from config import DevelopmentConfig
 from flask_migrate import Migrate
 from auth import auth
 from dashboard import dashboard
-from models import db, User as Usuario, Role as Rol
+from proveedores import proveedor
+from ventas import venta
+from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
 from usuarios import usuarios_bp
 from recetas import recetas_bp
 from produccion import produccion_bp
-
 app = Flask(__name__)
-
 limiter.init_app(app)
 
 app.config.from_object(DevelopmentConfig)
@@ -50,10 +50,15 @@ def unauthorized():
     return redirect(url_for('auth.login'))
 
 csrf = CSRFProtect()
+
+# Rutas Blueprint
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
+app.register_blueprint(proveedor)
+app.register_blueprint(venta)
 
 @app.route("/")
+@login_required
 def index():
     return render_template('index.html')
 

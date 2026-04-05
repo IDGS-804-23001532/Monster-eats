@@ -141,6 +141,55 @@ def register():
     return render_template('auth/register.html', form=create_form)
 
 
+@auth.route("/crear-cajero-demo")
+def crear_cajero_demo():
+    from app import user_datastore
+
+    try:
+        email = "cajero.demo@monstereats.com"
+        password_plana = "Cajero123*"
+
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            flash("El usuario cajero ya existe.", "info")
+            return redirect(url_for("index"))
+
+        rol_cajero = user_datastore.find_or_create_role(
+            name="Cajero",
+            descripcion="Registro de ventas en mostrador"
+        )
+        db.session.commit()
+
+        nueva_persona = Persona(
+            nombre="Cajero",
+            apellido_pa="Demo",
+            apellido_ma="Sistema",
+            telefono="2220001111"
+        )
+        db.session.add(nueva_persona)
+        db.session.flush()
+
+        nuevo_usuario = user_datastore.create_user(
+            id_persona=nueva_persona.id_persona,
+            email=email,
+            password=generate_password_hash(password_plana),
+            active=True,
+            fs_uniquifier=uuid.uuid4().hex,
+            intentos_fallidos=0,
+            bloqueado_hasta=None
+        )
+
+        user_datastore.add_role_to_user(nuevo_usuario, rol_cajero)
+        db.session.commit()
+
+        flash("Usuario cajero creado correctamente.", "success")
+        return redirect(url_for("index"))
+
+    except Exception as error:
+        db.session.rollback()
+        flash(f"No se pudo crear el usuario cajero: {str(error)}", "error")
+        return redirect(url_for("index"))
+
 @auth.route("/logout")
 @login_required
 def logout():
