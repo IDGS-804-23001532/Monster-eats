@@ -135,6 +135,7 @@ class Insumo(db.Model):
         # CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
         CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
     )
+
 # ==========================================================================
 # MÓDULO DE DETALLE DE COMPRAS
 # ==========================================================================

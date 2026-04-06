@@ -967,18 +967,21 @@ camposNuevos %} {% block content %}
 {% if show_modal or historial_compras %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const modalId = "{{ show_modal if show_modal else 'historialComprasModal' }}";
+    const modalId =
+      "{{ show_modal if show_modal else 'historialComprasModal' }}";
     const $modalElement = document.getElementById(modalId);
-    
+
     if ($modalElement) {
       setTimeout(() => {
         const modal = new Modal($modalElement);
         modal.show();
 
         // Forzamos que todos los botones de cerrar dentro de este modal funcionen
-        const closeButtons = $modalElement.querySelectorAll(`[data-modal-hide="${modalId}"]`);
-        closeButtons.forEach(btn => {
-          btn.addEventListener('click', () => modal.hide());
+        const closeButtons = $modalElement.querySelectorAll(
+          `[data-modal-hide="${modalId}"]`,
+        );
+        closeButtons.forEach((btn) => {
+          btn.addEventListener("click", () => modal.hide());
         });
       }, 200);
     }

@@ -1,5 +1,5 @@
 {% macro camposNuevos(field) %}
-  <label class="block mb-2 text-sm font-medium text-white">{{ field.label }}</label>
+  <label class="block mb-2 text-sm font-medium text-white">{{ field.label.text }}</label>
   
   <div>{{ field(**kwargs) | safe }}</div>
 

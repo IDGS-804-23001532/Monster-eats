@@ -658,16 +658,18 @@ camposNuevos %} {% block content %}
     const modalId = "{{ show_modal }}";
     const $modalElement = document.getElementById(modalId);
     if ($modalElement) {
-        setTimeout(() => {
-            const modal = new Modal($modalElement);
-            modal.show();
+      setTimeout(() => {
+        const modal = new Modal($modalElement);
+        modal.show();
 
-            // Forzamos que todos los botones de cerrar dentro de este modal funcionen
-            const closeButtons = $modalElement.querySelectorAll(`[data-modal-hide="${modalId}"]`);
-            closeButtons.forEach(btn => {
-                btn.addEventListener('click', () => modal.hide());
-            });
-        }, 200);
+        // Forzamos que todos los botones de cerrar dentro de este modal funcionen
+        const closeButtons = $modalElement.querySelectorAll(
+          `[data-modal-hide="${modalId}"]`,
+        );
+        closeButtons.forEach((btn) => {
+          btn.addEventListener("click", () => modal.hide());
+        });
+      }, 200);
     }
   });
 </script>

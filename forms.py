@@ -1,5 +1,5 @@
-from wtforms import Form, SelectField, DecimalField
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
+from flask_wtf import FlaskForm
+from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField
 from wtforms import validators
 
 class LoginForm(Form):
@@ -200,3 +200,15 @@ class VentasForm(Form):
             validators.Optional(),
             validators.NumberRange(min=0.01, message='Debe ingresar un monto recibido válido')
         ])
+
+class MermaForm(FlaskForm):
+    id_lote = HiddenField('ID Lote', [validators.DataRequired()])
+    id_insumo = HiddenField('ID Insumo', [validators.DataRequired()])
+    cantidad = DecimalField('Cantidad a retirar', [
+        validators.DataRequired(message='La cantidad es requerida'),
+        validators.NumberRange(message='La cantidad debe ser mayor a 0')
+    ])
+    motivo = StringField('Motivo', [
+        validators.DataRequired(message='El motivo es requerido'),
+        validators.Length(max=255, message='El motivo no puede exceder los 255 caracteres')
+    ])
