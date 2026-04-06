@@ -98,7 +98,7 @@
           </li>
           <li>
             <a
-              href="#"
+              href="{{ url_for('usuarios.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -259,7 +259,7 @@
           </li>
           <li>
             <a
-              href="#"
+              href="{{ url_for('recetas.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -284,7 +284,7 @@
           </li>
           <li>
             <a
-              href="/costo-utilidad"
+              href="{{ url_for('costo_utilidad.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -315,7 +315,7 @@
           %}
           <li>
             <a
-              href="#"
+              href="{{ url_for('produccion.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -349,7 +349,7 @@
           </li>
           <li>
             <a
-              href="/inventario-produccion"
+              href="{{ url_for('inventario_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -376,7 +376,7 @@
           </li>
           <li>
             <a
-              href="/solicitud-produccion"
+              href="{{ url_for('solicitud_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -403,7 +403,7 @@
           </li>
           <li>
             <a
-              href="/solicitud-produccion/tablero"
+              href="{{ url_for('solicitud_produccion.tablero_cocina') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -432,7 +432,7 @@
           current_user.has_role('Cliente') %}
           <li>
             <a
-              href="/solicitud-produccion"
+              href="{{ url_for('solicitud_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg

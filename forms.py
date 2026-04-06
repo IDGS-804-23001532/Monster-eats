@@ -1,12 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField
-from flask_wtf import FlaskForm, Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, HiddenField, IntegerField, TextAreaField, SubmitField
-from wtforms import SelectField, FloatField
-from wtforms import Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField, DecimalField, HiddenField, SubmitField
+from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField, TextAreaField, SubmitField
 from wtforms import validators
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, Length, Email, Regexp, Optional
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -284,3 +279,47 @@ class FiltroFechaForm(Form):
 
     submit = SubmitField('Filtrar')
 
+
+# ==========================================================================
+# FORMULARIOS DE ADMINISTRACIÓN (USUARIOS)
+# ==========================================================================
+
+class UsuarioForm(FlaskForm):
+    nombre = StringField('Nombre', validators=[DataRequired(), Length(max=50)])
+    apellido_pa = StringField('Apellido Paterno', validators=[DataRequired()])
+    apellido_ma = StringField('Apellido Materno')
+    fecha_nacimiento = DateField('Fecha de Nacimiento', validators=[DataRequired()])
+    telefono = TelField('Teléfono', validators=[DataRequired(), Length(min=10, max=15)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Contraseña', validators=[
+        DataRequired(),
+        Length(min=8),
+        Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+               message="La contraseña debe tener mayúscula, minúscula, número y carácter especial.")
+    ])
+    rol_id = SelectField('Rol', coerce=int, validators=[DataRequired()])
+
+# ==========================================================================
+# FORMULARIOS DE RECETAS
+# ==========================================================================
+
+class RecetaFiltroForm(FlaskForm):
+    search = StringField('Buscar', validators=[Optional()])
+
+class RecetaInsumoForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    id_insumo = SelectField('Insumo', coerce=int, validators=[DataRequired()])
+    cantidad_requerida = DecimalField('Cantidad Requerida', 
+        validators=[DataRequired(), NumberRange(min=0.01, message="La cantidad debe ser mayor a 0")],
+        places=4)
+
+
+class ProduccionOrdenForm(FlaskForm):
+    id_producto = SelectField('Producto', coerce=int, validators=[DataRequired()])
+    cantidad_programada = IntegerField('Cantidad a producir', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
+    observaciones = TextAreaField('Observaciones', validators=[Optional()])
+
+class ProduccionFinalizarForm(FlaskForm):
+    cantidad_producida = IntegerField('Cantidad producida', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
