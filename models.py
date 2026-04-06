@@ -70,6 +70,41 @@ class Proveedor(db.Model):
     id_categoria_proveedor = db.Column(db.Integer, db.ForeignKey('categorias_proveedor.id_categoria_proveedor'), nullable=False)
     fecha_registro = db.Column(db.DateTime, nullable=False, default=func.now())
     activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
+# ==========================================================================
+# MÓDULO DE COMPRAS
+# ==========================================================================
+
+class Compra(db.Model):
+    __tablename__ = 'compras'
+    id_compra = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+    fecha_compra = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
+    total = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    estado_compra = db.Column(db.Enum('Completada', 'Cancelada', name='estado_compra_enum'), nullable=False, default='Completada', index=True)
+
+    # Relaciones
+    proveedor = db.relationship('Proveedor', backref='compras', lazy=True)
+    usuario = db.relationship('Usuario', backref='compras', lazy=True)
+    detalles = db.relationship('DetalleCompra', backref='compra', lazy=True)
+
+    __table_args__ = (
+        CheckConstraint('total >= 0', name='chk_compras_total'),
+    )
+
+class ConversionUnidadInsumo(db.Model):
+    __tablename__ = 'conversion_unidades_insumo'
+    id_conversion = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    id_unidad_compra = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
+    cantidad_equivalente_base = db.Column(db.Numeric(12, 4), nullable=False)
+    activo = db.Column(db.Boolean, nullable=False, default=True)
+
+    __table_args__ = (
+        CheckConstraint('cantidad_equivalente_base > 0', name='chk_conversion_equivalencia'),
+        UniqueConstraint('id_insumo', 'id_unidad_compra', name='uq_conversion_insumo_unidad'),
+    )
+
 
 # ==========================================================================
 # MÓDULO DE INVENTARIO DE MATERIA PRIMA
@@ -87,28 +122,82 @@ class Insumo(db.Model):
     nombre = db.Column(db.String(100), nullable=False, unique=True, index=True)
     id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
     costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
-    fecha_cad = db.Column(db.Date, nullable=True)
-    nivel_min_reorden = db.Column(db.Numeric(10, 4), nullable=True)
+    # fecha_cad = db.Column(db.Date, nullable=True)
+    # nivel_min_reorden = db.Column(db.Numeric(10, 4), nullable=True)
     porcentaje_merma = db.Column(db.Numeric(5, 2), nullable=False, default=0.00)
     activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
+    # Relaciones
+    unidad_medida = db.relationship('UnidadMedida', backref='insumos', lazy=True)
+
     __table_args__ = (
         CheckConstraint('costo_unitario >= 0', name='chk_insumos_costo_unitario'),
-        CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
+        # CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
         CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
     )
+
+
+# ==========================================================================
+# MÓDULO DE DETALLE DE COMPRAS
+# ==========================================================================
+class DetalleCompra(db.Model):
+    __tablename__ = 'detalle_compras'
+    id_detalle_compra = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_compra = db.Column(db.Integer, db.ForeignKey('compras.id_compra'), nullable=False)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    cantidad_comprada = db.Column(db.Numeric(10, 4), nullable=False)
+    id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
+    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
+    # Nota: SQLAlchemy no maneja columnas "GENERATED ALWAYS" nativamente de forma sencilla
+    # Lo ideal es calcularlo en la lógica de negocio antes de guardar
+    costo_subtotal = db.Column(db.Numeric(10, 2), nullable=False)
+
+    # Relaciones
+    insumo = db.relationship('Insumo', backref='detalle_compras', lazy=True)
+    unidad_medida = db.relationship('UnidadMedida', backref='detalle_compras', lazy=True)
+
+
+    __table_args__ = (
+        CheckConstraint('cantidad_comprada > 0', name='chk_detalle_compras_cantidad'),
+        CheckConstraint('costo_unitario >= 0', name='chk_detalle_compras_costo'),
+        UniqueConstraint('id_compra', 'id_insumo', name='uq_detalle_compras'),
+    )
+# ==========================================================================
+# MÓDULO DE INVENTARIO DE MATERIA PRIMA - LOTE INSUMO
+# ==========================================================================
+class LoteInsumo(db.Model):
+    __tablename__ = 'lotes_insumo'
+    id_lote = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    id_detalle_compra = db.Column(db.Integer, db.ForeignKey('detalle_compras.id_detalle_compra'), nullable=True)
+    cantidad_inicial = db.Column(db.Numeric(10, 4), nullable=False)
+    cantidad_disponible = db.Column(db.Numeric(10, 4), nullable=False)
+    fecha_caducidad = db.Column(db.Date, nullable=False)
+    fecha_ingreso = db.Column(db.DateTime, nullable=False, default=func.now())
+
+    # Relaciones
+    insumo = db.relationship('Insumo', backref='lotes', lazy=True)
+
+    __table_args__ = (
+        CheckConstraint('cantidad_inicial >= 0', name='chk_lotes_insumo_cantidad_inicial'),
+        CheckConstraint('cantidad_disponible >= 0', name='chk_lotes_insumo_cantidad_disponible'),
+        CheckConstraint('cantidad_disponible <= cantidad_inicial', name='chk_lotes_insumo_cantidad_valida'),
+    )
+
+# ==========================================================================
+# MÓDULO DE INVENTARIO DE MATERIA PRIMA - INVENTARIO INSUMO
+# ==========================================================================
 
 class InventarioInsumo(db.Model):
     __tablename__ = 'inventario_insumos'
     id_inventario_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False, unique=True)
-    stock_actual = db.Column(db.Numeric(10, 4), nullable=False, default=0)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=False)
     nivel_minimo = db.Column(db.Numeric(10, 4), nullable=True)
     ubicacion_pasillo = db.Column(db.String(50), nullable=True)
 
     __table_args__ = (
-        CheckConstraint('stock_actual >= 0', name='chk_inventario_insumos_stock'),
         CheckConstraint('nivel_minimo IS NULL OR nivel_minimo >= 0', name='chk_inventario_insumos_nivel'),
+        UniqueConstraint('id_lote', name='uq_inventario_insumos_lote'),
     )
 
 class MermaLog(db.Model):
@@ -119,6 +208,7 @@ class MermaLog(db.Model):
     fecha_baja = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
     motivo = db.Column(db.String(255), nullable=False)
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=True)
 
     __table_args__ = (
         CheckConstraint('cantidad > 0', name='chk_mermas_cantidad'),
@@ -146,6 +236,7 @@ class MovimientoInventarioInsumo(db.Model):
     referencia_id = db.Column(db.Integer, nullable=True)
     motivo = db.Column(db.String(255), nullable=True)
     id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=True)
     fecha_movimiento = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
 
     __table_args__ = (
@@ -154,53 +245,6 @@ class MovimientoInventarioInsumo(db.Model):
         CheckConstraint('stock_nuevo >= 0', name='chk_mov_insumo_stock_nuevo'),
     )
 
-# ==========================================================================
-# MÓDULO DE COMPRAS
-# ==========================================================================
-
-class Compra(db.Model):
-    __tablename__ = 'compras'
-    id_compra = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
-    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
-    fecha_compra = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
-    total = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    estado_compra = db.Column(db.Enum('Completada', 'Cancelada', name='estado_compra_enum'), nullable=False, default='Completada', index=True)
-
-    __table_args__ = (
-        CheckConstraint('total >= 0', name='chk_compras_total'),
-    )
-
-class ConversionUnidadInsumo(db.Model):
-    __tablename__ = 'conversion_unidades_insumo'
-    id_conversion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
-    id_unidad_compra = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
-    cantidad_equivalente_base = db.Column(db.Numeric(12, 4), nullable=False)
-    activo = db.Column(db.Boolean, nullable=False, default=True)
-
-    __table_args__ = (
-        CheckConstraint('cantidad_equivalente_base > 0', name='chk_conversion_equivalencia'),
-        UniqueConstraint('id_insumo', 'id_unidad_compra', name='uq_conversion_insumo_unidad'),
-    )
-
-class DetalleCompra(db.Model):
-    __tablename__ = 'detalle_compras'
-    id_detalle_compra = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_compra = db.Column(db.Integer, db.ForeignKey('compras.id_compra'), nullable=False)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
-    cantidad_comprada = db.Column(db.Numeric(10, 4), nullable=False)
-    id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
-    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
-    # Nota: SQLAlchemy no maneja columnas "GENERATED ALWAYS" nativamente de forma sencilla
-    # Lo ideal es calcularlo en la lógica de negocio antes de guardar
-    costo_subtotal = db.Column(db.Numeric(10, 2), nullable=False) 
-
-    __table_args__ = (
-        CheckConstraint('cantidad_comprada > 0', name='chk_detalle_compras_cantidad'),
-        CheckConstraint('costo_unitario >= 0', name='chk_detalle_compras_costo'),
-        UniqueConstraint('id_compra', 'id_insumo', name='uq_detalle_compras'),
-    )
 
 # ==========================================================================
 # MÓDULO DE RECETAS

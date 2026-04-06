@@ -1,6 +1,12 @@
+from flask_wtf import FlaskForm
+from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField
+from flask_wtf import FlaskForm, Form
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, HiddenField, IntegerField, TextAreaField, SubmitField
+from wtforms import SelectField, FloatField
 from wtforms import Form
 from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
 from wtforms import validators
+from wtforms.validators import DataRequired, NumberRange
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -44,8 +50,125 @@ class RegisterForm(Form):
     password = PasswordField('Password', [
         validators.DataRequired(message='El password es requerido'),
         validators.Length(min=8, message='El password debe tener al menos 8 carácteres'),
-        validators.regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+        validators.Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
                message='La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.')
+    ])
+
+class CreateInsumoForm(Form):
+    nombre = StringField('Nombre', [
+        validators.DataRequired(message='El nombre es requerido'),
+        validators.Length(min=3, max=50, message='El nombre debe tener entre 3 y 50 carácteres')
+    ])
+    id_unidad_medida = SelectField('Unidad de Medida', [
+        validators.DataRequired(message='La unidad de medida es requerida')
+    ], coerce=int)
+    costo_unitario = DecimalField('Costo Unitario', [
+        validators.DataRequired(message='El costo es requerido')
+    ])
+    porcentaje_merma = DecimalField('Porcentaje Merma', [
+        validators.DataRequired(message='El porcentaje de merma es requerido')
+    ])
+
+class EditInsumoForm(CreateInsumoForm):
+    id_insumo = StringField('ID Insumo', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    id_unidad_medida = SelectField('Unidad de Medida', [
+        validators.DataRequired(message='La unidad de medida es requerida')
+    ], coerce=int)
+    costo_unitario = DecimalField('Costo Unitario', [
+        validators.DataRequired(message='El costo es requerido')
+    ])
+    porcentaje_merma = DecimalField('Porcentaje Merma', [
+        validators.DataRequired(message='El porcentaje de merma es requerido')
+    ])
+    activo = SelectField('Activo', [
+        validators.Optional()
+    ], choices=[(1, 'Activo'), (0, 'Inactivo')], coerce=int)
+
+class EliminarInsumoForm(Form):
+    id_insumo = StringField('ID Insumo', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+
+class CompraForm(Form):
+    id_proveedor = SelectField('Proveedor', [
+        validators.DataRequired(message='El proveedor es requerido')
+    ], coerce=int)
+    
+
+class DetalleCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    id_insumo = StringField('ID Insumo', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    cantidad = DecimalField('Cantidad', [
+        validators.DataRequired(message='La cantidad es requerida')
+    ])
+    precio_unitario = DecimalField('Precio Unitario', [
+        validators.DataRequired(message='El precio unitario es requerido')
+    ])
+
+class EliminarCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+
+class ActualizarCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    id_proveedor = SelectField('Proveedor', [
+        validators.DataRequired(message='El proveedor es requerido')
+    ], coerce=int)
+    id_insumo = SelectField('Insumo', [
+        validators.DataRequired(message='El insumo es requerido')
+    ], coerce=int)
+    cantidad = DecimalField('Cantidad', [
+        validators.DataRequired(message='La cantidad es requerida')
+    ])
+    precio_unitario = DecimalField('Precio Unitario', [
+        validators.DataRequired(message='El precio unitario es requerido')
+    ])
+    fecha_compra = DateField('Fecha de Compra', [
+        validators.DataRequired(message='La fecha de compra es requerida')
+    ])
+    estado_compra = SelectField('Estado de Compra', [
+        validators.DataRequired(message='El estado de la compra es requerido')
+    ], coerce=str)
+
+class AjusteStockForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad (sumar/restar)', validators=[
+        DataRequired(message="Ingresa un número válido")
+    ])
+    motivo = TextAreaField('Motivo del ajuste', validators=[
+        DataRequired(message="El motivo es obligatorio para la auditoría")
+    ])
+    submit = SubmitField('Guardar Ajuste')
+
+class CrearComboForm(FlaskForm):
+    nombre_combo = StringField('Nombre del Combo', [
+        validators.DataRequired(message='El nombre es obligatorio'),
+        validators.Length(min=3, max=100, message='El nombre debe tener entre 3 y 100 caracteres')
+    ])
+    precio_combo = FloatField('Precio ($)', [
+        validators.DataRequired(message='El precio es obligatorio'),
+        validators.NumberRange(min=1, message='El precio debe ser mayor a 0')
+    ])
+
+class VincularComboForm(FlaskForm):
+    id_padre = SelectField('Combo Base', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un combo base')
+    ])
+    id_hijo = SelectField('Ingrediente Físico', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un ingrediente')
+    ])
+    cantidad = IntegerField('Cantidad', [
+        validators.DataRequired(message='La cantidad es obligatoria'),
+        validators.NumberRange(min=1, message='La cantidad mínima es 1')
     ])
 
 class CategoriaProveedorForm(Form):
@@ -114,3 +237,16 @@ class VentasForm(Form):
             validators.Optional(),
             validators.NumberRange(min=0.01, message='Debe ingresar un monto recibido válido')
         ])
+
+class MermaForm(FlaskForm):
+    id_lote = HiddenField('ID Lote', [validators.DataRequired()])
+    id_insumo = HiddenField('ID Insumo', [validators.DataRequired()])
+    cantidad = DecimalField('Cantidad a retirar', [
+        validators.DataRequired(message='La cantidad es requerida'),
+        validators.NumberRange(message='La cantidad debe ser mayor a 0')
+    ])
+    motivo = StringField('Motivo', [
+        validators.DataRequired(message='El motivo es requerido'),
+        validators.Length(max=255, message='El motivo no puede exceder los 255 caracteres')
+    ])
+

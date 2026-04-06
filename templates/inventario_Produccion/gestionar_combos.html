@@ -1,0 +1,273 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('inventario_produccion.combos_dinamicos') }}"
+                class="inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition-colors shadow-sm">
+                Regresar
+            </a>
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 dark:text-white tracking-wide">
+                    {% if combo_temp.id_padre %} Editando Paquete {% else %} Gestión de Combos {% endif %}
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Administra tus ofertas y recetas.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 mb-12">
+        <div class="flex-1 space-y-6">
+
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                <h3
+                    class="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+                    Paso 1: Nombre y Precio</h3>
+
+                <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST" novalidate>
+                    <input type="hidden" name="action" value="guardar_datos_generales">
+                    {{ form_crear.hidden_tag() }}
+
+                    <div class="flex flex-col sm:flex-row gap-5 mb-5">
+                        <div class="flex-1">
+                            {{ form_crear.nombre_combo.label(class="block mb-2 text-xs font-bold text-gray-500
+                            dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_crear.nombre_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300
+                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
+                            focus:border-blue-500 block w-full p-3 transition-all") }}
+
+                            {% if form_crear.nombre_combo.errors %}
+                            {% for error in form_crear.nombre_combo.errors %}
+                            <p class="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                {{ error }}
+                            </p>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="w-full sm:w-40">
+                            {{ form_crear.precio_combo.label(class="block mb-2 text-xs font-bold text-gray-500
+                            dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_crear.precio_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300
+                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
+                            focus:border-blue-500 block w-full p-3 font-bold transition-all") }}
+
+                            {% if form_crear.precio_combo.errors %}
+                            {% for error in form_crear.precio_combo.errors %}
+                            <p class="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                {{ error }}
+                            </p>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20">
+                        Fijar Datos
+                    </button>
+                </form>
+            </div>
+
+            <div
+                class="bg-gray-50 dark:bg-gray-800/80 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 p-6">
+                <h3
+                    class="text-lg font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                    Paso 2: Agregar Ingredientes</h3>
+
+                <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST" novalidate>
+                    <input type="hidden" name="action" value="agregar_ingrediente">
+                    {{ form_vincular.hidden_tag() }}
+
+                    <div class="flex flex-col sm:flex-row gap-4 items-start">
+                        <div class="flex-1 w-full">
+                            {{ form_vincular.id_hijo.label(class="block mb-2 text-xs font-bold text-gray-500
+                            dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_vincular.id_hijo(class="bg-white dark:bg-gray-900 border border-gray-300
+                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
+                            focus:border-blue-500 block w-full p-3 transition-all") }}
+
+                            {% if form_vincular.id_hijo.errors %}
+                            {% for error in form_vincular.id_hijo.errors %}
+                            <p class="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                {{ error }}
+                            </p>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="w-full sm:w-28">
+                            {{ form_vincular.cantidad.label(class="block mb-2 text-xs font-bold text-gray-500
+                            dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_vincular.cantidad(class="bg-white dark:bg-gray-900 border border-gray-300
+                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
+                            focus:border-blue-500 block w-full p-3 text-center font-bold transition-all", value="1") }}
+
+                            {% if form_vincular.cantidad.errors %}
+                            {% for error in form_vincular.cantidad.errors %}
+                            <p class="text-xs text-red-500 mt-1.5">{{ error }}</p>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <button type="submit"
+                            class="px-6 py-3 mt-6 sm:mt-0 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20">
+                            Añadir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-[360px] shrink-0">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl border-2 border-blue-500 dark:border-blue-600 shadow-lg p-6 sticky top-6">
+                <h3 class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">
+                    Confirmación del Combo</h3>
+
+                <div class="mb-5 pb-5 border-b border-gray-100 dark:border-gray-700">
+                    <p class="text-xl font-black text-gray-900 dark:text-white leading-tight">
+                        {{ combo_temp.nombre if combo_temp.nombre else 'Sin Datos' }}
+                    </p>
+                    <p class="text-2xl font-black text-gray-400 dark:text-gray-500 mt-1">
+                        ${{ "%.2f"|format(combo_temp.precio) if combo_temp.precio else '0.00' }}
+                    </p>
+                </div>
+
+                <div class="space-y-3 mb-8 min-h-[100px]">
+                    {% for item in combo_temp.ingredientes %}
+                    <div
+                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ item.cantidad }}x {{
+                            item.nombre }}</span>
+                        <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST">
+                            <input type="hidden" name="action" value="eliminar_ingrediente">
+                            <input type="hidden" name="id_eliminar" value="{{ item.id_producto }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                class="text-red-500 hover:text-white hover:bg-red-500 w-7 h-7 flex items-center justify-center rounded-lg transition-colors">X</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex flex-col gap-3">
+
+                    {% with messages = get_flashed_messages(category_filter=["error_receta"]) %}
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-xl mb-1 text-center shadow-sm">
+                        <p class="text-xs text-red-600">{{ message }}</p>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST">
+                        <input type="hidden" name="action" value="finalizar_combo">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                            class="w-full py-3.5 bg-green-500 text-white font-black text-sm uppercase tracking-wide rounded-xl hover:bg-green-600 transition-colors shadow-md shadow-green-500/20">
+                            {% if combo_temp.id_padre %} Actualizar Paquete {% else %} Guardar Paquete {% endif %}
+                        </button>
+                    </form>
+
+                    <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST">
+                        <input type="hidden" name="action" value="cancelar_combo">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                            class="w-full py-2.5 bg-transparent text-red-500 border-2 border-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-sm">
+                            Cancelar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-2xl font-black text-gray-800 dark:text-white mb-6">Catálogo de Paquetes</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for combo in combos_data %}
+            <div
+                class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm flex flex-col overflow-hidden {% if combo.padre.activo == 0 %} opacity-75 grayscale-[50%] {% endif %} hover:shadow-lg transition-shadow relative">
+
+                <div
+                    class="absolute top-0 left-0 w-1.5 h-full {% if combo.padre.activo == 1 %} bg-green-500 {% else %} bg-gray-400 {% endif %}">
+                </div>
+
+                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="text-xl font-black text-gray-900 dark:text-white uppercase leading-tight">{{
+                            combo.padre.nombre }}</h5>
+                        <span class="text-lg font-black text-orange-500 ml-2">${{
+                            "%.2f"|format(combo.padre.precio_venta) }}</span>
+                    </div>
+                    <span
+                        class="text-xs font-bold uppercase tracking-wider {% if combo.padre.activo == 1 %} text-green-500 {% else %} text-red-500 {% endif %}">
+                        {% if combo.padre.activo == 1 %} • Activo {% else %} • Inactivo {% endif %}
+                    </span>
+                </div>
+
+                <div class="p-6 flex-grow bg-gray-50/50 dark:bg-gray-800/50">
+                    <ul class="space-y-3">
+                        {% for info in combo.hijos %}
+                        <li class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-3">
+                            <span
+                                class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2.5 py-1 rounded-md text-xs">{{
+                                info.Combo.cantidad }}x</span>
+                            {{ info.Producto.nombre }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+                    <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST" class="flex-1">
+                        <input type="hidden" name="action" value="cargar_para_editar">
+                        <input type="hidden" name="id_padre" value="{{ combo.padre.id_producto }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                            class="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-sm font-bold rounded-xl hover:bg-blue-100 transition-colors border border-blue-100">
+                            Editar
+                        </button>
+                    </form>
+
+                    <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST" class="flex-1">
+                        <input type="hidden" name="action" value="alternar_estado">
+                        <input type="hidden" name="id_producto" value="{{ combo.padre.id_producto }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% if combo.padre.activo == 1 %}
+                        <button type="submit"
+                            class="w-full py-2 text-sm font-bold rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors border border-red-100">Desactivar</button>
+                        {% else %}
+                        <button type="submit"
+                            class="w-full py-2 text-sm font-bold rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors border border-green-100">Activar</button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
