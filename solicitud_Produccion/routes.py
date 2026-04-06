@@ -3,6 +3,7 @@ from models import db, Producto, SolicitudProduccion
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted, current_user
 import random
+from audit_logger import audit  # <--- IMPORTAMOS EL LOGGER DE MONGODB
 
 solicitud_produccion = Blueprint('solicitud_produccion', __name__, url_prefix='/solicitud-produccion')
 
@@ -84,13 +85,28 @@ def confirmar_pedido():
             
         db.session.commit()
         
+        num_ticket = random.randint(100, 999)
+        
         session['ultimo_ticket'] = {
-            'num_orden': random.randint(100, 999),
+            'num_orden': num_ticket,
             'cliente': current_user.email,
             'productos': productos_ticket,
             'total': total_pagar,
             'metodo': metodo_pago
         }
+        
+        # --- REGISTRO DE AUDITORÍA MONGODB: PEDIDO CREADO ---
+        audit.log_action(
+            module_name="logs_produccion",
+            action="Nuevo Pedido Creado",
+            details={
+                "num_ticket": num_ticket,
+                "total_pagado": total_pagar,
+                "metodo_pago": metodo_pago,
+                "articulos": productos_ticket
+            },
+            level="INFO"
+        )
         
         session.pop('carrito', None)
         
@@ -136,6 +152,17 @@ def completar_solicitud(id_solicitud):
     try:
         db.session.execute(text("CALL sp_completar_solicitud(:id)"), {'id': id_solicitud})
         db.session.commit()
+        
+        # --- REGISTRO DE AUDITORÍA MONGODB: PLATILLO DESPACHADO ---
+        audit.log_action(
+            module_name="logs_produccion",
+            action="Comanda Completada en Cocina",
+            details={
+                "id_solicitud_produccion": id_solicitud
+            },
+            level="INFO"
+        )
+        
         flash('¡Platillo marcado como LISTO! El Cajero ha sido notificado.', 'success')
     except Exception as e:
         db.session.rollback()

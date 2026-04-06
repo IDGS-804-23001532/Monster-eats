@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 from models import db
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted
+from audit_logger import audit
 
 costo_utilidad = Blueprint('costo_utilidad', __name__, url_prefix='/costo-utilidad')
 
@@ -10,6 +11,12 @@ costo_utilidad = Blueprint('costo_utilidad', __name__, url_prefix='/costo-utilid
 @roles_accepted('Gerente', 'gerente') # REGLA: Bloqueo por decorador (Gerente y gerente)
 def principal():
     try:
+                # Creará y guardará en la colección "logs_finanzas"
+        audit.log_action(
+            module_name="logs_finanzas",
+            action="Visualización Reporte Financiero", 
+            level="WARNING"
+        )
         # 1. Obtener la tabla principal de Costo y Utilidad
         query_principal = text("SELECT * FROM vw_costo_utilidad ORDER BY margen_ganancia ASC")
         resultados = db.session.execute(query_principal).mappings().fetchall()
