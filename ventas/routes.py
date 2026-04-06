@@ -10,7 +10,7 @@ from datetime import datetime
 from sanitizador import Sanitizador
 from flask_security import login_required, current_user
 from flask_security.decorators import roles_required, roles_accepted
-
+from audit_logger import audit
 
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
@@ -37,10 +37,9 @@ def ventas():
     id_efectivo = str(metodo_efectivo.id_metodo_pago) if metodo_efectivo else ''
 
     id_usuario = current_user.id_usuario
+    email_usuario = current_user.email # Extraemos el email para auditoría
 
     if request.method == 'POST':
-        # create_form.id_tarjeta = id_tarjeta
-        # create_form.id_efectivo = id_efectivo
         accion = request.form.get('accion')
         id_producto = request.form.get('id_producto', type=int)
 
@@ -77,6 +76,14 @@ def ventas():
                     }
                 )
                 db.session.commit()
+                
+                # Opcional: Registrar cuando se elimina un producto entero del carrito (suele ser útil por seguridad)
+                audit.log_action(
+                    module_name="logs_ventas",
+                    action="Producto eliminado del carrito",
+                    details={"email_cajero": email_usuario, "id_producto": id_producto},
+                    level="INFO"
+                )
                 return redirect(url_for('venta.ventas'))
 
             if accion == 'completar':
@@ -113,6 +120,19 @@ def ventas():
                         ''
                     )
 
+                    # --- REGISTRO DE AUDITORÍA: VENTA COMPLETADA ---
+                    audit.log_action(
+                        module_name="logs_ventas",
+                        action="Venta Completada",
+                        details={
+                            "email_cajero": email_usuario, 
+                            "id_venta": id_venta,
+                            "metodo_pago": metodo_nombre,
+                            "monto_recibido": create_form.monto_recibido.data
+                        },
+                        level="INFO"
+                    )
+
                     if metodo_nombre == 'efectivo':
                         flash('Caja abierta. Efectivo registrado y cambio calculado correctamente.', 'success')
                     else:
@@ -133,6 +153,14 @@ def ventas():
                     mensaje_usuario = mensaje_mysql
             except Exception:
                 pass
+
+            # --- REGISTRO DE AUDITORÍA: ERROR EN VENTA ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Error al procesar venta",
+                details={"email_cajero": email_usuario, "error": mensaje_usuario},
+                level="ERROR"
+            )
 
             flash(mensaje_usuario, 'error')
             return redirect(url_for('venta.ventas'))    
@@ -181,7 +209,6 @@ def ventas():
 @roles_required('Cajero')
 @limiter.limit('8 per minute') # 8 request por minuto
 def ver_ticket(id_venta):
-    # Usamos las vistas que creamos en el Paso 1 para que el código quede limpísimo
     cabecera = db.session.execute(
         db.text("SELECT * FROM vw_ticket_cabecera WHERE id_venta = :id"), 
         {'id': id_venta}
@@ -205,17 +232,11 @@ def ver_ticket(id_venta):
 def historial():
     create_form = forms.FiltroFechaForm(request.args)
 
-    # Validamos si hay fecha
     if create_form.validate() and create_form.fecha.data:
         fecha_filtro = create_form.fecha.data
-
         query = db.text('SELECT * FROM vw_historial_caja WHERE DATE(fecha_movimiento) = :fecha ORDER BY fecha_movimiento DESC')
-
-        movimientos = db.session.execute(query, 
-                                         {'fecha': fecha_filtro}
-                                        ).mappings().all()
+        movimientos = db.session.execute(query, {'fecha': fecha_filtro}).mappings().all()
     else:
-        # Consulta por defecto si noy hay filtro
         movimientos = db.session.execute(
             db.text('SELECT * FROM vw_historial_caja ORDER BY fecha_movimiento DESC LIMIT 100')
         ).mappings().all()
@@ -231,6 +252,7 @@ def corte_caja():
     fecha_hoy = datetime.now().strftime('%Y-%m-%d')
     fecha_vista = datetime.now().strftime('%d/%m/%Y')
     id_cajero = current_user.id_usuario 
+    email_usuario = current_user.email # Email para auditoría
 
     if request.method == 'POST':
         try:
@@ -243,6 +265,14 @@ def corte_caja():
             rs_retiro = cursor.fetchone()
             monto_retirado = float(rs_retiro['monto_retirado']) if rs_retiro else 0.0
             
+            # --- REGISTRO DE AUDITORÍA: CORTE DE CAJA EXITOSO ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Corte de Caja Realizado",
+                details={"email_cajero": email_usuario, "monto_retirado": monto_retirado},
+                level="INFO"
+            )
+
             if monto_retirado > 0:
                 flash(f'Corte de caja realizado. Se retiró ${monto_retirado:.2f} en efectivo.', 'success')
             else:
@@ -252,14 +282,22 @@ def corte_caja():
             if 'connection' in locals():
                 connection.rollback()
             
-            # El código de error 1644 en MySQL representa el SQLSTATE 45000 (SIGNAL personalizado)
+            mensaje_error = str(e)
             if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
-                # Mostramos el mensaje exacto que definimos en el SIGNAL del SP
-                flash(f'{e.args[1]}', 'error')
+                mensaje_error = e.args[1]
+                flash(f'{mensaje_error}', 'error')
             else:
-                # Error interno genérico para cualquier otra falla técnica
                 print(f'Error técnico detectado: {e}')
                 flash('Hubó un error interno, que se comunique con el técnico.', 'error')
+
+            # --- REGISTRO DE AUDITORÍA: ERROR EN CORTE DE CAJA ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Error en Corte de Caja",
+                details={"email_cajero": email_usuario, "error": mensaje_error},
+                level="ERROR"
+            )
+
         finally:
             if 'cursor' in locals():
                 cursor.close()
@@ -268,7 +306,6 @@ def corte_caja():
             
         return redirect(url_for('venta.corte_caja'))
 
-    # Lógica GET 
     resumen = {
         'total_ventas': 0, 'total_efectivo': 0.0,
         'total_tarjeta': 0.0, 'transacciones_tarjeta': 0,
@@ -303,6 +340,7 @@ def salida_caja():
     create_form = forms.SalidaEfectivoForm(request.form)
     motivo = create_form.motivo.data
     monto = create_form.monto.data
+    email_usuario = current_user.email # Email para auditoría
 
     if request.method == 'POST' and create_form.validate():
         id_cajero = current_user.id_usuario
@@ -311,43 +349,50 @@ def salida_caja():
             connection = db.engine.raw_connection()
             cursor = connection.cursor()
 
-
-            # Llamamos al sp pasandole los 3 parametros del orden correcto
             cursor.callproc('sp_registrar_salida_efectivo', [id_cajero, monto, motivo])
-
-            # Configuramos la transaccion
             connection.commit()
 
-            # Si todo salio bien
+            # --- REGISTRO DE AUDITORÍA: SALIDA DE EFECTIVO ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Salida de Efectivo Registrada",
+                details={"email_cajero": email_usuario, "monto": monto, "motivo": motivo},
+                level="INFO"
+            )
+
             flash('Salida registrada correctamente', 'success')
             return redirect(url_for('venta.salida_caja'))
         
         except Exception as e:
-            # Si hay error, deshacemos cualquier cambio a medias
             if 'connection' in locals():
                 connection.rollback()
 
-            # Capturamos especificamente los errores controlados por el SP
+            mensaje_error = str(e)
             if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
-                # Mostramos error
-                flash(f'{e.args[1]}', 'error')
+                mensaje_error = e.args[1]
+                flash(f'{mensaje_error}', 'error')
             else:
-                # Error interno
                 print(f'Error tecnico al registrar salida: {e}')
                 flash('Hubo un error interno, comunicate con el técnico', 'error')
+
+            # --- REGISTRO DE AUDITORÍA: ERROR EN SALIDA DE EFECTIVO ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Error al registrar Salida de Efectivo",
+                details={"email_cajero": email_usuario, "error": mensaje_error},
+                level="ERROR"
+            )
+
         finally:
-            # Cerramos cursores de manera segura
             if 'cursor' in locals():
                 cursor.close()
             if 'connection' in locals():
                 connection.close()
 
-    # Traemos las salidas de la vista
     salidas_hoy = db.session.execute(
         db.text('SELECT * FROM vw_salidas_efectivo WHERE DATE(fecha_hora) = CURRENT_DATE()')
     ).mappings().all()
 
-    # Calculamos la suma total de las salidas de hoy
     total_salidas_monto = sum(salida['monto'] for salida in salidas_hoy)
 
     return render_template('ventas/salidas_efectivo.html', form = create_form, salidas = salidas_hoy, total_hoy = total_salidas_monto)
@@ -358,6 +403,7 @@ def salida_caja():
 @limiter.limit('8 per minute') # 8 request por minuto
 def solicitud_produccion_venta():
     create_form = forms.SolicitudProduccionVentasForm(request.form)
+    email_usuario = current_user.email # Email para auditoría
 
     if request.method == 'POST' and create_form.validate():
         id_producto = create_form.id_producto.data
@@ -368,9 +414,16 @@ def solicitud_produccion_venta():
             connection = db.engine.raw_connection()
             cursor = connection.cursor()
 
-            # Mandamos los datos al SP
             cursor.callproc('sp_registrar_solicitud_produccion', [id_usuario, id_producto, cantidad])
             connection.commit()
+
+            # --- REGISTRO DE AUDITORÍA: SOLICITUD DE PRODUCCIÓN ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Solicitud de Producción desde Caja",
+                details={"email_cajero": email_usuario, "id_producto": id_producto, "cantidad": cantidad},
+                level="INFO"
+            )
 
             flash('Solicitud de producción enviada con éxito', 'success')
             return redirect(url_for('venta.solicitud_produccion_venta'))
@@ -379,22 +432,31 @@ def solicitud_produccion_venta():
             if 'connection' in locals():
                 connection.rollback()
             
+            mensaje_error = str(e)
             if hasattr(e, 'args') and len(e.args) > 0 and e.args[0] == 1644:
-                flash(f'{e.args[1]}', 'error')
+                mensaje_error = e.args[1]
+                flash(f'{mensaje_error}', 'error')
             else:
                 print(f'Error tecnico al solicitar produccion: {e}')
                 flash('Hubo un error interno, comunicate con el técnico', 'error')
+
+            # --- REGISTRO DE AUDITORÍA: ERROR EN SOLICITUD DE PRODUCCIÓN ---
+            audit.log_action(
+                module_name="logs_ventas",
+                action="Error al solicitar producción",
+                details={"email_cajero": email_usuario, "error": mensaje_error},
+                level="ERROR"
+            )
+
         finally:
             if 'cursor' in locals():
                 cursor.close()
-
             if 'connection' in locals():
                 connection.close()
 
     productos = db.session.execute(
         db.text('SELECT * FROM vw_productos_produccion')
     ).mappings().all()
-
 
     return render_template('ventas/solicitud_produccion_venta.html', form = create_form, productos = productos)
 
@@ -404,26 +466,20 @@ def solicitud_produccion_venta():
 @roles_required('Gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def utilidad_diaria():
-    # Inicializamos el formulario con los parámetros GET de la URL
     form = forms.FiltroFechaForm(request.args)
 
-    # Validamos si el usuario seleccionó una fecha válida
     if form.validate() and form.fecha.data:
         fecha_consulta = form.fecha.data
     else:
-        # Si no hay filtro, por defecto usamos la fecha de hoy
         fecha_consulta = datetime.now().date()
 
-    # Formateamos la fecha para hacerla bonita en la vista XD
     fecha_vista = fecha_consulta.strftime('%d/%m/%Y')
 
-    # Consultamos la vista para la fecha determinada (hoy o la filtrada)
     datos_hoy = db.session.execute(
         db.text('SELECT * FROM vw_utilidad_diaria WHERE fecha = :fecha'),
         {'fecha': fecha_consulta}
     ).mappings().first()
 
-    # Valores por defecto en caso de que sea un nuevo dia sin actividad
     estadisticas = {
         'transacciones_ventas': 0,
         'total_ventas': 0.0,
@@ -434,7 +490,6 @@ def utilidad_diaria():
     }
 
     if datos_hoy:
-        # Usamos "or 0" por si la base de datos devuelve None en algún campo vacío
         ventas = float(datos_hoy['total_ventas'] or 0)
         costos = float(datos_hoy['costo_produccion'] or 0)
         salidas = float(datos_hoy['total_salidas'] or 0)
@@ -445,7 +500,6 @@ def utilidad_diaria():
         estadisticas['registros_salidas'] = datos_hoy['registros_salidas'] or 0
         estadisticas['total_salidas'] = salidas
 
-        # Calculo del margen de Utilidad
         utilidad_neta = ventas - costos - salidas
 
         if ventas > 0:

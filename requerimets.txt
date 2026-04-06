@@ -30,3 +30,4 @@ flask-Admin
 flask-marshmallow
 bcrypt
 Flask-Limiter
+pymongo==4.6.2
