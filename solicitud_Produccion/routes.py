@@ -69,13 +69,16 @@ def confirmar_pedido():
         total_pagar = 0
         productos_ticket = []
         
+        # 1. Generamos EL MISMO número de orden para todos los productos de este carrito
+        num_ticket = random.randint(100, 999) 
+        
         for prod_id, item in carrito.items():
-            # Generamos la solicitud que viajará a la ruta de Cocina
             nueva_solicitud = SolicitudProduccion(
                 id_usuario_solicita=current_user.id_usuario,
                 id_producto=int(prod_id),
                 cantidad=item['cantidad'],
-                estado='Pendiente'
+                estado='Pendiente',
+                numero_orden=str(num_ticket) # <--- AQUÍ GUARDAMOS EL NO. DE ORDEN
             )
             db.session.add(nueva_solicitud)
             
@@ -85,8 +88,6 @@ def confirmar_pedido():
             
         db.session.commit()
         
-        num_ticket = random.randint(100, 999)
-        
         session['ultimo_ticket'] = {
             'num_orden': num_ticket,
             'cliente': current_user.email,
@@ -95,7 +96,7 @@ def confirmar_pedido():
             'metodo': metodo_pago
         }
         
-        # --- REGISTRO DE AUDITORÍA MONGODB: PEDIDO CREADO ---
+        # --- REGISTRO DE AUDITORÍA MONGODB ---
         audit.log_action(
             module_name="logs_produccion",
             action="Nuevo Pedido Creado",
