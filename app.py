@@ -3,11 +3,14 @@ from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
-
 from auth import auth
+from inventario.routes import inventario
+from compras.routes import compras 
 from dashboard import dashboard
+from insumos.routes import insumos
 from proveedores import proveedor
 from ventas import venta
+
 from inventario_Produccion.routes import inventario_produccion
 from solicitud_Produccion.routes import solicitud_produccion
 from costo_Utilidad.routes import costo_utilidad
@@ -20,7 +23,7 @@ from datetime import timedelta
 app = Flask(__name__)
 
 limiter.init_app(app)
-
+csrf = CSRFProtect()
 app.config.from_object(DevelopmentConfig)
 
 # Salt 
@@ -39,7 +42,7 @@ user_datastore = SQLAlchemyUserDatastore(db, Usuario, Rol)
 seguridad_app = Security(app, user_datastore)
 
 # Expiración por inactividad
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 60)
 app.config['SESSION_COOKIE_SECURE'] = False 
 app.config['SESSION_COOKIE_HTTPONLY'] = True # Evitar que el XSS robe la cookie
 
@@ -55,11 +58,15 @@ csrf = CSRFProtect()
 # Rutas Blueprint
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
+app.register_blueprint(inventario)
+app.register_blueprint(compras)
+app.register_blueprint(insumos)
 app.register_blueprint(proveedor)
 app.register_blueprint(venta)
 app.register_blueprint(inventario_produccion)
 app.register_blueprint(solicitud_produccion)
 app.register_blueprint(costo_utilidad)
+
 
 @app.route("/")
 @login_required
