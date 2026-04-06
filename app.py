@@ -75,7 +75,7 @@ app.register_blueprint(usuarios, url_prefix='/usuarios')
 @app.route("/")
 @login_required
 def index():
-    return redirect(url_for('dashboard.index'))
+    return render_template('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):

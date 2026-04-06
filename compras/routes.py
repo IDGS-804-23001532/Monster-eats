@@ -5,6 +5,7 @@ from sqlalchemy import text
 import json
 from flask_login import current_user
 from forms import CompraForm
+from audit_logger import audit
 
 
 @compras.route('/compras')
@@ -146,6 +147,12 @@ def nueva_compra():
         conn.close()
         
         flash('Compra registrada correctamente', 'success')
+        
+        # --- REGISTRO DE AUDITORÍA MONGO ---
+        audit.log_action("Compras", "NUEVA COMPRA", details={
+            "id_proveedor": id_proveedor,
+            "articulos": len(detalles)
+        })
     except Exception as e:
         flash(f'Error al registrar la compra: {str(e)}', 'error')
     
@@ -166,6 +173,11 @@ def cancelar_compra():
         conn.close()
         
         flash('Compra cancelada correctamente', 'success')
+        
+        # --- REGISTRO DE AUDITORÍA MONGO ---
+        audit.log_action("Compras", "CANCELACIÓN", details={
+            "id_compra": id_compra
+        })
     except Exception as e:
         flash(f'Error al cancelar la compra: {str(e)}', 'error')
     

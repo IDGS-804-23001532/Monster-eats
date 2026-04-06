@@ -3,6 +3,7 @@ from models import Insumo, UnidadMedida, db
 from forms import CreateInsumoForm, EditInsumoForm
 from . import insumos
 from flask_wtf.csrf import CSRFProtect
+from audit_logger import audit
 
 
 
@@ -55,6 +56,14 @@ def nuevo_insumo():
             )
             db.session.add(insumo)
             db.session.commit()
+            
+            # --- REGISTRO DE AUDITORÍA MONGO ---
+            audit.log_action("Insumos", "CREACIÓN", details={
+                "id": insumo.id_insumo,
+                "nombre": insumo.nombre,
+                "costo": float(insumo.costo_unitario)
+            })
+            
             return redirect(url_for('insumos.index'))
     
     # Si falla la validación, es por que no insertaste algo perro jajaja por noob :v
@@ -129,6 +138,14 @@ def editar_insumo():
                     insumo.porcentaje_merma = edit_form.porcentaje_merma.data
                     insumo.activo = bool(int(edit_form.activo.data))
                     db.session.commit()
+                    
+                    # --- REGISTRO DE AUDITORÍA MONGO ---
+                    audit.log_action("Insumos", "EDICIÓN", details={
+                        "id": insumo.id_insumo,
+                        "nombre": insumo.nombre,
+                        "activo": insumo.activo
+                    })
+                    
                     return redirect(url_for('insumos.index'))
     
     # Si falla la validación en POST, volvemos a mostrar el modal con errores
@@ -183,6 +200,12 @@ def eliminar():
         
         db.session.delete(insumo)
         db.session.commit()
+        
+        # --- REGISTRO DE AUDITORÍA MONGO ---
+        audit.log_action("Insumos", "ELIMINACIÓN", details={
+            "id": insumo.id_insumo,
+            "nombre": insumo.nombre
+        })
+        
         flash('Insumo eliminado correctamente', 'success')
         return redirect(url_for('insumos.index'))
-
