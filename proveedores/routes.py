@@ -6,8 +6,9 @@ from models import CategoriaProveedor, Proveedor
 from extensions import limiter
 import forms
 from sanitizador import Sanitizador
-from flask_security import login_required
+from flask_security import login_required, current_user
 from flask_security.decorators import roles_required
+from audit_logger import audit
 
 
 @proveedor.route("/proveedores", methods=['GET', 'POST'])
@@ -79,11 +80,26 @@ def proveedores():
             )
             
             db.session.commit()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Creación de Proveedor Exitosa",
+                details={"empresa": nombre_empresa, "rfc": rfc, "categoria_id": id_categoria_seleccionada, "email": current_user.email},
+                level="INFO"
+            )
+
             flash('Proveedor registrado con éxito', 'success')
             return redirect(url_for('proveedor.proveedores'))
             
         except OperationalError as e:
             db.session.rollback()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Fallo al crear proveedor (Duplicado)",
+                details={"empresa_intentada": nombre_empresa, "rfc_intentado": rfc, "usuario": current_user.email},
+                level="WARNING"
+            )
 
             # Atrapamos el error
             # mensaje_error = e.orig.args[1]
@@ -150,10 +166,26 @@ def actualizar_proveedor(id):
         )
     
         db.session.commit()
+
+        audit.log_action(
+            module_name="logs_proveedores",
+            action="Actualización de Proveedor Exitosa",
+            details={"id_proveedor": id, "nueva_empresa": nombre_empresa, "nuevo_rfc": rfc, "email": current_user.email},
+            level="INFO"
+        )
+
         flash('Proveedor actualizado con éxito', 'success')
         
     except OperationalError as e:
         db.session.rollback()
+
+        audit.log_action(
+            module_name="logs_proveedores",
+            action="Fallo al actualizar proveedor (Duplicado)",
+            details={"id_proveedor": id, "empresa_intentada": nombre_empresa, "rfc_intentado": rfc, "email": current_user.email},
+            level="WARNING"
+        )
+
         # Atrapamos si intentan poner un RFC o Empresa que ya le pertenece a otro
         mensaje_error = e.orig.args[1]
         flash('El nombre o RFC ya esta en uso' , 'error')
@@ -176,9 +208,25 @@ def eliminar_proveedor(id):
             )
 
             db.session.commit()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Proveedor Eliminado",
+                details={"id_proveedor_eliminado": id, "email": current_user.email},
+                level="INFO"
+            )
+
             flash("Se elimino con exito", 'success')
-        except:
+        except Exception as e:
             db.session.rollback()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Error al eliminar proveedor",
+                details={"id_proveedor": id, "error": str(e), "email": current_user.email},
+                level="ERROR"
+            )
+
             flash("Error al eliminar el proveedor", 'error')
 
     return redirect(url_for('proveedor.proveedores'))
@@ -208,10 +256,25 @@ def categorias():
             )
 
             db.session.commit()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Creación de Categoría de Proveedor",
+                details={"nombre_categoria": nombre_categoria, "email": current_user.email},
+                level="INFO"
+            )
+
             flash('Categoria creada con exito', 'success')
             return redirect(url_for('proveedor.categorias'))
         except OperationalError as e:
             db.session.rollback()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Fallo al crear categoría (Ya existe)",
+                details={"categoria_intentada": nombre_categoria, "email": current_user.email},
+                level="WARNING"
+            )
 
             # Si falla, mandamos el mensaje que ya existe
             flash(f'Esa categoria ya existe', 'error')
@@ -242,10 +305,25 @@ def actualizar_categoria(id):
             )
 
             db.session.commit()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Actualización de Categoría de Proveedor",
+                details={"id_categoria": id, "nuevo_nombre": nombre_categoria, "email": current_user.email},
+                level="INFO"
+            )
+
             flash('Categoria actualizada con exito', 'success')
             return redirect(url_for('proveedor.categorias'))
         except OperationalError as e:
             db.session.rollback()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Fallo al actualizar categoría (Nombre en uso)",
+                details={"id_categoria": id, "nombre_intentado": nombre_categoria, "email": current_user.email},
+                level="WARNING"
+            )
 
             # Mostrar mensaje de error
             flash('Esa categoria ya existe', 'error')
@@ -267,10 +345,26 @@ def eliminar_categoria(id):
                 {'id': id}
             )
             db.session.commit()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Categoría de Proveedor Eliminada",
+                details={"id_categoria_eliminada": id, "email": current_user.email},
+                level="INFO"
+            )
+
             flash('Categoría eliminada con éxito', 'success')
             
         except OperationalError as e:
             db.session.rollback()
+
+            audit.log_action(
+                module_name="logs_proveedores",
+                action="Fallo al eliminar categoría (En uso)",
+                details={"id_categoria": id, "email": current_user.email},
+                level="WARNING"
+            )
+
             # Atrapa el error si la categoría está en uso por un proveedor
             flash('No puedes eliminar esta categoría porque ya tiene proveedores asignados.', 'error')
 
