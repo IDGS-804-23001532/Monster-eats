@@ -5,6 +5,7 @@ from forms import AjusteStockForm, CrearComboForm, VincularComboForm
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted, current_user
 from collections import namedtuple
+from audit_logger import audit
 
 inventario_produccion = Blueprint('inventario_produccion', __name__, url_prefix='/inventario-produccion')
 
@@ -34,6 +35,20 @@ def principal():
                     {'p_id': id_prod, 'p_cant': cantidad_ajuste, 'p_motivo': motivo, 'p_usr': user_id}
                 )
                 db.session.commit()
+                
+                # REGISTRO DE AUDITORÍA: Ajuste de stock
+                # Creará y guardará en la colección "logs_inventario"
+                audit.log_action(
+                    module_name="logs_inventario",
+                    action="Ajuste de Stock Manual", 
+                    details={
+                        "id_producto_afectado": id_prod, 
+                        "cantidad_ajustada": cantidad_ajuste, 
+                        "motivo_declarado": motivo
+                    }, 
+                    level="CRITICAL"
+                )
+                
                 flash('Cambio guardado de forma correcta.', 'success')
                 
             except Exception as e:
@@ -195,6 +210,19 @@ def gestionar_combos():
                         
                     db.session.commit()
                     session.pop('combo_temp', None)
+
+                    # REGISTRO DE AUDITORÍA: Creación/Modificación de Receta
+                    audit.log_action(
+                        module_name="logs_inventario", # <--- ¡AQUÍ ESTÁ EL CAMBIO!
+                        action="Modificación de Combo/Receta", 
+                        details={
+                            "nombre_combo": nombre_final, 
+                            "precio_asignado": precio,
+                            "piezas_totales": total_piezas
+                        }, 
+                        level="WARNING"
+                    )
+                    
                     flash('Paquete guardado correctamente.', 'success')
                     return redirect(url_for('inventario_produccion.gestionar_combos'))
                 except Exception as e:
