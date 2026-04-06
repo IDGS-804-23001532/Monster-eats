@@ -87,7 +87,6 @@ class Compra(db.Model):
     proveedor = db.relationship('Proveedor', backref='compras', lazy=True)
     usuario = db.relationship('Usuario', backref='compras', lazy=True)
     detalles = db.relationship('DetalleCompra', backref='compra', lazy=True)
-
     __table_args__ = (
         CheckConstraint('total >= 0', name='chk_compras_total'),
     )
@@ -136,7 +135,6 @@ class Insumo(db.Model):
         CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
     )
 
-
 # ==========================================================================
 # MÓDULO DE DETALLE DE COMPRAS
 # ==========================================================================
@@ -155,7 +153,6 @@ class DetalleCompra(db.Model):
     # Relaciones
     insumo = db.relationship('Insumo', backref='detalle_compras', lazy=True)
     unidad_medida = db.relationship('UnidadMedida', backref='detalle_compras', lazy=True)
-
 
     __table_args__ = (
         CheckConstraint('cantidad_comprada > 0', name='chk_detalle_compras_cantidad'),
@@ -177,7 +174,6 @@ class LoteInsumo(db.Model):
 
     # Relaciones
     insumo = db.relationship('Insumo', backref='lotes', lazy=True)
-
     __table_args__ = (
         CheckConstraint('cantidad_inicial >= 0', name='chk_lotes_insumo_cantidad_inicial'),
         CheckConstraint('cantidad_disponible >= 0', name='chk_lotes_insumo_cantidad_disponible'),
@@ -312,6 +308,7 @@ class SolicitudProduccion(db.Model):
     estado = db.Column(db.Enum('Pendiente', 'En Proceso', 'Completada', 'Cancelada', name='estado_sol_enum'), nullable=False, default='Pendiente', index=True)
     fecha_solicitud = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
     fecha_completada = db.Column(db.DateTime, nullable=True)
+    numero_orden = db.Column(db.String(20), nullable=True)
 
     __table_args__ = (
         CheckConstraint('cantidad > 0', name='chk_solicitudes_cantidad'),

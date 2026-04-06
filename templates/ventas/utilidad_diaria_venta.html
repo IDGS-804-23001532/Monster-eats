@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="w-full px-4 md:px-8 space-y-6 text-white font-sans mt-4 relative">
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold tracking-wide">Utilidad Diaria</h2>
+            <p class="text-gray-400 text-sm mt-1">Mostrando datos para: <span class="font-bold text-white">{{ fecha_vista }}</span></p>
+        </div>
+
+        <form method="GET" action="{{ url_for('venta.utilidad_diaria') }}" class="flex flex-col sm:flex-row items-center gap-2">
+            
+            {{ form.fecha(class="bg-[#1b222c] border border-slate-700 text-slate-300 text-sm rounded-lg focus:ring-[#ff6b00] focus:border-[#ff6b00] block p-2.5") }}
+            
+            <div class="flex gap-2 w-full sm:w-auto">
+                {{ form.submit(class="w-full sm:w-auto text-white bg-[#ff6b00] hover:bg-[#e66000] focus:ring-4 focus:outline-none focus:ring-[#ff6b00]/50 font-medium rounded-lg text-sm px-4 py-2.5 text-center transition-colors cursor-pointer") }}
+                
+                {% if form.fecha.data %}
+                <a href="{{ url_for('venta.utilidad_diaria') }}" class="w-full sm:w-auto text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:ring-4 focus:outline-none focus:ring-slate-800 font-medium rounded-lg text-sm px-4 py-2.5 text-center transition-colors">
+                    Hoy
+                </a>
+                {% endif %}
+            </div>
+        </form>
+        </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        
+        <div class="border border-slate-700 bg-[#1b222c] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg hover:border-slate-500 transition-colors">
+            <div class="w-14 h-14 rounded-full border-4 border-green-500 flex items-center justify-center mb-4 text-green-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-[#ff6b00] text-2xl font-bold mb-1 tracking-wide">Total Ventas</h3>
+            <p class="text-white font-semibold text-lg">Transacciones</p>
+            <p class="text-white font-bold text-xl mb-1">{{ estadisticas.transacciones_ventas }}</p>
+            <p class="text-[#ff6b00] text-3xl font-extrabold">${{ "%.2f"|format(estadisticas.total_ventas) }}</p>
+        </div>
+
+        <div class="border border-slate-700 bg-[#1b222c] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg hover:border-blue-500 transition-colors">
+            <div class="mb-4 text-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-12 h-12">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                </svg>
+            </div>
+            <h3 class="text-[#ff6b00] text-2xl font-bold mb-1 tracking-wide">Costo Producción</h3>
+            <p class="text-white font-semibold text-lg mb-6">Ingredientes</p>
+            <p class="text-[#ff6b00] text-3xl font-extrabold">-${{ "%.2f"|format(estadisticas.costo_produccion) }}</p>
+        </div>
+
+        <div class="border border-slate-700 bg-[#1b222c] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg hover:border-slate-500 transition-colors">
+            <div class="mb-4 text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-12 h-12">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.51m-3.182 5.51l-5.511-3.181" />
+                </svg>
+            </div>
+            <h3 class="text-[#ff6b00] text-2xl font-bold mb-1 tracking-wide">Salidas Efectivo</h3>
+            <p class="text-white font-semibold text-lg">Registros</p>
+            <p class="text-white font-bold text-xl mb-1">{{ estadisticas.registros_salidas }}</p>
+            <p class="text-[#ff6b00] text-3xl font-extrabold">-${{ "%.2f"|format(estadisticas.total_salidas) }}</p>
+        </div>
+
+        <div class="border border-slate-700 bg-[#1b222c] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg hover:border-slate-500 transition-colors">
+            <div class="mb-4 text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-12 h-12">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+            </div>
+            <h3 class="text-[#ff6b00] text-2xl font-bold mb-1 tracking-wide">Margen Utilidad</h3>
+            <p class="text-white font-semibold text-lg mb-6">Porcentaje</p>
+            <p class="text-[#ff6b00] text-3xl font-extrabold">{{ "%.1f"|format(estadisticas.margen_utilidad) }}%</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

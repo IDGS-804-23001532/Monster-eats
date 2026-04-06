@@ -1,0 +1,90 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="w-full px-4 md:px-8 space-y-6 text-white font-sans mt-4 relative">
+
+    <div class="flex justify-end items-start">
+        <button onclick="abrirModal()" class="bg-[#ff6b00] hover:bg-[#e66000] text-white font-bold py-2.5 px-6 rounded-3xl shadow-lg flex items-center gap-2 transition-colors">
+            Registrar salida
+        </button>
+    </div>
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-6 flex justify-between items-center">
+        <div>
+            <h2 class="text-xl font-bold tracking-wide">Salidas de Efectivo</h2>
+            <p class="text-gray-400 text-sm mt-1">Registro de egresos y pagos a proveedores</p>
+        </div>
+        <div class="text-right">
+            <p class="text-gray-300 text-sm">Total salidas Hoy</p>
+            <p class="text-2xl font-bold text-[#ff6b00]">${{ "%.2f"|format(total_hoy) }}</p>
+        </div>
+    </div>
+
+    <div class="border border-slate-700 bg-[#242f3d] rounded-2xl p-6 min-h-[400px]">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-300 text-white">
+                        <th class="pb-3 font-bold text-lg">Fecha/Hora</th>
+                        <th class="pb-3 font-bold text-lg">Monto</th>
+                        <th class="pb-3 font-bold text-lg">Motivo</th>
+                        <th class="pb-3 font-bold text-lg">Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for salida in salidas %}
+                    <tr class="border-b border-slate-700/50 text-gray-300 hover:bg-slate-700/20">
+                        <td class="py-4">
+                            {{ salida.fecha_hora.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+
+                        <td class="py-4 font-bold text-white">
+                            {{ "%.2f"|format(salida.monto) }}
+                        </td>
+
+                        <td class="py-4">
+                            {{ salida.motivo }}
+                        </td>
+
+                        <td class="py-4">
+                            {{ salida.atendido_por }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="py-10 text-center text-slate-500">
+                            No hay salidas registradas el dia de hoy
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% include 'ventas/_modal_registrar_salida.html' %}
+
+<script>
+    const modal = document.getElementById('modalSalida');
+
+    function abrirModal() {
+        // Quita la clase 'hidden' para mostrarlo
+        modal.classList.remove('hidden');
+    }
+
+    function cerrarModal() {
+        // Añade la clase 'hidden' para ocultarlo
+        modal.classList.add('hidden');
+    }
+
+    // Cerrar al hacer clic fuera de la tarjeta del modal
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            cerrarModal();
+        }
+    }
+</script>
+
+{% endblock %}

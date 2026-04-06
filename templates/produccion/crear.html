@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="flex justify-center">
+    <div class="w-full max-w-2xl bg-[#1e293b] border border-slate-700 rounded-[2rem] p-8 shadow-2xl">
+        
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ url_for('produccion.index') }}" class="text-orange-400 hover:text-orange-300 transition-colors">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </a>
+                <div class="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                    <i class="fas fa-fire-burner text-orange-500 text-lg"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">
+                    Nueva Orden de Producción
+                </h2>
+            </div>
+            <p class="text-slate-400 text-sm ml-14">Programa la fabricación de productos según las recetas establecidas</p>
+        </div>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-300 mb-1">
+                    <i class="fas fa-box text-orange-500 text-xs mr-1"></i> Producto *
+                </label>
+                {{ form.id_producto(class="w-full rounded-xl border-slate-600 bg-[#111827] text-slate-200 focus:ring-orange-500 focus:border-orange-500 transition-all py-2.5 px-4") }}
+                {% if form.id_producto.errors %}
+                    <p class="text-rose-400 text-xs mt-1">{{ form.id_producto.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-300 mb-1">
+                    <i class="fas fa-hashtag text-orange-500 text-xs mr-1"></i> Cantidad a producir *
+                </label>
+                {{ form.cantidad_programada(class="w-full rounded-xl border-slate-600 bg-[#111827] text-slate-200 focus:ring-orange-500 focus:border-orange-500 transition-all py-2.5 px-4", type="number", min="1", placeholder="Ej: 10") }}
+                {% if form.cantidad_programada.errors %}
+                    <p class="text-rose-400 text-xs mt-1">{{ form.cantidad_programada.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-slate-300 mb-1">
+                    <i class="fas fa-pen text-orange-500 text-xs mr-1"></i> Observaciones
+                </label>
+                {{ form.observaciones(class="w-full rounded-xl border-slate-600 bg-[#111827] text-slate-200 focus:ring-orange-500 focus:border-orange-500 transition-all py-2.5 px-4", rows="3", placeholder="Notas adicionales para esta producción...") }}
+            </div>
+            
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-8 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(249,115,22,0.3)] flex items-center gap-2">
+                    <i class="fas fa-save"></i> Crear Orden
+                </button>
+                <a href="{{ url_for('produccion.index') }}" class="px-6 py-2.5 rounded-full text-slate-400 hover:text-white font-medium transition-all hover:bg-slate-800">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

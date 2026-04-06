@@ -98,7 +98,7 @@
           </li>
           <li>
             <a
-              href="#"
+              href="{{ url_for('usuarios.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -259,7 +259,7 @@
           </li>
           <li>
             <a
-              href="#"
+              href="{{ url_for('recetas.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -284,7 +284,7 @@
           </li>
           <li>
             <a
-              href="/costo-utilidad"
+              href="{{ url_for('costo_utilidad.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -315,7 +315,7 @@
           %}
           <li>
             <a
-              href="#"
+              href="{{ url_for('produccion.index') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -349,7 +349,7 @@
           </li>
           <li>
             <a
-              href="/inventario-produccion"
+              href="{{ url_for('inventario_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -376,7 +376,7 @@
           </li>
           <li>
             <a
-              href="/solicitud-produccion"
+              href="{{ url_for('solicitud_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -401,11 +401,38 @@
               >
             </a>
           </li>
+          <li>
+            <a
+              href="{{ url_for('solicitud_produccion.tablero_cocina') }}"
+              class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
+            >
+              <svg
+                class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m2-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
+                />
+              </svg>
+              <span class="flex-1 ms-3 whitespace-nowrap"
+                >Tablero de cocina</span
+              >
+            </a>
+          </li>
           {% endif %} {% if current_user.has_role('cliente') or
           current_user.has_role('Cliente') %}
           <li>
             <a
-              href="/solicitud-produccion"
+              href="{{ url_for('solicitud_produccion.principal') }}"
               class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
             >
               <svg
@@ -431,11 +458,18 @@
             </a>
           </li>
           {% endif %} {% if current_user.has_role('Cajero') or
-          current_user.has_role('cajero') %}
+          current_user.has_role('cajero') or current_user.has_role('Gerente') or
+          current_user.has_role('gerente') %}
           <li>
-            <a
-              href="{{ url_for('venta.ventas') }}"
-              class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
+            <button
+              type="button"
+              class="flex items-center w-full px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group transition duration-75"
+              aria-controls="dropdown-ventas"
+              onclick="
+                document
+                  .getElementById('dropdown-ventas')
+                  .classList.toggle('hidden')
+              "
             >
               <svg
                 class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
@@ -454,10 +488,90 @@
                   d="M15.56 2.44a2 2 0 0 0-1.41-.58H4.5a2 2 0 0 0-2 2v9.65a2 2 0 0 0 .59 1.41l8.59 8.59a2 2 0 0 0 2.83 0l6.59-6.59a2 2 0 0 0 0-2.83l-8.59-8.59ZM9.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
                 />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Venta</span>
-            </a>
+              <span class="flex-1 ms-3 text-left whitespace-nowrap"
+                >Ventas</span
+              >
+              <svg
+                class="w-4 h-4 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m19 9-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <ul id="dropdown-ventas" class="hidden py-1 mt-1 space-y-1">
+              {% if current_user.has_role('Cajero') or
+              current_user.has_role('cajero') %}
+              <li>
+                <a
+                  href="{{ url_for('venta.ventas') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Nueva Venta
+                </a>
+              </li>
+              {% endif %}
+
+              <li>
+                <a
+                  href="{{ url_for('venta.historial') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Historial
+                </a>
+              </li>
+
+              {% if current_user.has_role('Cajero') or
+              current_user.has_role('cajero') %}
+              <li>
+                <a
+                  href="{{ url_for('venta.corte_caja') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Corte de caja
+                </a>
+              </li>
+              <li>
+                <a
+                  href="{{ url_for('venta.salida_caja') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Salidas efectivo
+                </a>
+              </li>
+              <li>
+                <a
+                  href="{{ url_for('venta.solicitud_produccion_venta') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Solicitar producción
+                </a>
+              </li>
+              {% endif %} {% if current_user.has_role('Gerente') or
+              current_user.has_role('gerente') %}
+              <li>
+                <a
+                  href="{{ url_for('venta.utilidad_diaria') }}"
+                  class="flex items-center w-full px-2 py-1.5 pl-10 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white transition duration-75"
+                >
+                  Utilidad diaria
+                </a>
+              </li>
+              {% endif %}
+            </ul>
           </li>
           {% endif %}
+
           <li>
             <a
               href="{{ url_for('auth.logout')}}"
