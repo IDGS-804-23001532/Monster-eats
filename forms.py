@@ -1,6 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField
+from flask_wtf import FlaskForm, Form
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, HiddenField, IntegerField, TextAreaField, SubmitField
+from wtforms import SelectField, FloatField
+from wtforms import Form
+from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
 from wtforms import validators
+from wtforms.validators import DataRequired, NumberRange
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -44,7 +50,7 @@ class RegisterForm(Form):
     password = PasswordField('Password', [
         validators.DataRequired(message='El password es requerido'),
         validators.Length(min=8, message='El password debe tener al menos 8 carácteres'),
-        validators.regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+        validators.Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
                message='La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.')
     ])
 
@@ -133,6 +139,37 @@ class ActualizarCompraForm(Form):
         validators.DataRequired(message='El estado de la compra es requerido')
     ], coerce=str)
 
+class AjusteStockForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad (sumar/restar)', validators=[
+        DataRequired(message="Ingresa un número válido")
+    ])
+    motivo = TextAreaField('Motivo del ajuste', validators=[
+        DataRequired(message="El motivo es obligatorio para la auditoría")
+    ])
+    submit = SubmitField('Guardar Ajuste')
+
+class CrearComboForm(FlaskForm):
+    nombre_combo = StringField('Nombre del Combo', [
+        validators.DataRequired(message='El nombre es obligatorio'),
+        validators.Length(min=3, max=100, message='El nombre debe tener entre 3 y 100 caracteres')
+    ])
+    precio_combo = FloatField('Precio ($)', [
+        validators.DataRequired(message='El precio es obligatorio'),
+        validators.NumberRange(min=1, message='El precio debe ser mayor a 0')
+    ])
+
+class VincularComboForm(FlaskForm):
+    id_padre = SelectField('Combo Base', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un combo base')
+    ])
+    id_hijo = SelectField('Ingrediente Físico', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un ingrediente')
+    ])
+    cantidad = IntegerField('Cantidad', [
+        validators.DataRequired(message='La cantidad es obligatoria'),
+        validators.NumberRange(min=1, message='La cantidad mínima es 1')
+    ])
 
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [
@@ -212,3 +249,4 @@ class MermaForm(FlaskForm):
         validators.DataRequired(message='El motivo es requerido'),
         validators.Length(max=255, message='El motivo no puede exceder los 255 caracteres')
     ])
+

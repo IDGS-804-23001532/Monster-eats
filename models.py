@@ -136,6 +136,7 @@ class Insumo(db.Model):
         CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
     )
 
+
 # ==========================================================================
 # MÓDULO DE DETALLE DE COMPRAS
 # ==========================================================================
@@ -154,6 +155,7 @@ class DetalleCompra(db.Model):
     # Relaciones
     insumo = db.relationship('Insumo', backref='detalle_compras', lazy=True)
     unidad_medida = db.relationship('UnidadMedida', backref='detalle_compras', lazy=True)
+
 
     __table_args__ = (
         CheckConstraint('cantidad_comprada > 0', name='chk_detalle_compras_cantidad'),

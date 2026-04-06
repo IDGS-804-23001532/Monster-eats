@@ -10,6 +10,9 @@ from dashboard import dashboard
 from insumos.routes import insumos
 from proveedores import proveedor
 from ventas import venta
+from inventario_Produccion.routes import inventario_produccion
+from solicitud_Produccion.routes import solicitud_produccion
+from costo_Utilidad.routes import costo_utilidad
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
@@ -58,6 +61,9 @@ app.register_blueprint(compras)
 app.register_blueprint(insumos)
 app.register_blueprint(proveedor)
 app.register_blueprint(venta)
+app.register_blueprint(inventario_produccion)
+app.register_blueprint(solicitud_produccion)
+app.register_blueprint(costo_utilidad)
 
 
 @app.route("/")
