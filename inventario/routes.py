@@ -5,6 +5,7 @@ from flask_security import current_user
 from forms import MermaForm
 from . import inventario
 import datetime
+from audit_logger import audit
 
 @inventario.route('/inventario')
 def index():
@@ -172,6 +173,15 @@ def registrar_merma():
                 db.session.add(nuevo_mov)
 
             db.session.commit()
+            
+            # --- REGISTRO DE AUDITORÍA MONGO ---
+            audit.log_action("Inventario", "MERMA", details={
+                "id_insumo": id_insumo,
+                "id_lote": id_lote,
+                "cantidad": float(cantidad),
+                "motivo": motivo
+            })
+            
             flash('Merma registrada y stock actualizado correctamente', 'success')
         except Exception as e:
             db.session.rollback()
