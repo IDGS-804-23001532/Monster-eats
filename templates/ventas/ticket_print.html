@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket {{ cabecera.folio }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS específico para impresoras térmicas (58mm u 80mm) */
+        @media print {
+            @page { margin: 0; }
+            body { margin: 0.2cm; }
+            .no-print { display: none; }
+        }
+        body { 
+            font-family: 'Courier New', Courier, monospace; 
+            width: 80mm; /* Ancho estándar de ticket, ajusta a 58mm si tu impresora es más pequeña */
+            margin: 0 auto;
+            color: #000;
+        }
+    </style>
+</head>
+<body class="text-xs p-2">
+    <div class="text-center mb-3">
+        <h2 class="font-bold text-base uppercase">Monster Eats</h2>
+        <p>León, Guanajuato</p>
+        <p class="mt-1">Cajero: {{ cabecera.cajero }}</p>
+        <p>Folio: {{ cabecera.folio }}</p>
+        <p>{{ cabecera.fecha_emision.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+
+    <hr class="border-black border-dashed my-2">
+
+    <table class="w-full mb-2">
+        <thead>
+            <tr class="text-left border-b border-black">
+                <th class="w-1/6 pb-1">Cant</th>
+                <th class="w-4/6 pb-1">Prod</th>
+                <th class="w-1/6 text-right pb-1">Sub</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in detalles %}
+            <tr class="align-top">
+                <td class="pt-1">{{ item.cantidad }}</td>
+                <td class="pt-1 pr-1">{{ item.producto }}</td>
+                <td class="pt-1 text-right">${{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr class="border-black border-dashed my-2">
+
+    <div class="text-right font-bold space-y-1 mt-2">
+        <p>TOTAL: ${{ "%.2f"|format(cabecera.total) }}</p>
+        <p>Método: {{ cabecera.metodo_pago }}</p>
+        <p>RECIBIDO: ${{ "%.2f"|format(cabecera.monto_recibido or cabecera.total) }}</p>
+        <p>CAMBIO: ${{ "%.2f"|format(cabecera.cambio) }}</p>
+    </div>
+
+    <hr class="border-black border-dashed my-2">
+
+    <div class="text-center mt-3 mb-8">
+        <p class="italic">{{ cabecera.leyenda }}</p>
+        <p class="mt-2 font-bold">¡Vuelve pronto!</p>
+    </div>
+</body>
+</html>
