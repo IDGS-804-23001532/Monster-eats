@@ -1,4 +1,4 @@
-from wtforms import Form, EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField, validators
+from wtforms import Form, EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField, validators, HiddenField, DecimalField, TextAreaField
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Email, Length, Regexp, ValidationError, Optional, NumberRange
 import re
@@ -66,6 +66,20 @@ class UsuarioForm(FlaskForm):
     rol_id = SelectField('Rol', coerce=int, validators=[DataRequired()])
 
 # ==========================================================================
+# FORMULARIOS DE RECETAS
+# ==========================================================================
+
+class RecetaFiltroForm(FlaskForm):
+    search = StringField('Buscar', validators=[Optional()])
+
+class RecetaInsumoForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    id_insumo = SelectField('Insumo', coerce=int, validators=[DataRequired()])
+    cantidad_requerida = DecimalField('Cantidad Requerida', 
+        validators=[DataRequired(), NumberRange(min=0.01, message="La cantidad debe ser mayor a 0")],
+        places=4)
+    
+# ==========================================================================
 # FORMULARIOS DE PROVEEDORES E INSUMOS
 # ==========================================================================
 
@@ -121,3 +135,13 @@ class VentasForm(Form):
             validators.Optional(),
             validators.NumberRange(min=0.01, message='Debe ingresar un monto recibido válido')
         ])
+    
+class ProduccionOrdenForm(FlaskForm):
+    id_producto = SelectField('Producto', coerce=int, validators=[DataRequired()])
+    cantidad_programada = IntegerField('Cantidad a producir', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
+    observaciones = TextAreaField('Observaciones', validators=[Optional()])
+
+class ProduccionFinalizarForm(FlaskForm):
+    cantidad_producida = IntegerField('Cantidad producida', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])

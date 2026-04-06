@@ -70,90 +70,6 @@ class Proveedor(db.Model):
     id_categoria_proveedor = db.Column(db.Integer, db.ForeignKey('categorias_proveedor.id_categoria_proveedor'), nullable=False)
     fecha_registro = db.Column(db.DateTime, nullable=False, default=func.now())
     activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
-
-# ==========================================================================
-# MÓDULO DE INVENTARIO DE MATERIA PRIMA
-# ==========================================================================
-
-class UnidadMedida(db.Model):
-    __tablename__ = 'unidades_medida'
-    id_unidad_medida = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre = db.Column(db.String(30), nullable=False, unique=True)
-    abreviatura = db.Column(db.String(10), nullable=False, unique=True)
-
-class Insumo(db.Model):
-    __tablename__ = 'insumos'
-    id_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre = db.Column(db.String(100), nullable=False, unique=True, index=True)
-    id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
-    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
-    fecha_cad = db.Column(db.Date, nullable=True)
-    nivel_min_reorden = db.Column(db.Numeric(10, 4), nullable=True)
-    porcentaje_merma = db.Column(db.Numeric(5, 2), nullable=False, default=0.00)
-    activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
-
-    __table_args__ = (
-        CheckConstraint('costo_unitario >= 0', name='chk_insumos_costo_unitario'),
-        CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
-        CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
-    )
-
-class InventarioInsumo(db.Model):
-    __tablename__ = 'inventario_insumos'
-    id_inventario_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False, unique=True)
-    stock_actual = db.Column(db.Numeric(10, 4), nullable=False, default=0)
-    nivel_minimo = db.Column(db.Numeric(10, 4), nullable=True)
-    ubicacion_pasillo = db.Column(db.String(50), nullable=True)
-
-    __table_args__ = (
-        CheckConstraint('stock_actual >= 0', name='chk_inventario_insumos_stock'),
-        CheckConstraint('nivel_minimo IS NULL OR nivel_minimo >= 0', name='chk_inventario_insumos_nivel'),
-    )
-
-class MermaLog(db.Model):
-    __tablename__ = 'mermas_log'
-    id_merma = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
-    cantidad = db.Column(db.Numeric(10, 4), nullable=False)
-    fecha_baja = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
-    motivo = db.Column(db.String(255), nullable=False)
-    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
-
-    __table_args__ = (
-        CheckConstraint('cantidad > 0', name='chk_mermas_cantidad'),
-    )
-
-class HistorialPrecioInsumo(db.Model):
-    __tablename__ = 'historial_precios_insumos'
-    id_historial = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
-    precio_anterior = db.Column(db.Numeric(10, 2), nullable=True)
-    precio_nuevo = db.Column(db.Numeric(10, 2), nullable=True)
-    accion = db.Column(db.Enum('NUEVO', 'MODIFICACION', 'ELIMINADO', name='accion_enum'), nullable=False)
-    fecha_cambio = db.Column(db.DateTime, nullable=False, default=func.now())
-    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=True)
-
-class MovimientoInventarioInsumo(db.Model):
-    __tablename__ = 'movimientos_inventario_insumos'
-    id_movimiento_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
-    tipo_movimiento = db.Column(db.Enum('ENTRADA_COMPRA', 'SALIDA_PRODUCCION', 'SALIDA_MERMA', 'AJUSTE_MANUAL', 'REVERSO_COMPRA', name='tipo_mov_insumo_enum'), nullable=False, index=True)
-    cantidad = db.Column(db.Numeric(12, 4), nullable=False)
-    stock_anterior = db.Column(db.Numeric(12, 4), nullable=False)
-    stock_nuevo = db.Column(db.Numeric(12, 4), nullable=False)
-    referencia_tabla = db.Column(db.String(50), nullable=True)
-    referencia_id = db.Column(db.Integer, nullable=True)
-    motivo = db.Column(db.String(255), nullable=True)
-    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
-    fecha_movimiento = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
-
-    __table_args__ = (
-        CheckConstraint('cantidad > 0', name='chk_mov_insumo_cantidad'),
-        CheckConstraint('stock_anterior >= 0', name='chk_mov_insumo_stock_anterior'),
-        CheckConstraint('stock_nuevo >= 0', name='chk_mov_insumo_stock_nuevo'),
-    )
-
 # ==========================================================================
 # MÓDULO DE COMPRAS
 # ==========================================================================
@@ -184,6 +100,39 @@ class ConversionUnidadInsumo(db.Model):
         UniqueConstraint('id_insumo', 'id_unidad_compra', name='uq_conversion_insumo_unidad'),
     )
 
+
+# ==========================================================================
+# MÓDULO DE INVENTARIO DE MATERIA PRIMA
+# ==========================================================================
+
+class UnidadMedida(db.Model):
+    __tablename__ = 'unidades_medida'
+    id_unidad_medida = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nombre = db.Column(db.String(30), nullable=False, unique=True)
+    abreviatura = db.Column(db.String(10), nullable=False, unique=True)
+
+class Insumo(db.Model):
+    __tablename__ = 'insumos'
+    id_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True, index=True)
+    id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
+    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
+    # fecha_cad = db.Column(db.Date, nullable=True)
+    # nivel_min_reorden = db.Column(db.Numeric(10, 4), nullable=True)
+    porcentaje_merma = db.Column(db.Numeric(5, 2), nullable=False, default=0.00)
+    activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
+
+    # Relaciones
+    unidad_medida = db.relationship('UnidadMedida', backref='insumos', lazy=True)
+
+    __table_args__ = (
+        CheckConstraint('costo_unitario >= 0', name='chk_insumos_costo_unitario'),
+        # CheckConstraint('nivel_min_reorden IS NULL OR nivel_min_reorden >= 0', name='chk_insumos_nivel_min_reorden'),
+        CheckConstraint('porcentaje_merma >= 0 AND porcentaje_merma <= 100', name='chk_insumos_porcentaje_merma'),
+    )
+# ==========================================================================
+# MÓDULO DE DETALLE DE COMPRAS
+# ==========================================================================
 class DetalleCompra(db.Model):
     __tablename__ = 'detalle_compras'
     id_detalle_compra = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -201,6 +150,86 @@ class DetalleCompra(db.Model):
         CheckConstraint('costo_unitario >= 0', name='chk_detalle_compras_costo'),
         UniqueConstraint('id_compra', 'id_insumo', name='uq_detalle_compras'),
     )
+# ==========================================================================
+# MÓDULO DE INVENTARIO DE MATERIA PRIMA - LOTE INSUMO
+# ==========================================================================
+class LoteInsumo(db.Model):
+    __tablename__ = 'lotes_insumo'
+    id_lote = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    id_detalle_compra = db.Column(db.Integer, db.ForeignKey('detalle_compras.id_detalle_compra'), nullable=True)
+    cantidad_inicial = db.Column(db.Numeric(10, 4), nullable=False)
+    cantidad_disponible = db.Column(db.Numeric(10, 4), nullable=False)
+    fecha_caducidad = db.Column(db.Date, nullable=False)
+    fecha_ingreso = db.Column(db.DateTime, nullable=False, default=func.now())
+
+    __table_args__ = (
+        CheckConstraint('cantidad_inicial >= 0', name='chk_lotes_insumo_cantidad_inicial'),
+        CheckConstraint('cantidad_disponible >= 0', name='chk_lotes_insumo_cantidad_disponible'),
+        CheckConstraint('cantidad_disponible <= cantidad_inicial', name='chk_lotes_insumo_cantidad_valida'),
+    )
+
+# ==========================================================================
+# MÓDULO DE INVENTARIO DE MATERIA PRIMA - INVENTARIO INSUMO
+# ==========================================================================
+
+class InventarioInsumo(db.Model):
+    __tablename__ = 'inventario_insumos'
+    id_inventario_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=False)
+    nivel_minimo = db.Column(db.Numeric(10, 4), nullable=True)
+    ubicacion_pasillo = db.Column(db.String(50), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint('nivel_minimo IS NULL OR nivel_minimo >= 0', name='chk_inventario_insumos_nivel'),
+        UniqueConstraint('id_lote', name='uq_inventario_insumos_lote'),
+    )
+
+class MermaLog(db.Model):
+    __tablename__ = 'mermas_log'
+    id_merma = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    cantidad = db.Column(db.Numeric(10, 4), nullable=False)
+    fecha_baja = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
+    motivo = db.Column(db.String(255), nullable=False)
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint('cantidad > 0', name='chk_mermas_cantidad'),
+    )
+
+class HistorialPrecioInsumo(db.Model):
+    __tablename__ = 'historial_precios_insumos'
+    id_historial = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    precio_anterior = db.Column(db.Numeric(10, 2), nullable=True)
+    precio_nuevo = db.Column(db.Numeric(10, 2), nullable=True)
+    accion = db.Column(db.Enum('NUEVO', 'MODIFICACION', 'ELIMINADO', name='accion_enum'), nullable=False)
+    fecha_cambio = db.Column(db.DateTime, nullable=False, default=func.now())
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=True)
+
+class MovimientoInventarioInsumo(db.Model):
+    __tablename__ = 'movimientos_inventario_insumos'
+    id_movimiento_insumo = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_insumo = db.Column(db.Integer, db.ForeignKey('insumos.id_insumo'), nullable=False)
+    tipo_movimiento = db.Column(db.Enum('ENTRADA_COMPRA', 'SALIDA_PRODUCCION', 'SALIDA_MERMA', 'AJUSTE_MANUAL', 'REVERSO_COMPRA', name='tipo_mov_insumo_enum'), nullable=False, index=True)
+    cantidad = db.Column(db.Numeric(12, 4), nullable=False)
+    stock_anterior = db.Column(db.Numeric(12, 4), nullable=False)
+    stock_nuevo = db.Column(db.Numeric(12, 4), nullable=False)
+    referencia_tabla = db.Column(db.String(50), nullable=True)
+    referencia_id = db.Column(db.Integer, nullable=True)
+    motivo = db.Column(db.String(255), nullable=True)
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuarios.id_usuario'), nullable=False)
+    id_lote = db.Column(db.Integer, db.ForeignKey('lotes_insumo.id_lote'), nullable=True)
+    fecha_movimiento = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
+
+    __table_args__ = (
+        CheckConstraint('cantidad > 0', name='chk_mov_insumo_cantidad'),
+        CheckConstraint('stock_anterior >= 0', name='chk_mov_insumo_stock_anterior'),
+        CheckConstraint('stock_nuevo >= 0', name='chk_mov_insumo_stock_nuevo'),
+    )
+
 
 # ==========================================================================
 # MÓDULO DE RECETAS

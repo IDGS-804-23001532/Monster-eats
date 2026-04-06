@@ -1,84 +1,194 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 {% block content %}
-<div class="p-4 sm:ml-64 mt-14">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 p-6 bg-white/20 backdrop-blur-lg border border-white/30 rounded-2xl shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-white">Ingredientes: {{ producto.nombre }}</h3>
-                <button data-modal-target="ingrediente-modal" data-modal-toggle="ingrediente-modal" class="block text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5">
-                    Añadir Insumo
+<div class="py-8">
+    <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-8 shadow-2xl shadow-black/50">
+
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+            <div>
+                <a href="{{ url_for('recetas.index') }}" class="text-orange-500 hover:text-orange-400 transition-colors font-bold flex items-center gap-2 mb-4">
+                    <i class="fas fa-arrow-left"></i> Volver a recetas
+                </a>
+                <h2 class="text-4xl font-black text-white tracking-tight">{{ producto.producto }}</h2>
+                <span class="inline-block mt-2 px-3 py-1 rounded-lg bg-slate-700/50 text-slate-400 text-xs font-bold uppercase tracking-widest border border-slate-600/50">
+                    {{ producto.categoria }}
+                </span>
+            </div>
+            <div class="bg-slate-900/60 p-6 rounded-3xl border border-white/5 text-right min-w-[200px]">
+                <div class="text-xs font-black text-orange-500 uppercase tracking-widest mb-1">Precio de Venta</div>
+                <div class="text-4xl font-mono font-black text-white">${{ "%.2f"|format(producto.precio_venta) }}</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-900/40 border border-slate-700/30 rounded-3xl p-6 text-center group hover:border-red-500/30 transition-all">
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Costo de Producción</div>
+                <div class="text-3xl font-mono font-black text-red-400 group-hover:scale-110 transition-transform">${{ "%.2f"|format(producto.costo_total) }}</div>
+            </div>
+            <div class="bg-slate-900/40 border border-slate-700/30 rounded-3xl p-6 text-center group hover:border-green-500/30 transition-all">
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Utilidad Estimada</div>
+                <div class="text-3xl font-mono font-black text-green-400 group-hover:scale-110 transition-transform">${{ "%.2f"|format(producto.precio_venta - producto.costo_total) }}</div>
+            </div>
+            <div class="bg-slate-900/40 border border-slate-700/30 rounded-3xl p-6 text-center group hover:border-blue-500/30 transition-all">
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Margen de Ganancia</div>
+                <div class="text-3xl font-mono font-black text-blue-400 group-hover:scale-110 transition-transform">
+                    {{ "%.1f"|format(((producto.precio_venta - producto.costo_total) / producto.precio_venta * 100) if producto.precio_venta > 0 else 0) }}%
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h3 class="text-xl font-black text-white flex items-center gap-2">
+                    <i class="fas fa-layer-group text-orange-500"></i> Ingredientes y Cantidades
+                </h3>
+                <button onclick="abrirModalAgregar()" 
+                        class="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-orange-600/20 transition-all hover:scale-105 flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i> AGREGAR INSUMO
                 </button>
             </div>
-            
-            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                {% for i in ingredientes %}
-                <li class="py-3 sm:py-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate dark:text-white">{{ i.insumo }}</p>
-                            <p class="text-sm text-gray-500 truncate dark:text-gray-400">{{ i.cantidad_requerida }} {{ i.unidad }}</p>
-                        </div>
-                        <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                            ${{ "{:.2f}".format(i.costo_ingrediente) }}
-                        </div>
-                        <a href="{{ url_for('recetas.eliminar_ingrediente', id_prod=producto.id_producto, id_ins=i.id_insumo) }}" class="text-red-500 hover:text-red-700">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                        </a>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
 
-        <div class="p-6 bg-gray-900/80 rounded-2xl border border-blue-500/50 shadow-blue-500/20 shadow-lg">
-            <h4 class="text-lg font-bold text-blue-400 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                Explosión de Insumos
-            </h4>
-            <form action="{{ url_for('recetas.simular') }}" method="POST">
-                <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
-                <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-gray-300">Cantidad a Producir</label>
-                    <input type="number" name="cantidad_simular" class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 20" required>
-                </div>
-                <button type="submit" class="w-full text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                    Calcular Lote
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
+            <div class="relative overflow-x-auto rounded-3xl border border-slate-700/50 bg-slate-900/20">
+                <table class="w-full text-sm text-left text-slate-300">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-black tracking-widest">
+                        <tr>
+                            <th class="px-6 py-5">Insumo</th>
+                            <th class="px-6 py-5">Cantidad</th>
+                            <th class="px-6 py-5">Unidad</th>
+                            <th class="px-6 py-5">Costo Unit.</th>
+                            <th class="px-6 py-5">Subtotal</th>
+                            <th class="px-6 py-5 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/30">
+                        {% for insumo in insumos %}
+                        <tr class="hover:bg-white/5 transition-colors group">
+                            <td class="px-6 py-4 font-bold text-white">{{ insumo.insumo }}</td>
+                            <td class="px-6 py-4 font-mono">{{ "%.4f"|format(insumo.cantidad_requerida) }}</td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-slate-800 text-slate-400 text-xs">{{ insumo.abreviatura }}</span></td>
+                            <td class="px-6 py-4 font-mono text-slate-400">${{ "%.2f"|format(insumo.costo_unitario) }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-white">${{ "%.2f"|format(insumo.costo_parcial) }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <form action="{{ url_for('recetas.eliminar_insumo', id_producto=producto.id_producto, id_insumo=insumo.id_insumo) }}" 
+                                      method="POST" 
+                                      onsubmit="return confirm('¿Eliminar este insumo de la receta?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                <i class="fas fa-mortar-pestle text-4xl mb-4 block opacity-20"></i>
+                                No hay insumos en esta receta. Empieza agregando uno.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if insumos %}
+                    <tfoot class="bg-slate-900/60 font-black text-white">
+                        <tr>
+                            <td colspan="4" class="px-6 py-5 text-right text-slate-400 tracking-widest uppercase text-xs">Costo Total de Receta:</td>
+                            <td class="px-6 py-5 text-xl font-mono text-orange-500">${{ "%.2f"|format(producto.costo_total) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
 
-<div id="ingrediente-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full">
-    <div class="relative w-full max-w-md max-h-full">
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <form action="{{ url_for('recetas.guardar_ingrediente') }}" method="POST">
-                <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Añadir/Editar Insumo</h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="ingrediente-modal">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            {% if insumos %}
+            <div class="mt-6 flex justify-end">
+                <form action="{{ url_for('recetas.limpiar', id_producto=producto.id_producto) }}" 
+                      method="POST" 
+                      onsubmit="return confirm('¿Limpiar toda la receta? Esto eliminará todos los insumos.');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="group text-slate-500 hover:text-red-400 text-sm font-bold flex items-center gap-2 transition-colors">
+                        <i class="fas fa-broom group-hover:animate-bounce"></i> Limpiar toda la receta
                     </button>
-                </div>
-                <div class="p-6 space-y-6">
-                    <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selecciona Insumo</label>
-                        <select name="id_insumo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
-                            {% for ins in insumos %}
-                            <option value="{{ ins.id_insumo }}">{{ ins.nombre }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad Requerida</label>
-                        <input type="number" step="0.0001" name="cantidad" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
-                    </div>
-                </div>
-                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Guardar</button>
-                </div>
-            </form>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<div id="modalAgregar" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[100] p-4 transition-opacity duration-300">
+    <div class="bg-slate-800 border border-slate-700 rounded-[2rem] p-8 w-full max-w-md shadow-2xl scale-95 transition-transform duration-300" id="modalContainer">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-black text-white">Agregar Insumo</h3>
+            <button onclick="cerrarModal()" class="text-slate-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form action="{{ url_for('recetas.agregar_insumo') }}" method="POST" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 ml-1">Seleccionar Insumo</label>
+                <select name="id_insumo" required class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900 text-white focus:ring-2 focus:ring-orange-500 outline-none appearance-none cursor-pointer">
+                    <option value="">Selecciona un ingrediente...</option>
+                    {% for insumo in insumos_disponibles %}
+                    <option value="{{ insumo.id_insumo }}">
+                        {{ insumo.nombre }} ({{ insumo.abreviatura }}) - ${{ "%.2f"|format(insumo.costo_unitario) }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 ml-1">Cantidad Requerida</label>
+                <input type="number" name="cantidad_requerida" step="0.0001" min="0.0001" required
+                       class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900 text-white focus:ring-2 focus:ring-orange-500 outline-none"
+                       placeholder="0.0000">
+                <p class="text-[10px] text-slate-500 mt-2 ml-1 uppercase font-bold tracking-tighter">Utiliza la unidad base (kg, l, pz)</p>
+            </div>
+            
+            <div class="flex gap-4 pt-2">
+                <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-3 rounded-2xl font-black shadow-lg shadow-orange-600/20 transition-all hover:scale-105 active:scale-95">
+                    GUARDAR
+                </button>
+                <button type="button" onclick="cerrarModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 py-3 rounded-2xl font-black transition-all">
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalAgregar() {
+    const modal = document.getElementById('modalAgregar');
+    const container = document.getElementById('modalContainer');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        container.classList.remove('scale-95');
+        container.classList.add('scale-100');
+    }, 10);
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalAgregar');
+    const container = document.getElementById('modalContainer');
+    container.classList.add('scale-95');
+    container.classList.remove('scale-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 200);
+}
+
+// Cerrar modal al hacer click fuera
+window.onclick = function(event) {
+    const modal = document.getElementById('modalAgregar');
+    if (event.target == modal) {
+        cerrarModal();
+    }
+}
+</script>
 {% endblock %}

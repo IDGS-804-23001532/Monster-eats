@@ -1,73 +1,88 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="p-4 sm:ml-64 flex justify-center">
-    <div class="w-full max-w-2xl bg-white/40 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl mt-10">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-            <i class="fas fa-id-card mr-3 text-orange-500"></i> Registro de Nuevo Colaborador
-        </h2>
+<div class="flex justify-center items-center py-10">
+    <div class="w-full max-w-2xl bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-8 shadow-2xl shadow-black/50">
+        
+        <div class="mb-8">
+            <h2 class="text-3xl font-extrabold text-white flex items-center gap-3">
+                <i class="fas fa-user-plus text-orange-500"></i> 
+                Nuevo Colaborador
+            </h2>
+            <p class="text-slate-400 mt-2">Completa los datos para dar de alta en el sistema.</p>
+        </div>
 
         <form method="POST" action="{{ url_for('usuarios.crear') }}" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {{ form.csrf_token }}
             
-            <div class="md:col-span-2 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Información Personal</div>
-            
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Nombre(s)</label>
-                {{ form.nombre(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60 focus:ring-orange-500") }}
-                {% for error in form.nombre.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+            <div class="md:col-span-2 flex items-center gap-3 mt-2">
+                <span class="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Información Personal</span>
+                <div class="h-[1px] flex-1 bg-slate-700"></div>
             </div>
             
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Nombre(s)</label>
+                {{ form.nombre(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500 transition-all outline-none", placeholder="Ej. Bryan Uriel") }}
+                {% for error in form.nombre.errors %}<p class="text-red-400 text-xs mt-1 italic"><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>{% endfor %}
+            </div>
+            
             <div>
-                <label class="block text-sm font-medium text-gray-700">Apellido Paterno</label>
-                {{ form.apellido_pa(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60") }}
-                {% for error in form.apellido_pa.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Apellido Paterno</label>
+                {{ form.apellido_pa(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none") }}
+                {% for error in form.apellido_pa.errors %}<p class="text-red-400 text-xs mt-1 italic">{{ error }}</p>{% endfor %}
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Apellido Materno</label>
-                {{ form.apellido_ma(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60") }}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Apellido Materno</label>
+                {{ form.apellido_ma(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none") }}
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-                {{ form.fecha_nacimiento(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60", type="date") }}
-                {% for error in form.fecha_nacimiento.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Fecha de Nacimiento</label>
+                {{ form.fecha_nacimiento(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none", type="date") }}
+                {% for error in form.fecha_nacimiento.errors %}<p class="text-red-400 text-xs mt-1 italic">{{ error }}</p>{% endfor %}
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                {{ form.telefono(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60", placeholder="10 dígitos") }}
-                {% for error in form.telefono.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Teléfono</label>
+                {{ form.telefono(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none", placeholder="10 dígitos") }}
+                {% for error in form.telefono.errors %}<p class="text-red-400 text-xs mt-1 italic">{{ error }}</p>{% endfor %}
             </div>
 
-            <div class="md:col-span-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Acceso al Sistema</div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Email Institucional</label>
-                {{ form.email(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60") }}
-                {% for error in form.email.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+            <div class="md:col-span-2 flex items-center gap-3 mt-6">
+                <span class="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Acceso al Sistema</span>
+                <div class="h-[1px] flex-1 bg-slate-700"></div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Rol Asignado</label>
-                {{ form.rol_id(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60") }}
-                {% for error in form.rol_id.errors %}<p class="text-red-500 text-xs italic">{{ error }}</p>{% endfor %}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Email Institucional</label>
+                {{ form.email(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none", placeholder="usuario@monstereats.com") }}
+                {% for error in form.email.errors %}<p class="text-red-400 text-xs mt-1 italic">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Rol Asignado</label>
+                {{ form.rol_id(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none") }}
+                {% for error in form.rol_id.errors %}<p class="text-red-400 text-xs mt-1 italic">{{ error }}</p>{% endfor %}
             </div>
 
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Contraseña Robustez</label>
-                {{ form.password(class="w-full mt-1 rounded-xl border-gray-200 bg-white/60", placeholder="Min 8 caracteres, Mayús, Núm y Símbolo") }}
+                <label class="block text-sm font-semibold text-slate-300 ml-1 mb-2">Contraseña</label>
+                {{ form.password(class="w-full px-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none", placeholder="••••••••") }}
                 {% if form.password.errors %}
                     {% for error in form.password.errors %}
-                        <p class="text-red-500 text-xs mt-1 font-semibold italic">{{ error }}</p>
+                        <p class="text-red-400 text-xs mt-1 font-medium italic">{{ error }}</p>
                     {% endfor %}
                 {% endif %}
             </div>
 
-            <div class="md:col-span-2 flex justify-end gap-4 mt-6">
-                <a href="{{ url_for('usuarios.index') }}" class="px-6 py-2 text-gray-500 hover:text-gray-700 font-medium">Cancelar</a>
-                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 rounded-full font-bold shadow-lg transition-transform hover:scale-105">
-                    Guardar Colaborador
+            <div class="md:col-span-2 flex flex-col sm:flex-row justify-end gap-4 mt-8">
+                <a href="{{ url_for('usuarios.index') }}" 
+                   class="px-8 py-3 text-slate-400 hover:text-white font-bold transition-colors text-center order-2 sm:order-1">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-orange-600 hover:bg-orange-500 text-white px-10 py-3 rounded-2xl font-black shadow-lg shadow-orange-600/20 transition-all hover:scale-[1.02] active:scale-95 order-1 sm:order-2">
+                    GUARDAR COLABORADOR
                 </button>
             </div>
         </form>
