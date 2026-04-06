@@ -1,12 +1,7 @@
 from flask_wtf import FlaskForm, Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, HiddenField, IntegerField, TextAreaField, SubmitField
-from wtforms import SelectField, FloatField
-from wtforms import Form
-from wtforms import EmailField, PasswordField, StringField, DateField, TelField, SelectField, IntegerField, FloatField
-from flask_wtf import FlaskForm
-from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField
+from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField, TextAreaField, SubmitField
 from wtforms import validators
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, Email, Length, Regexp, ValidationError, Optional, NumberRange
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -63,6 +58,49 @@ class AjusteStockForm(FlaskForm):
         DataRequired(message="El motivo es obligatorio para la auditoría")
     ])
     submit = SubmitField('Guardar Ajuste')
+
+# ==========================================================================
+# FORMULARIOS DE PROVEEDORES E INSUMOS
+# ==========================================================================
+
+class CategoriaProveedorForm(Form):
+    nombre = StringField('Nombre de la categoria', [
+        validators.DataRequired(message='El nombre de la categoria es requerida')
+    ])
+
+class ProveedorForm(Form):
+    nombre_empresa = StringField('Nombre de empresa', [
+        validators.DataRequired(message = 'El nombre de empresa es requerida')
+    ])
+    nombre_contacto = StringField('Nombre del contacto', [
+        validators.DataRequired(message='El nombre del contacto es requerido')
+    ])
+    apellido_pa = StringField('Apellido Paterno', [
+        validators.DataRequired(message='El apellido paterno es requerido')
+    ])
+    apellido_ma = StringField('Apellido Materno', [
+        validators.DataRequired(message='El apellido materno es requerido')
+    ])
+    telefono = TelField('Teléfono', [
+        validators.DataRequired(message= 'El Teléfono es requerido'),
+        validators.Length(min=10, message='El número debe tener 10 digitos'),
+        validators.Regexp(r'^\d{10}$', message="El número debe tener exactamente 10 dígitos.")
+    ])
+    email = EmailField('Email', [
+        validators.DataRequired('El email es requerido'),
+        validators.Email(message= 'Formato de correo no válido')
+    ])
+    rfc = StringField('RFC', [
+        validators.DataRequired(message= 'El RFC es requerido'),
+        validators.Length(min=12, max=13, message= 'Su RFC debe ser minimo 12 y maximo 13 caracteres')
+    ])
+    direccion = StringField('Dirección', [
+        validators.DataRequired(message= 'La dirección es requerida')
+    ])
+    categoria_proveedor = SelectField('Categoria del proveedor', [
+        validators.DataRequired(message= 'Debes seleccionar una categoría')
+    ], coerce = int)
+
 
 class CrearComboForm(FlaskForm):
     nombre_combo = StringField('Nombre del Combo', [
@@ -249,3 +287,46 @@ class MermaForm(FlaskForm):
         validators.DataRequired(message='El motivo es requerido'),
         validators.Length(max=255, message='El motivo no puede exceder los 255 caracteres')
     ])
+    
+    # ==========================================================================
+# FORMULARIOS DE ADMINISTRACIÓN (USUARIOS)
+# ==========================================================================
+
+class UsuarioForm(FlaskForm):
+    nombre = StringField('Nombre', validators=[DataRequired(), Length(max=50)])
+    apellido_pa = StringField('Apellido Paterno', validators=[DataRequired()])
+    apellido_ma = StringField('Apellido Materno')
+    fecha_nacimiento = DateField('Fecha de Nacimiento', validators=[DataRequired()])
+    telefono = TelField('Teléfono', validators=[DataRequired(), Length(min=10, max=15)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Contraseña', validators=[
+        DataRequired(),
+        Length(min=8),
+        Regexp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+               message="La contraseña debe tener mayúscula, minúscula, número y carácter especial.")
+    ])
+    rol_id = SelectField('Rol', coerce=int, validators=[DataRequired()])
+
+# ==========================================================================
+# FORMULARIOS DE RECETAS
+# ==========================================================================
+
+class RecetaFiltroForm(FlaskForm):
+    search = StringField('Buscar', validators=[Optional()])
+
+class RecetaInsumoForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    id_insumo = SelectField('Insumo', coerce=int, validators=[DataRequired()])
+    cantidad_requerida = DecimalField('Cantidad Requerida', 
+        validators=[DataRequired(), NumberRange(min=0.01, message="La cantidad debe ser mayor a 0")],
+        places=4)
+
+class ProduccionOrdenForm(FlaskForm):
+    id_producto = SelectField('Producto', coerce=int, validators=[DataRequired()])
+    cantidad_programada = IntegerField('Cantidad a producir', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
+    observaciones = TextAreaField('Observaciones', validators=[Optional()])
+
+class ProduccionFinalizarForm(FlaskForm):
+    cantidad_producida = IntegerField('Cantidad producida', 
+        validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
