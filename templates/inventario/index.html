@@ -297,6 +297,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium text-center">Caducidad</th>
                 <th class="px-4 py-3 font-medium text-center">Estado</th>
+                <th class="px-4 py-3 font-medium text-center">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-700">
@@ -336,6 +337,18 @@
                     >Vigente</span
                   >
                   {% endif %}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button
+                    type="button"
+                    onclick="openMermaModal('{{ lote.id_lote }}', '{{ detalle_insumo.id_insumo }}', '{{ lote.cantidad_disponible }}')"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all border border-red-500/30"
+                    title="Registrar Merma"
+                  >
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
                 </td>
               </tr>
               {% endfor %} {% else %}
@@ -385,5 +398,76 @@
       }, 200);
     }
   });
+
+  function openMermaModal(loteId, insumoId, maxCant) {
+    document.getElementById('merma_id_lote').value = loteId;
+    document.getElementById('merma_id_insumo').value = insumoId;
+    document.getElementById('merma_cantidad').max = maxCant;
+    document.getElementById('merma_lote_display').innerText = '#' + loteId;
+    
+    const $target = document.getElementById('registrarMermaModal');
+    const modal = new Modal($target);
+    modal.show();
+  }
 </script>
-{% endif %} {% endblock %}
+{% endif %}
+
+<!-- ==================== MODAL REGISTRAR MERMA ==================== -->
+<div
+  id="registrarMermaModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[80] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <div class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between border-b border-gray-600 pb-4 mb-4">
+        <h3 class="text-xl font-bold text-white">Registrar Merma</h3>
+        <button type="button" class="text-gray-400 hover:text-white" data-modal-hide="registrarMermaModal">
+          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/></svg>
+        </button>
+      </div>
+      
+      <form action="{{ url_for('inventario.registrar_merma') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id_lote" id="merma_id_lote">
+        <input type="hidden" name="id_insumo" id="merma_id_insumo">
+        
+        <div class="space-y-4">
+          <p class="text-sm text-gray-400">Registrando merma para el lote <span id="merma_lote_display" class="text-blue-400 font-mono"></span></p>
+          
+          <div>
+            <label class="block mb-2 text-sm font-medium text-white">Cantidad a retirar</label>
+            <input type="number" name="cantidad" id="merma_cantidad" step="0.0001" min="0.0001" required class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+          </div>
+          
+          <div>
+            <label class="block mb-2 text-sm font-medium text-white">Motivo</label>
+            <textarea name="motivo" required rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Ej: Producto caducado, empaque dañado..."></textarea>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" data-modal-hide="registrarMermaModal" class="px-5 py-2.5 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Registrar Salida</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Script global para manejar el cierre de cualquier modal con data-modal-hide
+  document.addEventListener('click', function(event) {
+    const hideBtn = event.target.closest('[data-modal-hide]');
+    if (hideBtn) {
+      const modalId = hideBtn.getAttribute('data-modal-hide');
+      const $modal = document.getElementById(modalId);
+      if ($modal) {
+        const modal = new Modal($modal);
+        modal.hide();
+      }
+    }
+  });
+</script>
+{% endblock %}

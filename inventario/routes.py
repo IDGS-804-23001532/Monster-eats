@@ -1,6 +1,7 @@
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, flash
 from models import Insumo, LoteInsumo, UnidadMedida, db
-from sqlalchemy import func as sql_func
+from sqlalchemy import func as sql_func, text
+from flask_security import current_user
 from . import inventario
 
 
@@ -70,6 +71,41 @@ def index():
                          hoy=hoy,
                          caducidad_proxima=caducidad_proxima,
                          show_modal=show_modal)
+
+@inventario.route('/registrar_merma', methods=['POST'])
+def registrar_merma():
+    id_insumo = request.form.get('id_insumo')
+    id_lote = request.form.get('id_lote')
+    cantidad = request.form.get('cantidad')
+    motivo = request.form.get('motivo')
+    id_usuario = current_user.id_usuario
+
+    try:
+        # Ejecutamos el procedimiento almacenado
+        db.session.execute(
+            text("CALL sp_registrar_merma(:id_insumo, :id_lote, :cantidad, :motivo, :id_usuario)"),
+            {
+                'id_insumo': id_insumo,
+                'id_lote': id_lote,
+                'cantidad': cantidad,
+                'motivo': motivo,
+                'id_usuario': id_usuario
+            }
+        )
+        db.session.commit()
+        flash('Merma registrada correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        # Intentamos obtener un mensaje más amable si viene del SIGNAL de SQL
+        error_msg = str(e)
+        if "No hay suficiente stock" in error_msg:
+            flash('Error: No hay suficiente stock en el lote', 'danger')
+        elif "El lote no existe" in error_msg:
+            flash('Error: El lote seleccionado no existe', 'danger')
+        else:
+            flash(f'Error al registrar merma: {error_msg}', 'danger')
+
+    return redirect(url_for('inventario.index', ver=id_insumo))
 
 @inventario.route('/limpiar_busqueda_inventario')
 def limpiar_busqueda():
