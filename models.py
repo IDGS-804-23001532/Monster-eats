@@ -312,6 +312,7 @@ class SolicitudProduccion(db.Model):
     estado = db.Column(db.Enum('Pendiente', 'En Proceso', 'Completada', 'Cancelada', name='estado_sol_enum'), nullable=False, default='Pendiente', index=True)
     fecha_solicitud = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
     fecha_completada = db.Column(db.DateTime, nullable=True)
+    numero_orden = db.Column(db.String(20), nullable=True)
 
     __table_args__ = (
         CheckConstraint('cantidad > 0', name='chk_solicitudes_cantidad'),
