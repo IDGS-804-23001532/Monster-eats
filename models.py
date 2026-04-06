@@ -83,6 +83,11 @@ class Compra(db.Model):
     total = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     estado_compra = db.Column(db.Enum('Completada', 'Cancelada', name='estado_compra_enum'), nullable=False, default='Completada', index=True)
 
+    # Relaciones
+    proveedor = db.relationship('Proveedor', backref='compras', lazy=True)
+    usuario = db.relationship('Usuario', backref='compras', lazy=True)
+    detalles = db.relationship('DetalleCompra', backref='compra', lazy=True)
+
     __table_args__ = (
         CheckConstraint('total >= 0', name='chk_compras_total'),
     )
@@ -143,7 +148,11 @@ class DetalleCompra(db.Model):
     costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
     # Nota: SQLAlchemy no maneja columnas "GENERATED ALWAYS" nativamente de forma sencilla
     # Lo ideal es calcularlo en la lógica de negocio antes de guardar
-    costo_subtotal = db.Column(db.Numeric(10, 2), nullable=False) 
+    costo_subtotal = db.Column(db.Numeric(10, 2), nullable=False)
+
+    # Relaciones
+    insumo = db.relationship('Insumo', backref='detalle_compras', lazy=True)
+    unidad_medida = db.relationship('UnidadMedida', backref='detalle_compras', lazy=True)
 
     __table_args__ = (
         CheckConstraint('cantidad_comprada > 0', name='chk_detalle_compras_cantidad'),
@@ -162,6 +171,9 @@ class LoteInsumo(db.Model):
     cantidad_disponible = db.Column(db.Numeric(10, 4), nullable=False)
     fecha_caducidad = db.Column(db.Date, nullable=False)
     fecha_ingreso = db.Column(db.DateTime, nullable=False, default=func.now())
+
+    # Relaciones
+    insumo = db.relationship('Insumo', backref='lotes', lazy=True)
 
     __table_args__ = (
         CheckConstraint('cantidad_inicial >= 0', name='chk_lotes_insumo_cantidad_inicial'),

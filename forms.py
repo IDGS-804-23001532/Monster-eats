@@ -85,6 +85,55 @@ class EliminarInsumoForm(Form):
         validators.DataRequired(message='El ID es requerido')
     ])
 
+class CompraForm(Form):
+    id_proveedor = SelectField('Proveedor', [
+        validators.DataRequired(message='El proveedor es requerido')
+    ], coerce=int)
+    
+
+class DetalleCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    id_insumo = StringField('ID Insumo', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    cantidad = DecimalField('Cantidad', [
+        validators.DataRequired(message='La cantidad es requerida')
+    ])
+    precio_unitario = DecimalField('Precio Unitario', [
+        validators.DataRequired(message='El precio unitario es requerido')
+    ])
+
+class EliminarCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+
+class ActualizarCompraForm(Form):
+    id_compra = StringField('ID Compra', [
+        validators.DataRequired(message='El ID es requerido')
+    ])
+    id_proveedor = SelectField('Proveedor', [
+        validators.DataRequired(message='El proveedor es requerido')
+    ], coerce=int)
+    id_insumo = SelectField('Insumo', [
+        validators.DataRequired(message='El insumo es requerido')
+    ], coerce=int)
+    cantidad = DecimalField('Cantidad', [
+        validators.DataRequired(message='La cantidad es requerida')
+    ])
+    precio_unitario = DecimalField('Precio Unitario', [
+        validators.DataRequired(message='El precio unitario es requerido')
+    ])
+    fecha_compra = DateField('Fecha de Compra', [
+        validators.DataRequired(message='La fecha de compra es requerida')
+    ])
+    estado_compra = SelectField('Estado de Compra', [
+        validators.DataRequired(message='El estado de la compra es requerido')
+    ], coerce=str)
+
+
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [
         validators.DataRequired(message='El nombre de la categoria es requerida')

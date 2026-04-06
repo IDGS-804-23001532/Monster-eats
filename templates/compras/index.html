@@ -1,23 +1,31 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %} {% from 'macros/alert_wftForms_macro.html' import
+camposNuevos %} {% block content %}
 
-<div class="w-full flex justify-start mt-20 pl-10">
-  <form class="flex items-center gap-4 w-full max-w-full justify-start">
+<div
+  class="w-full max-w-[1168px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center mt-10 md:mt-20 gap-6 px-4 xl:px-0"
+>
+  <form
+    action="{{ url_for('compras.index') }}"
+    method="GET"
+    class="flex flex-nowrap items-center gap-2 w-full lg:w-auto"
+  >
     <!-- Input -->
-    <div class="flex justify-end">
-      <label for="simple-search" class="sr-only">Buscar</label>
+    <div class="relative flex-1 sm:flex-none">
+      <label for="search-compras" class="sr-only">Buscar</label>
       <input
         type="text"
-        id="simple-search"
-        placeholder="Buscar"
-        class="w-[400px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-3 mx-2 my-5 bg-[#3b4252] text-white placeholder-white"
+        name="search_query"
+        value="{{ search_query }}"
+        id="search-compras"
+        placeholder="Buscar por proveedor..."
+        class="w-full sm:w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-gray-400"
       />
     </div>
 
-    <!-- Botón -->
+    <!-- Botón buscar -->
     <button
-      type="button"
-      onclick="buscar()"
-      class="flex items-center justify-center w-12 h-12 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
+      type="submit"
+      class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
     >
       <svg
         class="w-5 h-5 text-white"
@@ -33,14 +41,57 @@
         />
       </svg>
     </button>
+  </form>
 
+  <div class="w-full lg:w-auto">
     <button
       type="button"
-      onclick="nuevaCompra()"
-      class="flex items-center justify-center w-[200px] h-[50px] rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white ml-117"
+      onclick="window.location.href = '{{ url_for('compras.index') }}?historial=1'"
+      class="w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#101828] border-2 border-[#101828] hover:bg-orange-600 transition text-white whitespace-nowrap"
     >
       <svg
-        class="w-6 h-6 text-gray-800 dark:text-white"
+        class="w-6 h-6 text-white mr-2"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill="currentColor"
+          d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"
+        />
+        <path
+          fill="currentColor"
+          fill-rule="evenodd"
+          d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+
+      Historial de Compras
+    </button>
+  </div>
+
+  <div
+    class="flex flex-col sm:flex-row flex-wrap gap-4 w-full lg:w-auto justify-start lg:justify-end ml-auto"
+  >
+    <button
+      type="button"
+      onclick="window.location.href = '{{ url_for('compras.limpiar_busqueda') }}'"
+      class="w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#101828] border-2 border-[#101828] hover:bg-orange-600 transition text-white whitespace-nowrap"
+    >
+      Limpiar Búsqueda
+    </button>
+    <button
+      data-modal-target="nuevaCompraModal"
+      data-modal-toggle="nuevaCompraModal"
+      type="button"
+      class="btn-animate-modal w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition text-white"
+    >
+      <svg
+        class="w-6 h-6 text-white mr-2"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -53,68 +104,141 @@
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M5 12h14m-7 7V5"
+          d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
       </svg>
-      Nueva compra
+      Nueva Compra
     </button>
-  </form>
+  </div>
 </div>
 
-<div
-  class="w-[1168px] ml-auto mr-10 bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mb-10 overflow-hidden"
->
-  <table class="w-full text-sm text-left rtl:text-right text-body">
-    <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
-      <tr class="divide-x divide-[#ffffff]">
-        <th scope="col" class="px-6 py-3 font-medium text-white">Fecha</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Proveedor</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Total</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Estado</th>
-        <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        class="odd:bg-[#0B1D33] text-white even:bg-[#1E2939] border-b border-[#ffffff] divide-x divide-[#ffffff]"
-      >
-        <th
-          scope="row"
-          class="px-6 py-4 font-medium text-white whitespace-nowrap"
+<!-- ==================== TABLA DE COMPRAS ==================== -->
+<div class="px-4 xl:px-0">
+  <div
+    class="table-container w-full max-w-[1168px] mx-auto bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mt-6 mb-10 overflow-x-auto"
+  >
+    <table
+      class="mobile-cards w-full text-sm text-left rtl:text-right text-body whitespace-nowrap"
+    >
+      <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
+        <tr class="divide-x divide-[#ffffff]">
+          <th scope="col" class="px-6 py-3 font-medium text-white">#</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Proveedor
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Fecha</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Insumos</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Total</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Estado</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for compra in compras %}
+        <tr
+          class="odd:bg-[#0B1D33] text-white even:bg-[#0B1D33] border-b border-[#ffffff] divide-x divide-[#ffffff]"
         >
-          Apple MacBook Pro 17"
-        </th>
-        <td class="px-6 py-4">Silver</td>
-        <td class="px-6 py-4">Laptop</td>
-        <td class="px-6 py-4">$2999</td>
-        <td class="px-6 py-4">
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              title="Ver Detalle"
-              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] hover:brightness-110 transition"
+          <th
+            scope="row"
+            class="px-6 py-4 font-semibold text-white whitespace-nowrap text-lg md:text-sm"
+          >
+            {{ compra.id_compra }}
+          </th>
+          <td data-label="Proveedor:" class="px-6 py-4">
+            {{ compra.proveedor.nombre_empresa }}
+          </td>
+          <td data-label="Fecha:" class="px-6 py-4">
+            {{ compra.fecha_compra.strftime('%d/%m/%Y %H:%M') }}
+          </td>
+          <td data-label="Insumos:" class="px-6 py-4 text-center">
+            <span
+              class="bg-blue-500/20 text-blue-400 font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-blue-500/30"
             >
-              <svg
-                class="w-5 h-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+              {{ compra.detalles | length }}
+            </span>
+          </td>
+          <td data-label="Total:" class="px-6 py-4 font-semibold">
+            ${{ "%.2f" | format(compra.total) }}
+          </td>
+          <td data-label="Estado:" class="px-6 py-4">
+            {% if compra.estado_compra == 'Completada' %}
+            <span
+              class="bg-green-500/20 text-[#00B40C] font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-green-500/30"
+              >Completada</span
+            >
+            {% else %}
+            <span
+              class="bg-red-500/20 text-red-500 font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-red-500/30"
+              >Cancelada</span
+            >
+            {% endif %}
+          </td>
+          <td class="px-6 py-4">
+            <div
+              class="flex items-center justify-center md:justify-start gap-5 md:gap-3"
+            >
+              <a
+                href="{{ url_for('compras.index') }}?ver={{ compra.id_compra }}"
+                title="Ver detalle"
+                class="flex items-center justify-center w-12 h-12 md:w-10 md:h-10 rounded-full bg-[#FF6B00] hover:brightness-110 transition shadow-lg md:shadow-none"
               >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-width="2.5"
-                  d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              title="Eliminar"
-              class="flex items-center justify-center w-10 h-10 rounded-full bg-[#B22222] hover:brightness-110 transition"
-            >
+                <svg
+                  class="w-6 h-6 md:w-5 md:h-5 text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-width="2"
+                    d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+                  />
+                  <path
+                    stroke="currentColor"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+              </a>
+              {% if compra.estado_compra != 'Cancelada' %}
+              <a
+                href="{{ url_for('compras.index') }}?cancelar={{ compra.id_compra }}"
+                title="Cancelar compra"
+                class="flex items-center justify-center w-12 h-12 md:w-10 md:h-10 rounded-full bg-[#B22222] hover:brightness-110 transition shadow-lg md:shadow-none"
+              >
+                <svg
+                  class="w-6 h-6 md:w-5 md:h-5 text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18 17.94 6M18 18 6.06 6"
+                  />
+                </svg>
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        <!-- si no hay compras -->
+        {% if compras | length == 0 %}
+        <tr>
+          <td colspan="7" class="px-6 py-8 text-center text-gray-400">
+            <div class="flex flex-col items-center gap-2">
               <svg
-                class="w-5 h-5 text-white"
+                class="w-12 h-12 text-gray-600"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -123,16 +247,741 @@
                   stroke="currentColor"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M9 15L4 10l5-5M4 10h10c2.76 0 5 2.24 5 5v4"
+                  stroke-width="1.5"
+                  d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z"
                 />
               </svg>
-            </button>
+              <p class="text-sm">No hay compras registradas</p>
+              <p class="text-xs text-gray-500">
+                Haz clic en "Nueva Compra" para registrar una
+              </p>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} {% block modals %}
+<!-- ==================== MODAL NUEVA COMPRA ==================== -->
+<div
+  id="nuevaCompraModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+    <!-- Modal content -->
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Modal header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Nueva Compra
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
+          data-modal-hide="nuevaCompraModal"
+        >
+          <svg
+            class="w-5 h-5 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18 17.94 6M18 18 6.06 6"
+            />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <form
+        action="{{ url_for('compras.nueva_compra') }}"
+        method="POST"
+        novalidate
+        id="formNuevaCompra"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="py-4 md:py-6 space-y-4">
+          <!-- Proveedor -->
+          <div class="wtforms-field">
+            {{ camposNuevos(form.id_proveedor, class="block w-full bg-[#394E6D]
+            text-white text-sm rounded-lg px-3 py-2.5 shadow-xs
+            focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none
+            cursor-pointer") }}
           </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+
+          <!-- Líneas de detalle -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <label class="text-sm font-medium text-white"
+                >Insumos de la compra</label
+              >
+              <button
+                type="button"
+                id="btnAgregarLinea"
+                class="flex items-center gap-1 text-xs text-[#FF6B00] hover:text-orange-400 transition font-semibold"
+              >
+                <svg
+                  class="w-4 h-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
+                </svg>
+                Agregar Insumo
+              </button>
+            </div>
+
+            <!-- Contenedor de líneas -->
+            <div
+              id="lineasCompra"
+              class="space-y-3 max-h-[280px] overflow-y-auto pr-1"
+            >
+              <!-- Las líneas se agregan dinámicamente con JS -->
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div
+            class="flex items-center justify-between border-t border-gray-600 pt-4"
+          >
+            <span class="text-white font-semibold text-lg">Total:</span>
+            <span id="totalCompra" class="text-[#FF6B00] font-bold text-xl"
+              >$0.00</span
+            >
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-gray-600 pt-4 md:pt-6 mt-2"
+        >
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#FF6B00] hover:brightness-110 transition focus:ring-4 focus:ring-orange-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            <svg
+              class="w-5 h-5 text-white mr-2"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+            Registrar Compra
+          </button>
+          <button
+            data-modal-hide="nuevaCompraModal"
+            type="button"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition focus:ring-4 focus:ring-red-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            <svg
+              class="w-5 h-5 text-white mr-2"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18 17.94 6M18 18 6.06 6"
+              />
+            </svg>
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
-{% endblock %}
+<!-- ==================== MODAL VER DETALLE ==================== -->
+<div
+  id="verDetalleModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white">
+          Compra #{{ detalle_compra.id_compra if detalle_compra else '' }}
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="verDetalleModal"
+        >
+          <svg
+            class="w-4 h-4"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Info de la compra -->
+      <div class="grid grid-cols-2 gap-4 py-4 text-sm">
+        <div>
+          <span class="text-gray-400">Proveedor:</span>
+          <p class="text-white font-semibold">
+            {{ detalle_compra.proveedor.nombre_empresa if detalle_compra else ''
+            }}
+          </p>
+        </div>
+        <div>
+          <span class="text-gray-400">Fecha:</span>
+          <p class="text-white font-semibold">
+            {{ detalle_compra.fecha_compra.strftime('%d/%m/%Y %H:%M') if
+            detalle_compra else '' }}
+          </p>
+        </div>
+        <div>
+          <span class="text-gray-400">Estado:</span>
+          <p>
+            {% if detalle_compra and detalle_compra.estado_compra ==
+            'Completada' %}
+            <span class="text-[#00B40C] font-semibold">Completada</span>
+            {% elif detalle_compra %}
+            <span class="text-red-500 font-semibold">Cancelada</span>
+            {% endif %}
+          </p>
+        </div>
+        <div>
+          <span class="text-gray-400">Total:</span>
+          <p class="text-[#FF6B00] font-bold text-lg">
+            ${{ "%.2f" | format(detalle_compra.total if detalle_compra else 0)
+            }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Tabla de detalles -->
+      <div class="overflow-x-auto rounded-lg border border-gray-600">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-[#394E6D] text-white text-xs">
+            <tr>
+              <th class="px-4 py-2">Insumo</th>
+              <th class="px-4 py-2">Cantidad</th>
+              <th class="px-4 py-2">Unidad</th>
+              <th class="px-4 py-2">Costo Unit.</th>
+              <th class="px-4 py-2">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if detalle_compra %} {% for det in detalle_compra.detalles %}
+            <tr class="border-t border-gray-700 text-white">
+              <td class="px-4 py-2">{{ det.insumo.nombre }}</td>
+              <td class="px-4 py-2">{{ det.cantidad_comprada }}</td>
+              <td class="px-4 py-2">{{ det.unidad_medida.abreviatura }}</td>
+              <td class="px-4 py-2">
+                ${{ "%.2f" | format(det.costo_unitario) }}
+              </td>
+              <td class="px-4 py-2 font-semibold">
+                ${{ "%.2f" | format(det.costo_subtotal) }}
+              </td>
+            </tr>
+            {% endfor %} {% else %}
+            <tr>
+              <td
+                colspan="5"
+                class="px-4 py-4 text-center text-gray-500 italic"
+              >
+                No hay detalles para mostrar
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Botón cerrar -->
+      <div class="flex justify-center mt-4">
+        <button
+          data-modal-hide="verDetalleModal"
+          type="button"
+          class="flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL CANCELAR COMPRA ==================== -->
+<div
+  id="cancelarCompraModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4"
+      >
+        <h3 class="text-lg font-medium text-white w-full text-center">
+          Cancelar Compra
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="cancelarCompraModal"
+        >
+          <svg
+            class="w-4 h-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="py-6 flex flex-col items-center text-center gap-4">
+        <!-- Warning icon -->
+        <div
+          class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center"
+        >
+          <svg
+            class="w-10 h-10 text-red-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v4m0 4h.01M5.313 20h13.374c1.505 0 2.471-1.6 1.77-2.931L13.77 4.363c-.75-1.425-2.79-1.425-3.54 0L3.543 17.069C2.842 18.4 3.808 20 5.313 20Z"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-white text-sm font-medium mb-2">
+            ¿Estás seguro de cancelar esta compra?
+          </p>
+          <div
+            class="bg-[#0B1D33] rounded-lg p-3 border border-gray-700 text-left text-sm space-y-1"
+          >
+            <p class="text-gray-400">
+              Compra:
+              <span class="text-white font-semibold"
+                >#{{ cancel_compra.id_compra if cancel_compra else '' }}</span
+              >
+            </p>
+            <p class="text-gray-400">
+              Proveedor:
+              <span class="text-white font-semibold"
+                >{{ cancel_compra.proveedor.nombre_empresa if cancel_compra else
+                '' }}</span
+              >
+            </p>
+            <p class="text-gray-400">
+              Total:
+              <span class="text-[#FF6B00] font-bold"
+                >${{ "%.2f" | format(cancel_compra.total if cancel_compra else
+                0) }}</span
+              >
+            </p>
+            <p class="text-gray-400">
+              Insumos:
+              <span class="text-white font-semibold"
+                >{{ cancel_compra.detalles | length if cancel_compra else 0
+                }}</span
+              >
+            </p>
+          </div>
+          <p class="text-red-400 text-xs mt-3">
+            Se revertirá el stock de los insumos asociados a esta compra.
+          </p>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <form action="{{ url_for('compras.cancelar_compra') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input
+          type="hidden"
+          name="id_compra"
+          value="{{ cancel_compra.id_compra if cancel_compra else '' }}"
+        />
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-gray-600 pt-4"
+        >
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition focus:ring-4 focus:ring-red-900 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            <svg
+              class="w-5 h-5 text-white mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18 17.94 6M18 18 6.06 6"
+              />
+            </svg>
+            Sí, cancelar compra
+          </button>
+          <button
+            data-modal-hide="cancelarCompraModal"
+            type="button"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition focus:ring-4 focus:ring-gray-700 shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            No, volver
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% if historial_compras %}
+<!-- ==================== MODAL HISTORIAL COMPRAS ==================== -->
+<div
+  id="historialComprasModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-4xl max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white w-full text-center">
+          Historial de Compras
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="historialComprasModal"
+        >
+          <svg
+            class="w-4 h-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabla del historial -->
+      <div class="py-4 max-h-[500px] overflow-y-auto">
+        <div class="overflow-x-auto rounded-lg border border-gray-600">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-[#394E6D] text-white text-xs sticky top-0">
+              <tr>
+                <th class="px-3 py-2"># Compra</th>
+                <th class="px-3 py-2">Fecha</th>
+                <th class="px-3 py-2">Estado</th>
+                <th class="px-3 py-2">Insumo</th>
+                <th class="px-3 py-2">Cantidad</th>
+                <th class="px-3 py-2">Unidad</th>
+                <th class="px-3 py-2">Costo U.</th>
+                <th class="px-3 py-2">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in historial_compras %}
+              <tr class="border-t border-gray-700 text-white text-xs">
+                <td class="px-3 py-2 font-semibold">{{ row.id_compra }}</td>
+                <td class="px-3 py-2">
+                  {{ row.fecha_compra.strftime('%d/%m/%Y %H:%M') if
+                  row.fecha_compra.strftime else row.fecha_compra }}
+                </td>
+                <td class="px-3 py-2">
+                  {% if row.estado_compra == 'Completada' %}
+                  <span
+                    class="bg-green-500/20 text-[#00B40C] font-semibold px-2 py-0.5 rounded-full text-xs border border-green-500/30"
+                    >Completada</span
+                  >
+                  {% else %}
+                  <span
+                    class="bg-red-500/20 text-red-500 font-semibold px-2 py-0.5 rounded-full text-xs border border-red-500/30"
+                    >Cancelada</span
+                  >
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2">{{ row.insumo }}</td>
+                <td class="px-3 py-2">{{ row.cantidad_comprada }}</td>
+                <td class="px-3 py-2">{{ row.unidad }}</td>
+                <td class="px-3 py-2">
+                  ${{ "%.2f" | format(row.costo_unitario) }}
+                </td>
+                <td class="px-3 py-2 font-semibold">
+                  ${{ "%.2f" | format(row.costo_subtotal) }}
+                </td>
+              </tr>
+              {% endfor %} {% if historial_compras | length == 0 %}
+              <tr>
+                <td
+                  colspan="8"
+                  class="px-3 py-6 text-center text-gray-400 text-sm"
+                >
+                  No hay registros en el historial
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Botón cerrar -->
+      <div class="flex justify-center border-t border-gray-600 pt-4">
+        <button
+          data-modal-hide="historialComprasModal"
+          type="button"
+          class="flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ==================== SCRIPT PARA LÍNEAS DINÁMICAS ==================== -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("lineasCompra");
+    const btnAgregar = document.getElementById("btnAgregarLinea");
+    const totalDisplay = document.getElementById("totalCompra");
+    const form = document.getElementById("formNuevaCompra");
+    let lineaCount = 0;
+
+    // Datos de insumos y unidades para los selects
+    const insumosData = [
+      {% for ins in insumos %}
+      { id: {{ ins.id_insumo }}, nombre: "{{ ins.nombre }}", costo: {{ ins.costo_unitario }}, unidad: {{ ins.id_unidad_medida }} },
+      {% endfor %}
+    ];
+
+    const unidadesData = [
+      {% for um in unidades_medida %}
+      { id: {{ um.id_unidad_medida }}, nombre: "{{ um.nombre }} ({{ um.abreviatura }})" },
+      {% endfor %}
+    ];
+
+    function crearLinea() {
+      lineaCount++;
+      const div = document.createElement("div");
+      div.className = "bg-[#0B1D33] rounded-lg p-3 border border-gray-700 space-y-2";
+      div.id = `linea-${lineaCount}`;
+
+      let optionsInsumo = '<option value="">-- Insumo --</option>';
+      insumosData.forEach(function (ins) {
+        optionsInsumo += `<option value="${ins.id}" data-costo="${ins.costo}" data-unidad="${ins.unidad}">${ins.nombre}</option>`;
+      });
+
+      let optionsUnidad = '<option value="">-- Unidad --</option>';
+      unidadesData.forEach(function (um) {
+        optionsUnidad += `<option value="${um.id}">${um.nombre}</option>`;
+      });
+
+      div.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-500 font-mono">#${lineaCount}</span>
+          <button type="button" class="btn-eliminar-linea text-red-400 hover:text-red-300 transition" title="Eliminar línea">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+            </svg>
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-2 sm:col-span-1">
+            <label class="block mb-1 text-xs text-gray-400">Insumo</label>
+            <select name="insumo_id[]" class="select-insumo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required>
+              ${optionsInsumo}
+            </select>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label class="block mb-1 text-xs text-gray-400">Unidad de compra</label>
+            <select name="unidad_id[]" class="select-unidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required>
+              ${optionsUnidad}
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <div>
+            <label class="block mb-1 text-xs text-gray-400">Cantidad</label>
+            <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
+          </div>
+          <div>
+            <label class="block mb-1 text-xs text-gray-400">Costo U.</label>
+            <input type="number" name="costo_unit[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
+          </div>
+          <div>
+            <label class="block mb-1 text-xs text-gray-400">Caducidad</label>
+            <input type="date" name="caducidad[]" class="input-caducidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
+          </div>
+          <div>
+            <label class="block mb-1 text-xs text-gray-400">Subtotal</label>
+            <span class="block text-[#FF6B00] text-xs font-bold py-2 subtotal-display">$0.00</span>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      // Auto-fill costo y unidad al seleccionar insumo
+      const selectInsumo = div.querySelector(".select-insumo");
+      const selectUnidad = div.querySelector(".select-unidad");
+      const inputCosto = div.querySelector(".input-costo");
+
+      selectInsumo.addEventListener("change", function () {
+        const selected = this.options[this.selectedIndex];
+        if (selected.dataset.costo) {
+          inputCosto.value = selected.dataset.costo;
+          calcularSubtotal(div);
+        }
+        // Auto-seleccionar la unidad base del insumo
+        if (selected.dataset.unidad) {
+          selectUnidad.value = selected.dataset.unidad;
+        }
+      });
+
+      // Calcular subtotal al cambiar cantidad o costo
+      div.querySelector(".input-cantidad").addEventListener("input", () => calcularSubtotal(div));
+      inputCosto.addEventListener("input", () => calcularSubtotal(div));
+
+      // Botón eliminar línea
+      div.querySelector(".btn-eliminar-linea").addEventListener("click", function () {
+        div.remove();
+        calcularTotal();
+      });
+    }
+
+    //calcular subtotal de cada linea
+    function calcularSubtotal(linea) {
+      const cantidad = parseFloat(linea.querySelector(".input-cantidad").value) || 0;
+      const costo = parseFloat(linea.querySelector(".input-costo").value) || 0;
+      const subtotal = cantidad * costo;
+      linea.querySelector(".subtotal-display").textContent = `$${subtotal.toFixed(2)}`;
+      calcularTotal();
+    }
+
+    //calcular total de todas las lineas
+    function calcularTotal() {
+      let total = 0;
+      document.querySelectorAll(".subtotal-display").forEach(function (el) {
+        total += parseFloat(el.textContent.replace("$", "")) || 0;
+      });
+      totalDisplay.textContent = `$${total.toFixed(2)}`;
+    }
+
+    btnAgregar.addEventListener("click", crearLinea);
+
+    // Agregar primera línea automáticamente
+    crearLinea();
+  });
+</script>
+
+<!-- Auto-open modal logic -->
+{% if show_modal or historial_compras %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const modalId = "{{ show_modal if show_modal else 'historialComprasModal' }}";
+    const $modalElement = document.getElementById(modalId);
+    
+    if ($modalElement) {
+      setTimeout(() => {
+        const modal = new Modal($modalElement);
+        modal.show();
+
+        // Forzamos que todos los botones de cerrar dentro de este modal funcionen
+        const closeButtons = $modalElement.querySelectorAll(`[data-modal-hide="${modalId}"]`);
+        closeButtons.forEach(btn => {
+          btn.addEventListener('click', () => modal.hide());
+        });
+      }, 200);
+    }
+  });
+</script>
+{% endif %} {% endblock %}

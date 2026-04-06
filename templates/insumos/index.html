@@ -227,7 +227,7 @@ camposNuevos %} {% block content %}
   id="nuevoInsumo"
   tabindex="-1"
   aria-hidden="true"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
     <!-- Modal content -->
@@ -296,7 +296,8 @@ camposNuevos %} {% block content %}
             {{ camposNuevos(create_form.porcentaje_merma, type="number",
             step="any", class_="bg-[#394E6D] text-white text-sm rounded-base
             focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
-            shadow-xs placeholder:text-gray-300", placeholder= "Porcentaje de merma") }}
+            shadow-xs placeholder:text-gray-300", placeholder= "Porcentaje de
+            merma") }}
           </div>
         </div>
         <div
@@ -367,7 +368,7 @@ camposNuevos %} {% block content %}
   id="editInsumoModal"
   tabindex="-1"
   aria-hidden="true"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
     <!-- Modal content -->
@@ -481,7 +482,7 @@ camposNuevos %} {% block content %}
   id="historialMovimientosModal"
   tabindex="-1"
   aria-hidden="true"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
   <div class="relative p-4 w-full max-w-2xl max-h-full">
     <!-- Modal content -->
@@ -539,7 +540,7 @@ camposNuevos %} {% block content %}
   id="eliminarInsumoModal"
   tabindex="-1"
   aria-hidden="true"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
     <!-- Modal content -->
@@ -652,18 +653,22 @@ camposNuevos %} {% block content %}
 <!-- **********************************************************************  -->
 
 {% if show_modal %}
-<button
-  id="autoOpenModalBtn"
-  data-modal-target="{{ show_modal }}"
-  data-modal-toggle="{{ show_modal }}"
-  class="btn-animate-modal hidden"
-></button>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(() => {
-      const btn = document.getElementById("autoOpenModalBtn");
-      if (btn) btn.click();
-    }, 100);
+    const modalId = "{{ show_modal }}";
+    const $modalElement = document.getElementById(modalId);
+    if ($modalElement) {
+        setTimeout(() => {
+            const modal = new Modal($modalElement);
+            modal.show();
+
+            // Forzamos que todos los botones de cerrar dentro de este modal funcionen
+            const closeButtons = $modalElement.querySelectorAll(`[data-modal-hide="${modalId}"]`);
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => modal.hide());
+            });
+        }, 200);
+    }
   });
 </script>
 {% endif %} {% endblock %}
