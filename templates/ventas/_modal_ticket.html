@@ -32,12 +32,10 @@
 
 <script>
     window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const imprimirId = urlParams.get('imprimir_id');
-        
-        if (imprimirId) {
-            abrirModalTicket(imprimirId);
-        }
+        // Usamos Jinja para inyectar el ID directamente en el JS si existe la venta
+        {% if ticket_a_imprimir %}
+            abrirModalTicket({{ ticket_a_imprimir }});
+        {% endif %}
     });
 
     function abrirModalTicket(id) {
@@ -49,7 +47,10 @@
 
     function cerrarModalTicket() {
         document.getElementById('modalTicket').classList.add('hidden');
-        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Ya no es necesario limpiar la URL con history.replaceState 
+        // porque la URL ya viene limpia desde el servidor.
+        iframe.src = ""; // Opcional: Limpiar el iframe por seguridad visual
     }
 
     function imprimirTicket() {

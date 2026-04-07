@@ -1,4 +1,4 @@
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, session
 from . import venta
 from sqlalchemy.exc import OperationalError, DBAPIError
 from models import db
@@ -15,7 +15,7 @@ from audit_logger import audit
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
 @roles_required('Cajero')
-@limiter.limit('8 per minute') # 8 request por minuto
+@limiter.limit('20 per minute') # 8 request por minuto
 def ventas():
     create_form = forms.VentasForm(request.form)
 
@@ -138,7 +138,11 @@ def ventas():
                     else:
                         flash('Cobro con tarjeta procesado correctamente.', 'success')
 
-                    return redirect(url_for('venta.ventas', imprimir_id = id_venta))
+                    # Guardamos el id temporalmente
+                    session['ticket_a_imprimir'] = id_venta
+
+                    # Redirigimos a la pagina de ventas
+                    return redirect(url_for('venta.ventas'))
 
         except (OperationalError, DBAPIError) as e:
             db.session.rollback()
@@ -201,8 +205,12 @@ def ventas():
             'total': 0.00,
             'total_piezas': 0
         }
+    
+    # Extraemos el id de la sesion del ticket de la venta y al final queremos que se borre
+    # Automaticamente
+    ticket_a_imprimir = session.pop('ticket_a_imprimir', None)
 
-    return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen)
+    return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen, ticket_a_imprimir = ticket_a_imprimir)
 
 @venta.route('/ticket/<int:id_venta>')
 @login_required
