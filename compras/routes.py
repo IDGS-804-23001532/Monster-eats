@@ -6,9 +6,13 @@ import json
 from flask_login import current_user
 from forms import CompraForm
 from audit_logger import audit
+from flask_security import login_required, current_user
+from flask_security.decorators import roles_required, roles_accepted
 
 
 @compras.route('/compras')
+@login_required
+@roles_accepted('Gerente', 'gerente')
 def index():
     # Busqueda por proveedor
     search_query = request.args.get('search_query', '')

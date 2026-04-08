@@ -6,8 +6,12 @@ from forms import MermaForm
 from . import inventario
 import datetime
 from audit_logger import audit
+from flask_security import login_required, current_user
+from flask_security.decorators import roles_required, roles_accepted
 
 @inventario.route('/inventario')
+@login_required
+@roles_accepted('Gerente', 'gerente')
 def index():
     hoy = datetime.date.today()
     

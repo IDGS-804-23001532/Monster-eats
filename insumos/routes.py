@@ -4,9 +4,12 @@ from forms import CreateInsumoForm, EditInsumoForm
 from . import insumos
 from flask_wtf.csrf import CSRFProtect
 from audit_logger import audit
+from flask_security import login_required, current_user
+from flask_security.decorators import roles_required, roles_accepted
 
 
-
+@login_required
+@roles_accepted('Gerente', 'gerente')
 @insumos.route('/insumos')
 def index():
     search_query = request.args.get('search_query', '')
