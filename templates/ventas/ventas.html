@@ -1,204 +1,279 @@
-{% extends 'layout.html' %}
-{% import 'macros/_macros.html' as macros %}
+{% extends 'layout.html' %} {% import 'macros/_macros.html' as macros %} {%
+block content %}
 
-{% block content %}
+<div
+  id="ventas-page"
+  data-id-tarjeta="{{ id_tarjeta }}"
+  data-id-efectivo="{{ id_efectivo }}"
+  class="w-full min-h-[calc(100vh-6rem)] bg-slate-950 p-4 md:p-6"
+>
+  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 h-full">
+    <!-- Catálogo -->
+    <section
+      class="xl:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl"
+    >
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"
+      >
+        <div>
+          <h2
+            class="text-2xl md:text-3xl font-extrabold text-white tracking-tight"
+          >
+            Ventas
+          </h2>
+          <p class="text-slate-400 text-sm">
+            Selecciona productos para agregarlos al carrito
+          </p>
+        </div>
+      </div>
 
-<div id="ventas-page"
-     data-id-tarjeta="{{ id_tarjeta }}"
-     data-id-efectivo="{{ id_efectivo }}"
-     class="w-full min-h-[calc(100vh-6rem)] bg-slate-950 p-4 md:p-6">
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 h-full">
+      <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-5">
+        {% for producto in productos %}
+        <article
+          class="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-200"
+        >
+          <div class="aspect-[4/3] bg-slate-700 overflow-hidden">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+              alt="{{ producto.nombre }}"
+              class="w-full h-full object-contain p-6"
+            />
+          </div>
 
-        <!-- Catálogo -->
-        <section class="xl:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                        Ventas
-                    </h2>
-                    <p class="text-slate-400 text-sm">
-                        Selecciona productos para agregarlos al carrito
-                    </p>
-                </div>
+          <div class="p-4">
+            <div class="mb-2 flex flex-wrap gap-2">
+              <span
+                class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-medium text-orange-400 border border-orange-500/20"
+              >
+                {{ producto.categoria }}
+              </span>
+
+              <span
+                class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border {% if producto.tipo_item == 'Combo' %} bg-emerald-500/15 text-emerald-400 border-emerald-500/20 {% else %} bg-slate-700 text-slate-300 border-slate-600 {% endif %}"
+              >
+                {{ producto.tipo_item }}
+              </span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {% for producto in productos %}
-                <article class="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-200">
-                    <div class="aspect-[4/3] bg-slate-700 overflow-hidden">
-                        <img
-                            src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
-                            alt="{{ producto.nombre }}"
-                            class="w-full h-full object-contain p-6"
-                        >
-                    </div>
+            <h3 class="text-white font-bold text-lg leading-tight">
+              {{ producto.nombre }}
+            </h3>
 
-                    <div class="p-4">
-                        <div class="mb-2 flex flex-wrap gap-2">
-                            <span class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-medium text-orange-400 border border-orange-500/20">
-                                {{ producto.categoria }}
-                            </span>
+            <div class="flex items-center justify-between mt-4 gap-3">
+              <span class="text-orange-400 font-extrabold text-lg">
+                ${{ '%.2f'|format(producto.precio_venta) }}
+              </span>
 
-                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border
-                                {% if producto.tipo_item == 'Combo' %}
-                                    bg-emerald-500/15 text-emerald-400 border-emerald-500/20
-                                {% else %}
-                                    bg-slate-700 text-slate-300 border-slate-600
-                                {% endif %}">
-                                {{ producto.tipo_item }}
-                            </span>
-                        </div>
-
-                        <h3 class="text-white font-bold text-lg leading-tight">
-                            {{ producto.nombre }}
-                        </h3>
-
-                        <div class="flex items-center justify-between mt-4 gap-3">
-                            <span class="text-orange-400 font-extrabold text-lg">
-                                ${{ '%.2f'|format(producto.precio_venta) }}
-                            </span>
-
-                            <form method="POST">
-                                {{ form.csrf_token }}
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="accion" value="agregar">
-                                <input type="hidden" name="id_producto" value="{{ producto.id_producto }}">
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 hover:border-orange-600 transition"
-                                >
-                                    Agregar
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </article>
-                {% endfor %}
+              <form method="POST">
+                {{ form.csrf_token }}
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <input type="hidden" name="accion" value="agregar" />
+                <input
+                  type="hidden"
+                  name="id_producto"
+                  value="{{ producto.id_producto }}"
+                />
+                <button
+                  type="submit"
+                  class="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 hover:border-orange-600 transition"
+                >
+                  Agregar
+                </button>
+              </form>
             </div>
-        </section>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
 
-        <!-- Carrito -->
-        <aside class="xl:col-span-1">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl h-full flex flex-col">
-                
-                <div class="mb-5">
-                    <h3 class="text-xl font-extrabold text-white">
-                        Tu carrito <span class="text-orange-400">({{ resumen.total_piezas }})</span>
-                    </h3>
-                </div>
+    <!-- Carrito -->
+    <aside class="xl:col-span-1">
+      <div
+        class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl h-full flex flex-col"
+      >
+        <div class="mb-5">
+          <h3 class="text-xl font-extrabold text-white">
+            Tu carrito
+            <span class="text-orange-400">({{ resumen.total_piezas }})</span>
+          </h3>
+        </div>
 
-                <div class="space-y-4 flex-1 overflow-y-auto pr-1">
-                    {% if carrito %}
-                        {% for item in carrito %}
-                        <div class="rounded-2xl bg-slate-800 border border-slate-700 p-4">
-                            <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <h4 class="text-white font-semibold text-sm">{{ item.nombre }}</h4>
-                                    <p class="text-slate-400 text-xs mt-1">{{ item.tipo_item }}</p>
-                                    <p class="text-slate-400 text-xs mt-1">x{{ item.cantidad }}</p>
-                                    <p class="text-white font-bold text-sm mt-1">
-                                        ${{ '%.2f'|format(item.total_linea) }}
-                                    </p>
-                                </div>
+        <div class="space-y-4 flex-1 overflow-y-auto pr-1">
+          {% if carrito %} {% for item in carrito %}
+          <div class="rounded-2xl bg-slate-800 border border-slate-700 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h4 class="text-white font-semibold text-sm">
+                  {{ item.nombre }}
+                </h4>
+                <p class="text-slate-400 text-xs mt-1">{{ item.tipo_item }}</p>
+                <p class="text-slate-400 text-xs mt-1">x{{ item.cantidad }}</p>
+                <p class="text-white font-bold text-sm mt-1">
+                  ${{ '%.2f'|format(item.total_linea) }}
+                </p>
+              </div>
 
-                                <div class="flex gap-2">
-                                    <form method="POST">
-                                        {{ form.csrf_token }}
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="accion" value="quitar_unidad">
-                                        <input type="hidden" name="id_producto" value="{{ item.id_producto }}">
-                                        <button type="submit" class="px-2 py-1 rounded-lg bg-slate-700 text-white text-xs">-</button>
-                                    </form>
-
-                                    <form method="POST">
-                                        {{ form.csrf_token }}
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="accion" value="agregar">
-                                        <input type="hidden" name="id_producto" value="{{ item.id_producto }}">
-                                        <button type="submit" class="px-2 py-1 rounded-lg bg-orange-500 text-white text-xs">+</button>
-                                    </form>
-
-                                    <form method="POST">
-                                        {{ form.csrf_token }}
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <input type="hidden" name="accion" value="eliminar_producto">
-                                        <input type="hidden" name="id_producto" value="{{ item.id_producto }}">
-                                        <button type="submit" class="px-2 py-1 rounded-lg bg-red-500 text-white text-xs">Quitar</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="rounded-2xl bg-slate-800 border border-slate-700 p-4 text-slate-400 text-sm">
-                            No hay productos en el carrito
-                        </div>
-                    {% endif %}
-                </div>
-
-                <form method="POST" class="border-t border-slate-700 pt-5 mt-5 space-y-4" novalidate>
-                    {{ form.csrf_token }}
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="accion" value="completar">
-
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-300 text-sm">Subtotal</span>
-                        <span class="text-white font-semibold">${{ '%.2f'|format(resumen.subtotal) }}</span>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-300 text-sm">Descuento</span>
-                        <span class="text-emerald-400 font-semibold">${{ '%.2f'|format(resumen.descuento) }}</span>
-                    </div>
-
-                    <div class="flex items-center justify-between text-lg">
-                        <span class="text-white font-extrabold">Total</span>
-                        <span class="text-orange-400 font-extrabold">${{ '%.2f'|format(resumen.total) }}</span>
-                    </div>
-
-                    <div>
-                        {{ macros.camposNuevos(
-                            form.metodo_pago,
-                            id="metodo_pago",
-                            class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3"
-                        ) }}
-                    </div>
-
-                    <div id="contenedor_numero_cuenta"
-                         class="{% if form.metodo_pago.data|string != id_tarjeta|string %}hidden{% endif %}">
-                        {{ macros.camposNuevos(
-                            form.numero_cuenta,
-                            id="numero_cuenta",
-                            class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3"
-                        ) }}
-                    </div>
-
-                    <div id="contenedor_monto_recibido" class="{%if form.metodo_pago.data|string != id_efectivo|string %}hidden{% endif %}">
-                        {{ macros.camposNuevos( form.monto_recibido, id="monto_recibido", class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3" ) }}
-                    </div>
-
-                    <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-3">
-                        <p class="text-emerald-400 text-xs font-medium">
-                            Venta lista para procesarse correctamente.
-                        </p>
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-500/30 font-bold rounded-2xl text-sm px-5 py-3 text-center transition"
-                    >
-                        Completar venta
-                    </button>
+              <div class="flex gap-2">
+                <form method="POST">
+                  {{ form.csrf_token }}
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <input type="hidden" name="accion" value="quitar_unidad" />
+                  <input
+                    type="hidden"
+                    name="id_producto"
+                    value="{{ item.id_producto }}"
+                  />
+                  <button
+                    type="submit"
+                    class="px-2 py-1 rounded-lg bg-slate-700 text-white text-xs"
+                  >
+                    -
+                  </button>
                 </form>
 
-            </div>
-        </aside>
+                <form method="POST">
+                  {{ form.csrf_token }}
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <input type="hidden" name="accion" value="agregar" />
+                  <input
+                    type="hidden"
+                    name="id_producto"
+                    value="{{ item.id_producto }}"
+                  />
+                  <button
+                    type="submit"
+                    class="px-2 py-1 rounded-lg bg-orange-500 text-white text-xs"
+                  >
+                    +
+                  </button>
+                </form>
 
-    </div>
+                <form method="POST">
+                  {{ form.csrf_token }}
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <input
+                    type="hidden"
+                    name="accion"
+                    value="eliminar_producto"
+                  />
+                  <input
+                    type="hidden"
+                    name="id_producto"
+                    value="{{ item.id_producto }}"
+                  />
+                  <button
+                    type="submit"
+                    class="px-2 py-1 rounded-lg bg-red-500 text-white text-xs"
+                  >
+                    Quitar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div
+            class="rounded-2xl bg-slate-800 border border-slate-700 p-4 text-slate-400 text-sm"
+          >
+            No hay productos en el carrito
+          </div>
+          {% endif %}
+        </div>
+
+        <form
+          method="POST"
+          class="border-t border-slate-700 pt-5 mt-5 space-y-4"
+          novalidate
+        >
+          {{ form.csrf_token }}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" name="accion" value="completar" />
+
+          <div class="flex items-center justify-between">
+            <span class="text-slate-300 text-sm">Subtotal</span>
+            <span class="text-white font-semibold"
+              >${{ '%.2f'|format(resumen.subtotal) }}</span
+            >
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-slate-300 text-sm">Descuento</span>
+            <span class="text-emerald-400 font-semibold"
+              >${{ '%.2f'|format(resumen.descuento) }}</span
+            >
+          </div>
+
+          <div class="flex items-center justify-between text-lg">
+            <span class="text-white font-extrabold">Total</span>
+            <span class="text-orange-400 font-extrabold"
+              >${{ '%.2f'|format(resumen.total) }}</span
+            >
+          </div>
+
+          <div>
+            {{ macros.camposNuevos( form.metodo_pago, id="metodo_pago",
+            class="bg-slate-800 border border-slate-700 text-white text-sm
+            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
+            w-full p-3" ) }}
+          </div>
+
+          <div
+            id="contenedor_numero_cuenta"
+            class="{% if form.metodo_pago.data|string != id_tarjeta|string %}hidden{% endif %}"
+          >
+            {{ macros.camposNuevos( form.numero_cuenta, id="numero_cuenta",
+            class="bg-slate-800 border border-slate-700 text-white text-sm
+            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
+            w-full p-3" ) }}
+          </div>
+
+          <div
+            id="contenedor_monto_recibido"
+            class="{%if form.metodo_pago.data|string != id_efectivo|string %}hidden{% endif %}"
+          >
+            {{ macros.camposNuevos( form.monto_recibido, id="monto_recibido",
+            class="bg-slate-800 border border-slate-700 text-white text-sm
+            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
+            w-full p-3" ) }}
+          </div>
+
+          <div
+            class="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-3"
+          >
+            <p class="text-emerald-400 text-xs font-medium">
+              Venta lista para procesarse correctamente.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-500/30 font-bold rounded-2xl text-sm px-5 py-3 text-center transition"
+          >
+            Completar venta
+          </button>
+        </form>
+      </div>
+    </aside>
+  </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/ventas.js') }}"></script>
 
-{% include 'ventas/_modal_ticket.html' %}
-
-{% endblock %}
+{% include 'ventas/_modal_ticket.html' %} {% endblock %}

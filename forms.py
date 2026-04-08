@@ -211,7 +211,7 @@ class ProveedorForm(Form):
     categoria_proveedor = SelectField('Categoria del proveedor', [
         validators.DataRequired(message= 'Debes seleccionar una categoría')
     ], coerce = int)
-
+    
 class VentasForm(Form):
     metodo_pago = SelectField('Método de pago', [
         validators.DataRequired(message='Debes seleccionar un método de pago')
@@ -219,8 +219,10 @@ class VentasForm(Form):
 
     numero_cuenta = StringField(
         'Número de cuenta', [
-            validators.Optional()
-        ])
+            validators.Optional(),
+            validators.Length(min=16, max=20, message='El Num. cuenta debe tener entre 16 a 20 digitos'),
+            validators.Regexp(regex=r'^\d+$', message='El Num. cuenta solo debe contener números, sin espacios ni letra')
+        ], render_kw={"minlenght": 16, "maxlenght":20, "pattern":"[0-9]*", "inputmode":"numeric"})
 
     pin = IntegerField(
         'PIN tarjeta', [
