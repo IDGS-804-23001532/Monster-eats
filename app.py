@@ -70,16 +70,10 @@ app.register_blueprint(venta)
 app.register_blueprint(inventario_produccion)
 app.register_blueprint(solicitud_produccion)
 app.register_blueprint(costo_utilidad)
-<<<<<<< Updated upstream
-app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
-app.register_blueprint(recetas_bp, url_prefix='/recetas')
-app.register_blueprint(produccion_bp, url_prefix='/produccion')
-=======
 app.register_blueprint(tablero_kds)
 app.register_blueprint(recetas, url_prefix='/recetas')
 app.register_blueprint(produccion, url_prefix='/produccion')
 app.register_blueprint(usuarios, url_prefix='/usuarios')
->>>>>>> Stashed changes
 
 
 @app.route("/")

@@ -19,23 +19,11 @@ def principal():
         query = text("SELECT * FROM vw_kds_cocina")
         resultados = db.session.execute(query).mappings().fetchall()
         comandas = [dict(row) for row in resultados]
-        
-        # ==========================================
-        # ZONA DE DEBUGGING (IMPRIMIR EN CONSOLA)
-        # ==========================================
-        print("\n" + "="*40)
-        print("🔍 MODO DEBUG: TABLERO KDS")
-        print(f"Cantidad de pedidos encontrados: {len(comandas)}")
-        if len(comandas) > 0:
-            print(f"Columnas reales de tu Base de Datos: {list(comandas[0].keys())}")
-            print(f"Datos del primer pedido: {comandas[0]}")
-        print("="*40 + "\n")
-        # ==========================================
 
         return render_template('tablero_kds/principal.html', comandas=comandas)
     
     except Exception as e:
-        print("\n❌ ERROR GRAVE EN EL KDS:")
+        print("\n ERROR GRAVE EN EL KDS:")
         traceback.print_exc()  # <--- ESTO IMPRIME LA LÍNEA EXACTA DEL ERROR
         flash(f'Error técnico: {str(e)}', 'error')
         return redirect(url_for('dashboard.index'))
