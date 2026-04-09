@@ -1,0 +1,128 @@
+<div
+  id="modalTicket"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
+>
+  <div
+    class="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh] overflow-hidden transform transition-all scale-100"
+  >
+    <div
+      class="flex justify-between items-center p-5 border-b border-gray-800 bg-gray-900/50"
+    >
+      <h3
+        class="text-xl font-black text-white uppercase tracking-wider flex items-center gap-3"
+      >
+        <span class="text-2xl">🎟️</span> Ticket de Venta
+      </h3>
+      <button
+        onclick="cerrarModalTicket()"
+        class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-full hover:bg-gray-800"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <div
+      class="flex-grow p-4 sm:p-6 bg-gray-800 overflow-y-auto flex justify-center custom-scrollbar"
+    >
+      <div
+        class="w-full max-w-[85mm] min-h-[400px] bg-white rounded shadow-md overflow-hidden border border-gray-300"
+      >
+        <iframe
+          id="frameTicket"
+          src=""
+          class="w-full h-full min-h-[80vh] border-0 bg-white"
+        ></iframe>
+      </div>
+    </div>
+
+    <div
+      class="p-5 border-t border-gray-800 bg-gray-900 flex gap-3 sm:flex-row flex-col"
+    >
+      <button
+        onclick="imprimirTicket()"
+        class="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white py-3.5 rounded-xl font-bold text-lg shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transform transition-all duration-200 hover:-translate-y-1 flex justify-center items-center gap-2 uppercase tracking-wide"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+          ></path>
+        </svg>
+        Imprimir
+      </button>
+
+      <button
+        onclick="cerrarModalTicket()"
+        class="sm:w-1/3 w-full bg-gray-800 text-gray-300 border border-gray-700 py-3.5 rounded-xl hover:bg-gray-700 hover:text-white font-bold uppercase tracking-wide transition-colors duration-200"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+      // Usamos Jinja para inyectar el ID directamente en el JS si existe la venta
+      {% if ticket_a_imprimir %}
+          abrirModalTicket({{ ticket_a_imprimir }});
+      {% endif %}
+  });
+
+  function abrirModalTicket(id) {
+      const modal = document.getElementById('modalTicket');
+      const iframe = document.getElementById('frameTicket');
+      iframe.src = `/ticket/${id}`;
+      modal.classList.remove('hidden');
+  }
+
+  function cerrarModalTicket() {
+      document.getElementById('modalTicket').classList.add('hidden');
+
+      // Ya no es necesario limpiar la URL con history.replaceState
+      // porque la URL ya viene limpia desde el servidor.
+      iframe.src = ""; // Opcional: Limpiar el iframe por seguridad visual
+  }
+
+  function imprimirTicket() {
+      const iframe = document.getElementById('frameTicket');
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+  }
+</script>
+
+<style>
+  /* Estilo para que el scrollbar del modal no se vea feo en Windows */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+  }
+</style>

@@ -1,7 +1,8 @@
 # recetas/routes.py
-
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import db, Producto, Insumo, UnidadMedida
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from models import db, Producto, Insumo, UnidadMedida, CategoriaProducto
 from sqlalchemy import text
 import logging
 from . import recetas_bp
@@ -24,6 +25,53 @@ def index():
         flash('Error al cargar las recetas', 'danger')
         return render_template('recetas/index.html', recetas=[])
 
+@recetas_bp.route('/crear', methods=['GET', 'POST'])
+def crear():
+    form = forms.ProductoForm()
+    # Llenamos el select de categorías dinámicamente
+    categorias = CategoriaProducto.query.all()
+    form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in categorias]
+
+    if form.validate_on_submit():
+        try:
+            nombre_imagen = 'default_product.png'
+            
+            # Manejo de la imagen
+            if form.imagen.data:
+                file = form.imagen.data
+                filename = secure_filename(f"{form.nombre.data}_{file.filename}")
+                # Ruta: static/img/productos/
+                upload_path = os.path.join(current_app.root_path, 'static', 'img', 'productos')
+                
+                # Crear carpeta si no existe
+                if not os.path.exists(upload_path):
+                    os.makedirs(upload_path)
+                
+                file.save(os.path.join(upload_path, filename))
+                nombre_imagen = filename
+
+            # Crear el objeto Producto
+            nuevo_producto = Producto(
+                nombre=form.nombre.data,
+                precio_venta=form.precio_venta.data,
+                id_categoria=form.id_categoria.data,
+                imagen=nombre_imagen,
+                activo=True
+            )
+            
+            db.session.add(nuevo_producto)
+            db.session.commit()
+
+            flash('Producto creado. Ahora añade los ingredientes de la receta.', 'success')
+            # Redireccionamos al detalle que ya tienes para que agregue insumos
+            return redirect(url_for('recetas.detalle', id=nuevo_producto.id_producto))
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error al crear producto: {str(e)}")
+            flash('Error al guardar el producto', 'danger')
+
+    return render_template('recetas/crear.html', form=form)
 
 @recetas_bp.route('/detalle/<int:id>')
 def detalle(id):

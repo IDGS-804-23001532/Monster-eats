@@ -3,9 +3,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
 import forms
 from . import auth
+from audit_logger import audit
 from sanitizador import Sanitizador
 from models import Usuario, Persona, db
-from flask_security import login_required
+from flask_security import login_required, current_user
 from flask_security.utils import login_user, logout_user
 from datetime import datetime, timedelta
 import uuid
@@ -35,6 +36,16 @@ def login():
                         tiempo_restante = usuario.bloqueado_hasta - datetime.now()
                         minutos = int(tiempo_restante.total_seconds() // 60)
                         logging.warning(f'Intento de inicio de sesion bloqueada del {email}')
+
+                        audit.log_action(
+                            module_name="logs_auth",
+                            action="Intento de inicio de sesión en cuenta bloqueada",
+                            details={
+                                "email_intentando": email, "minutos_restantes": minutos
+                            },
+                            level="WARNING"
+                        )
+
                         flash(f'Tu cuenta ha sido bloqueada por {minutos} minutos, intente despues', 'error')
                         return redirect(url_for('auth.login'))
                     else:
@@ -51,9 +62,29 @@ def login():
                         usuario.bloqueado_hasta = datetime.now() + timedelta(minutes = 30)
                         usuario.intentos_fallidos = 0
                         logging.warning(f'Se bloqueo la cuenta temporalmente a {email} por 30 minutos')
+
+                        audit.log_action(
+                            module_name="logs_auth",
+                            action="Cuenta bloqueada temporalmente por intentos fallidos",
+                            details={
+                                "email_afectado": email, "limite_intentos": 5, "minutos_bloqueo": 30
+                            },
+                            level="WARNING"
+                        )
+
                         flash(f"Por seguridad, se bloqueo tu cuenta temporalmente, espera 30 minutos", 'error')
                     else :
                         restantes = 5 - usuario.intentos_fallidos
+
+                        audit.log_action(
+                            module_name="logs_auth",
+                            action="Intento fallido de inicio de sesión",
+                            details={
+                                "email_intentando": email, "intentos_restantes": restantes
+                            },
+                            level="WARNING"
+                        )
+
                         logging.warning(f'Intento de inicio sesión fallido por {email}, intentos: {restantes}')
                         flash(f'Contraseña incorrecta. Te quedan {restantes} intentos', 'error')
 
@@ -65,14 +96,31 @@ def login():
                 usuario.intentos_fallidos = 0
                 db.session.commit()
                 logging.info(f'Inicio de sesion exisoto de {email}')
+
+                audit.log_action(
+                    module_name="logs_auth",
+                    action="Inicio de sesión exitoso",
+                    details={"email": email},
+                    level="INFO"
+                )
+
                 login_user(usuario, remember = remember)
                 return redirect(url_for('index'))
             else:
                 logging.warning(f'Intento de inicio de sesión sin datos sin coincidir {email}')
+
+                audit.log_action(
+                    module_name="logs_auth",
+                    action="Intento de inicio de sesión de usuario inexistente",
+                    details={"email_intentado": email},
+                    level="WARNING"
+                )
+
                 flash('El correo y/o contraseña son incorrectos', 'error')
                 return redirect(url_for('auth.login'))
     except Exception as error:
         logging.warning(f'Error al inicio de sesion del usuario {email}: {str(error)}')
+        audit.log_action(module_name="logs_auth", action="Error crítico en login", details={"error": str(error)}, level="ERROR")
     return render_template("auth/login.html", form=create_form)
 
 @auth.route("/register", methods=['GET', 'POST'])
@@ -104,6 +152,14 @@ def register():
             # Comprobamos si existe el correo, en caso de que si confudimos al atacante
             if usuario:
                 logging.warning('f"Intento de registro con correo existente{email}')
+
+                audit.log_action(
+                    module_name="logs_auth",
+                    action="Intento de registro con correo existente",
+                    details={"email_intentado": email},
+                    level="WARNING"
+                )
+
                 flash('Si tus datos son correctos, tu cuenta ha sido creada', 'success')
                 return redirect(url_for('auth.login'))
             
@@ -133,6 +189,13 @@ def register():
             db.session.commit()
 
             logging.info(f'Nuevo cliente registrado{email}')
+
+            audit.log_action(
+                module_name="logs_auth",
+                action="Registro de usuario exitoso",
+                details={"email_nuevo_usuario": email, "id_persona": nueva_persona.id_persona},
+                level="INFO"
+            )
 
             # Mensaje real de exito :3
             flash('Cuenta creada exitosamente', 'success')
@@ -189,10 +252,140 @@ def crear_cajero_demo():
     except Exception as error:
         db.session.rollback()
         flash(f"No se pudo crear el usuario cajero: {str(error)}", "error")
+        audit.log_action(module_name="logs_auth", action="Error crítico en registro", details={"error": str(error)}, level="ERROR")
         return redirect(url_for("index"))
+
+@auth.route("/gerente-full")
+def gerente_full():
+    try:
+        import uuid
+        from werkzeug.security import generate_password_hash
+        from models import Usuario, Persona, Rol, db
+        from app import user_datastore
+
+        email = "gerente@monstereats.com"
+        password_plana = "Gerente123*"
+
+        # 1. Buscamos o creamos el usuario
+        usuario = Usuario.query.filter_by(email=email).first()
+        
+        if not usuario:
+            nueva_persona = Persona(
+                nombre="SUPER",
+                apellido_pa="GERENTE",
+                apellido_ma="SISTEMA",
+                telefono="3220001111"
+            )
+            db.session.add(nueva_persona)
+            db.session.flush()
+
+            usuario = user_datastore.create_user(
+                id_persona=nueva_persona.id_persona,
+                email=email,
+                password=generate_password_hash(password_plana),
+                active=True,
+                fs_uniquifier=uuid.uuid4().hex,
+                intentos_fallidos=0,
+                bloqueado_hasta=None
+            )
+        else:
+            usuario.active = True
+            usuario.password = generate_password_hash(password_plana)
+            # Actualizamos el nombre para que sepa que es el nuevo
+            usuario.persona.nombre = "SUPER"
+            usuario.persona.apellido_pa = "GERENTE"
+
+        # 2. Lista de roles EXACTOS según layout.html
+        # Nota: 'Cajero' es con C mayúscula en layout.html
+        roles_a_asignar = [
+            ("gerente", "Acceso total"),
+            ("cocina", "Cocina"),
+            ("cliente", "Cliente"),
+            ("Cajero", "Cajero")
+        ]
+
+        # Limpiamos roles actuales para evitar duplicados o conflictos
+        usuario.roles = []
+        
+        for nombre, desc in roles_a_asignar:
+            rol = user_datastore.find_or_create_role(name=nombre, descripcion=desc)
+            user_datastore.add_role_to_user(usuario, rol)
+        
+        db.session.commit()
+
+        flash(f"¡ÉXITO! Usuario '{email}' configurado como SUPER GERENTE con todos los roles. CIERRA SESIÓN Y ENTRA DE NUEVO.", "success")
+        return redirect(url_for("auth.login"))
+
+    except Exception as error:
+        db.session.rollback()
+        flash(f"Error crítico: {str(error)}", "error")
+        return redirect(url_for("auth.login"))
+
+@auth.route("/crear-cocinero-demo")
+def crear_cocinero_demo():
+    from app import user_datastore
+    from models import Rol
+
+    try:
+        email = "demo@monstereats.com"
+        password_plana = "Cocina123*"
+
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            flash("El usuario de cocina ya existe.", "info")
+            return redirect(url_for("auth.login"))
+
+        # Intentamos obtener el rol por ID 4 (como indicó el usuario) o por nombre 'Cocina'
+        rol_cocina = Rol.query.get(4)
+        if not rol_cocina:
+            rol_cocina = user_datastore.find_or_create_role(
+                name="Cocina",
+                descripcion="Personal de preparación de alimentos"
+            )
+        
+        db.session.commit()
+
+        nueva_persona = Persona(
+            nombre="Demo",
+            apellido_pa="Demo",
+            apellido_ma="Demo",
+            telefono="2220009999" # Cambiamos el teléfono para evitar el error de duplicado
+        )
+        db.session.add(nueva_persona)
+        db.session.flush()
+
+        nuevo_usuario = user_datastore.create_user(
+            id_persona=nueva_persona.id_persona,
+            email=email,
+            password=generate_password_hash(password_plana),
+            active=True,
+            fs_uniquifier=uuid.uuid4().hex,
+            intentos_fallidos=0,
+            bloqueado_hasta=None
+        )
+
+        user_datastore.add_role_to_user(nuevo_usuario, rol_cocina)
+        db.session.commit()
+        
+        flash(f"Usuario de cocina (Rol ID 4) creado: {email} / {password_plana}", "success")
+        return redirect(url_for("auth.login"))
+
+    except Exception as error:
+        db.session.rollback()
+        flash(f"No se pudo crear el usuario de cocina: {str(error)}", "error")
+        return redirect(url_for("auth.login"))
 
 @auth.route("/logout")
 @login_required
 def logout():
+    email_salida = current_user.email if current_user.is_authenticated else "Desconocido"
     logout_user()
+
+    audit.log_action(
+        module_name="logs_auth",
+        action="Cierre de sesión",
+        details={"email": email_salida},
+        level="INFO"
+    )
+
     return redirect(url_for('auth.login'))
