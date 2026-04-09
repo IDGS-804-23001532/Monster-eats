@@ -55,13 +55,16 @@ class CreateInsumoForm(Form):
         validators.Length(min=3, max=50, message='El nombre debe tener entre 3 y 50 carácteres')
     ])
     id_unidad_medida = SelectField('Unidad de Medida', [
-        validators.DataRequired(message='La unidad de medida es requerida')
+        validators.DataRequired(message='La unidad de medida es requerida'),
+        validators.NumberRange(min=1, message='Debes seleccionar una unidad válida')
     ], coerce=int)
     costo_unitario = DecimalField('Costo Unitario', [
-        validators.DataRequired(message='El costo es requerido')
+        validators.DataRequired(message='El costo es requerido'),
+        validators.NumberRange(min=0, message='El costo unitario no puede ser negativo')
     ])
     porcentaje_merma = DecimalField('Porcentaje Merma', [
-        validators.DataRequired(message='El porcentaje de merma es requerido')
+        validators.DataRequired(message='El porcentaje de merma es requerido'),
+        validators.NumberRange(min=0, message='La merma no puede ser negativa')
     ])
 
 class EditInsumoForm(CreateInsumoForm):
@@ -69,7 +72,8 @@ class EditInsumoForm(CreateInsumoForm):
         validators.DataRequired(message='El ID es requerido')
     ])
     id_unidad_medida = SelectField('Unidad de Medida', [
-        validators.DataRequired(message='La unidad de medida es requerida')
+        validators.DataRequired(message='La unidad de medida es requerida'),
+        validators.NumberRange(min=1, message='Debes seleccionar una unidad válida')
     ], coerce=int)
     costo_unitario = DecimalField('Costo Unitario', [
         validators.DataRequired(message='El costo es requerido')
@@ -88,7 +92,8 @@ class EliminarInsumoForm(Form):
 
 class CompraForm(Form):
     id_proveedor = SelectField('Proveedor', [
-        validators.DataRequired(message='El proveedor es requerido')
+        validators.DataRequired(message='El proveedor es requerido'),
+        validators.NumberRange(min=1, message='Debes seleccionar un proveedor')
     ], coerce=int)
     
 
@@ -116,10 +121,12 @@ class ActualizarCompraForm(Form):
         validators.DataRequired(message='El ID es requerido')
     ])
     id_proveedor = SelectField('Proveedor', [
-        validators.DataRequired(message='El proveedor es requerido')
+        validators.DataRequired(message='El proveedor es requerido'),
+        validators.NumberRange(min=1, message='Debes seleccionar un proveedor')
     ], coerce=int)
     id_insumo = SelectField('Insumo', [
-        validators.DataRequired(message='El insumo es requerido')
+        validators.DataRequired(message='El insumo es requerido'),
+        validators.NumberRange(min=1, message='Debes seleccionar un insumo')
     ], coerce=int)
     cantidad = DecimalField('Cantidad', [
         validators.DataRequired(message='La cantidad es requerida')
@@ -209,7 +216,8 @@ class ProveedorForm(Form):
     ])
 
     categoria_proveedor = SelectField('Categoria del proveedor', [
-        validators.DataRequired(message= 'Debes seleccionar una categoría')
+        validators.DataRequired(message= 'Debes seleccionar una categoría'),
+        validators.NumberRange(min=1, message='Debes seleccionar una categoría')
     ], coerce = int)
     
 class VentasForm(Form):

@@ -8,7 +8,6 @@ block content %}
   class="w-full min-h-[calc(100vh-6rem)] bg-slate-950 p-4 md:p-6"
 >
   <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 h-full">
-    <!-- Catálogo -->
     <section
       class="xl:col-span-3 bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl"
     >
@@ -59,31 +58,54 @@ block content %}
               {{ producto.nombre }}
             </h3>
 
-            <div class="flex items-center justify-between mt-4 gap-3">
-              <span class="text-orange-400 font-extrabold text-lg">
-                ${{ '%.2f'|format(producto.precio_venta) }}
-              </span>
-
-              <form method="POST">
-                {{ form.csrf_token }}
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value="{{ csrf_token() }}"
-                />
-                <input type="hidden" name="accion" value="agregar" />
-                <input
-                  type="hidden"
-                  name="id_producto"
-                  value="{{ producto.id_producto }}"
-                />
-                <button
-                  type="submit"
-                  class="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 hover:border-orange-600 transition"
+            <div class="mt-4 flex flex-col gap-2">
+              <div class="text-sm">
+                {% if producto.stock > 0 %}
+                <span class="text-emerald-400 font-medium"
+                  >Stock: {{ producto.stock }} disponibles</span
                 >
-                  Agregar
-                </button>
-              </form>
+                {% else %}
+                <span class="text-red-400 font-medium">Agotado</span>
+                {% endif %}
+              </div>
+
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-orange-400 font-extrabold text-lg">
+                  ${{ '%.2f'|format(producto.precio_venta) }}
+                </span>
+
+                <form method="POST">
+                  {{ form.csrf_token }}
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <input type="hidden" name="accion" value="agregar" />
+                  <input
+                    type="hidden"
+                    name="id_producto"
+                    value="{{ producto.id_producto }}"
+                  />
+
+                  {% if producto.stock > 0 %}
+                  <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 hover:border-orange-600 transition"
+                  >
+                    Agregar
+                  </button>
+                  {% else %}
+                  <button
+                    type="button"
+                    disabled
+                    class="inline-flex items-center justify-center rounded-2xl border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-semibold text-slate-400 cursor-not-allowed"
+                  >
+                    Sin stock
+                  </button>
+                  {% endif %}
+                </form>
+              </div>
             </div>
           </div>
         </article>
@@ -91,7 +113,6 @@ block content %}
       </div>
     </section>
 
-    <!-- Carrito -->
     <aside class="xl:col-span-1">
       <div
         class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl h-full flex flex-col"

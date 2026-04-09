@@ -20,6 +20,7 @@ from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
+from jinja2 import TemplateError
 
 app = Flask(__name__)
 
@@ -73,9 +74,8 @@ app.register_blueprint(usuarios, url_prefix='/usuarios')
 
 
 @app.route("/")
-@login_required
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -84,6 +84,11 @@ def page_not_found(e):
 # Diego: Para que funcione esta parte, desactiva el debug a False (Modo desarrollador False)
 @app.errorhandler(500)
 def interval_server_error(e):
+    return render_template('500.html'), 500
+
+@app.errorhandler(TemplateError)
+def handle_template_error(e):
+    # Intercepta errores de diseño para enviar a la ventana 500
     return render_template('500.html'), 500
 
 @app.errorhandler(429)
