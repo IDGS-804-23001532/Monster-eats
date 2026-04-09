@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
-from models import db, Producto, SolicitudProduccion
+from models import db, Producto, SolicitudProduccion, OrdenProduccion
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted, current_user
 import random
@@ -7,167 +7,98 @@ from audit_logger import audit  # <--- IMPORTAMOS EL LOGGER DE MONGODB
 
 solicitud_produccion = Blueprint('solicitud_produccion', __name__, url_prefix='/solicitud-produccion')
 
-# ==============================================================================
-# ZONA DE VENTAS / PEDIDOS (Exclusivo para Cliente, Cajero y Cocina)
-# ==============================================================================
-
 @solicitud_produccion.route('/')
 @login_required
-@roles_accepted('Cliente', 'Cajero', 'Cocina') 
+@roles_accepted('Gerente', 'Cajero', 'Cocina')
 def principal():
+    # Obtenemos productos activos para el formulario de petición
     productos = Producto.query.filter_by(activo=1).all()
     
-    if 'carrito' not in session:
-        session['carrito'] = {}
-        
-    total_carrito = sum(item['precio'] * item['cantidad'] for item in session['carrito'].values())
-    ultimo_ticket = session.pop('ultimo_ticket', None)
-    
-    return render_template('solicitud_Produccion/principal.html', 
-                           productos=productos, 
-                           carrito=session['carrito'], 
-                           total_carrito=total_carrito,
-                           ultimo_ticket=ultimo_ticket)
-
-@solicitud_produccion.route('/agregar/<int:id_producto>', methods=['POST'])
-@login_required
-@roles_accepted('Cliente', 'Cajero', 'Cocina')
-def agregar_carrito(id_producto):
-    producto = Producto.query.get_or_404(id_producto)
-    cantidad = int(request.form.get('cantidad', 1))
-    
-    carrito = session.get('carrito', {})
-    prod_id_str = str(id_producto)
-    
-    if prod_id_str in carrito:
-        carrito[prod_id_str]['cantidad'] += cantidad
+    # LÓGICA DE VISTAS POR ROL
+    if current_user.has_role('Cocina'):
+        # La cocina ve todas las peticiones pendientes para aprobarlas
+        solicitudes = SolicitudProduccion.query.filter(
+            SolicitudProduccion.estado.in_(['Pendiente', 'En Proceso'])
+        ).order_by(SolicitudProduccion.fecha_solicitud.desc()).all()
     else:
-        carrito[prod_id_str] = {
-            'nombre': producto.nombre,
-            'precio': float(producto.precio_venta),
-            'cantidad': cantidad
-        }
-        
-    session['carrito'] = carrito
-    session.modified = True
-    flash(f'¡{cantidad}x {producto.nombre} agregado a tu orden!', 'success')
-        
+        # El Cajero ve solo las peticiones que él ha hecho para saber si ya le hicieron caso
+        solicitudes = SolicitudProduccion.query.filter_by(
+            id_usuario_solicita=current_user.id_usuario
+        ).order_by(SolicitudProduccion.fecha_solicitud.desc()).limit(20).all()
+
+    return render_template('solicitud_Produccion/principal.html', productos=productos, solicitudes=solicitudes)
+
+@solicitud_produccion.route('/crear', methods=['POST'])
+@login_required
+@roles_accepted('Gerente', 'Cajero')
+def crear_solicitud():
+    id_producto = request.form.get('id_producto')
+    cantidad = request.form.get('cantidad')
+
+    try:
+        # CREACIÓN DE LA PETICIÓN (No descuenta inventario, solo avisa)
+        nueva_solicitud = SolicitudProduccion(
+            id_usuario_solicita=current_user.id_usuario,
+            id_producto=id_producto,
+            cantidad=cantidad,
+            estado='Pendiente'
+        )
+        db.session.add(nueva_solicitud)
+        db.session.commit()
+
+        audit.log_action(module_name="logs_solicitud_produccion", action="Crear Petición Reabastecimiento", details={"id_producto": id_producto, "cantidad": cantidad})
+        flash('Petición de reabastecimiento enviada a cocina.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        flash('Error al crear la petición.', 'error')
+
     return redirect(url_for('solicitud_produccion.principal'))
 
-@solicitud_produccion.route('/confirmar', methods=['POST'])
+@solicitud_produccion.route('/aprobar/<int:id_solicitud>', methods=['POST'])
 @login_required
-@roles_accepted('Cliente', 'Cajero', 'Cocina')
-def confirmar_pedido():
-    carrito = session.get('carrito', {})
-    metodo_pago = request.form.get('metodo_pago', 'Efectivo')
+@roles_accepted('Gerente', 'Cocina')
+def aprobar_solicitud(id_solicitud):
+    solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     
-    if not carrito:
-        flash('Tu orden está vacía. Agrega productos primero.', 'error')
-        return redirect(url_for('solicitud_produccion.principal'))
-        
     try:
-        total_pagar = 0
-        productos_ticket = []
-        
-        # 1. Generamos EL MISMO número de orden para todos los productos de este carrito
-        num_ticket = random.randint(100, 999) 
-        
-        for prod_id, item in carrito.items():
-            nueva_solicitud = SolicitudProduccion(
-                id_usuario_solicita=current_user.id_usuario,
-                id_producto=int(prod_id),
-                cantidad=item['cantidad'],
-                estado='Pendiente',
-                numero_orden=str(num_ticket) # <--- AQUÍ GUARDAMOS EL NO. DE ORDEN
-            )
-            db.session.add(nueva_solicitud)
-            
-            subtotal = item['precio'] * item['cantidad']
-            total_pagar += subtotal
-            productos_ticket.append({'nombre': item['nombre'], 'cantidad': item['cantidad']})
-            
-        db.session.commit()
-        
-        session['ultimo_ticket'] = {
-            'num_orden': num_ticket,
-            'cliente': current_user.email,
-            'productos': productos_ticket,
-            'total': total_pagar,
-            'metodo': metodo_pago
-        }
-        
-        # --- REGISTRO DE AUDITORÍA MONGODB ---
-        audit.log_action(
-            module_name="logs_produccion",
-            action="Nuevo Pedido Creado",
-            details={
-                "num_ticket": num_ticket,
-                "total_pagado": total_pagar,
-                "metodo_pago": metodo_pago,
-                "articulos": productos_ticket
-            },
-            level="INFO"
+        # 1. El chef aprueba la solicitud y el sistema crea la Orden de Producción Real
+        nueva_orden = OrdenProduccion(
+            id_producto=solicitud.id_producto,
+            id_usuario_crea=current_user.id_usuario,
+            cantidad_programada=solicitud.cantidad,
+            estado='Pendiente'
         )
+        db.session.add(nueva_orden)
+        db.session.flush() # Flush nos permite obtener el ID generado sin hacer commit final aún
+
+        # 2. Vinculamos el aviso (solicitud) con la orden de fábrica (orden_produccion)
+        solicitud.id_orden_produccion = nueva_orden.id_orden_produccion
+        solicitud.estado = 'En Proceso' # Avisamos al cajero que ya lo están haciendo
         
-        session.pop('carrito', None)
-        
+        db.session.commit()
+
+        audit.log_action(module_name="logs_solicitud_produccion", action="Aprobar Petición y Crear Orden", details={"id_solicitud": id_solicitud, "id_orden": nueva_orden.id_orden_produccion})
+        flash('Petición aprobada. Se ha generado la Orden de Producción formal.', 'success')
     except Exception as e:
         db.session.rollback()
-        print(f"Error procesando pedido web: {e}")
-        flash('Hubo un problema procesando tu orden. Intenta de nuevo.', 'error')
-        
+        print(e)
+        flash('Error al aprobar la petición.', 'error')
+
     return redirect(url_for('solicitud_produccion.principal'))
 
-@solicitud_produccion.route('/vaciar', methods=['POST'])
+@solicitud_produccion.route('/rechazar/<int:id_solicitud>', methods=['POST'])
 @login_required
-@roles_accepted('Cliente', 'Cajero', 'Cocina') # Homologado con las mayúsculas correctas
-def vaciar_carrito():
-    session.pop('carrito', None)
-    flash('Carrito vaciado correctamente.', 'success')
-    return redirect(url_for('solicitud_produccion.principal'))
-
-
-# ==============================================================================
-# ZONA DE COCINA / KDS (Exclusivo para el Cocinero)
-# ==============================================================================
-
-@solicitud_produccion.route('/tablero')
-@login_required
-@roles_accepted('Cocina') 
-def tablero_cocina():
+@roles_accepted('Gerente', 'Cocina')
+def rechazar_solicitud(id_solicitud):
+    solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     try:
-        query = text("SELECT * FROM vw_tablero_cocina")
-        solicitudes = db.session.execute(query).mappings().fetchall()
-        
-        # Renderiza la vista de las comandas
-        return render_template('solicitud_Produccion/tablero.html', solicitudes=solicitudes)
-    except Exception as e:
-        print(f"Error cargando Tablero KDS: {e}")
-        flash('Error de conexión con la base de datos de comandas.', 'error')
-        return redirect(url_for('dashboard.index'))
-
-@solicitud_produccion.route('/completar/<int:id_solicitud>', methods=['POST'])
-@login_required
-@roles_accepted('Cocina')
-def completar_solicitud(id_solicitud):
-    try:
-        db.session.execute(text("CALL sp_completar_solicitud(:id)"), {'id': id_solicitud})
+        solicitud.estado = 'Cancelada'
         db.session.commit()
-        
-        # --- REGISTRO DE AUDITORÍA MONGODB: PLATILLO DESPACHADO ---
-        audit.log_action(
-            module_name="logs_produccion",
-            action="Comanda Completada en Cocina",
-            details={
-                "id_solicitud_produccion": id_solicitud
-            },
-            level="INFO"
-        )
-        
-        flash('¡Platillo marcado como LISTO! El Cajero ha sido notificado.', 'success')
+        audit.log_action(module_name="logs_solicitud_produccion", action="Rechazar Petición", details={"id_solicitud": id_solicitud})
+        flash('Petición de reabastecimiento rechazada.', 'success')
     except Exception as e:
         db.session.rollback()
-        print(f"Error completando solicitud: {e}")
-        flash('Hubo un error al intentar despachar la orden.', 'error')
-        
-    return redirect(url_for('solicitud_produccion.tablero_cocina'))
+        flash('Error al rechazar la petición.', 'error')
+
+    return redirect(url_for('solicitud_produccion.principal'))

@@ -15,10 +15,10 @@ from inventario_Produccion.routes import inventario_produccion
 from solicitud_Produccion.routes import solicitud_produccion
 from costo_Utilidad.routes import costo_utilidad
 
-from usuarios import usuarios_bp
-from recetas import recetas_bp
-from produccion import produccion_bp
-
+from tablero_kds.routes import tablero_kds
+from recetas import recetas_bp as recetas
+from produccion import produccion_bp as produccion
+from usuarios import usuarios_bp as usuarios
 from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
@@ -70,9 +70,16 @@ app.register_blueprint(venta)
 app.register_blueprint(inventario_produccion)
 app.register_blueprint(solicitud_produccion)
 app.register_blueprint(costo_utilidad)
+<<<<<<< Updated upstream
 app.register_blueprint(usuarios_bp, url_prefix='/usuarios')
 app.register_blueprint(recetas_bp, url_prefix='/recetas')
 app.register_blueprint(produccion_bp, url_prefix='/produccion')
+=======
+app.register_blueprint(tablero_kds)
+app.register_blueprint(recetas, url_prefix='/recetas')
+app.register_blueprint(produccion, url_prefix='/produccion')
+app.register_blueprint(usuarios, url_prefix='/usuarios')
+>>>>>>> Stashed changes
 
 
 @app.route("/")
