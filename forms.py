@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField, TextAreaField, SubmitField
 from wtforms import validators
 from wtforms.validators import DataRequired, NumberRange, Length, Email, Regexp, Optional
@@ -333,3 +334,12 @@ class ProduccionOrdenForm(FlaskForm):
 class ProduccionFinalizarForm(FlaskForm):
     cantidad_producida = IntegerField('Cantidad producida', 
         validators=[DataRequired(), NumberRange(min=1, message="La cantidad debe ser al menos 1")])
+
+class ProductoForm(FlaskForm):
+    nombre = StringField('Nombre del Producto', validators=[DataRequired()])
+    precio_venta = DecimalField('Precio de Venta', validators=[DataRequired(), NumberRange(min=0)])
+    id_categoria = SelectField('Categoría', coerce=int, validators=[DataRequired()])
+    imagen = FileField('Imagen del Producto', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], '¡Solo se permiten imágenes (jpg, png)!')
+    ])
+    submit = SubmitField('Crear Producto y Continuar a Receta')

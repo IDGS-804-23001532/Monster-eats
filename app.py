@@ -1,3 +1,19 @@
+import configparser
+import sys
+
+# PARCHE PARA PYTHON 3.13
+# Engañamos a las librerías viejas para que encuentren lo que buscan
+if not hasattr(configparser, 'SafeConfigParser'):
+    configparser.SafeConfigParser = configparser.ConfigParser
+
+try:
+    import pkg_resources
+except ImportError:
+    # Si aun así no lo encuentra, creamos un objeto vacío para que no truene el import
+    class MockPkgResources:
+        def get_distribution(self, name): return None
+    sys.modules['pkg_resources'] = MockPkgResources()
+
 from flask import Flask, render_template, redirect, url_for, flash
 from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
@@ -74,8 +90,9 @@ app.register_blueprint(usuarios, url_prefix='/usuarios')
 
 
 @app.route("/")
+@login_required
 def index():
-    return render_template('login.html')
+    return render_template('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
