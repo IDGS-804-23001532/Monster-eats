@@ -891,11 +891,11 @@ camposNuevos %} {% block content %}
         <div class="grid grid-cols-4 gap-2">
           <div>
             <label class="block mb-1 text-xs text-gray-400">Cantidad</label>
-            <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
+            <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
           </div>
           <div>
             <label class="block mb-1 text-xs text-gray-400">Costo U.</label>
-            <input type="number" name="costo_unit[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
+            <input type="number" name="costo_unit[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
           </div>
           <div>
             <label class="block mb-1 text-xs text-gray-400">Caducidad</label>

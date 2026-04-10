@@ -1,3 +1,19 @@
+import configparser
+import sys
+
+# PARCHE PARA PYTHON 3.13
+# Engañamos a las librerías viejas para que encuentren lo que buscan
+if not hasattr(configparser, 'SafeConfigParser'):
+    configparser.SafeConfigParser = configparser.ConfigParser
+
+try:
+    import pkg_resources
+except ImportError:
+    # Si aun así no lo encuentra, creamos un objeto vacío para que no truene el import
+    class MockPkgResources:
+        def get_distribution(self, name): return None
+    sys.modules['pkg_resources'] = MockPkgResources()
+
 from flask import Flask, render_template, redirect, url_for, flash
 from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
@@ -20,6 +36,7 @@ from models import db, Usuario, Rol
 from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
+from jinja2 import TemplateError
 
 app = Flask(__name__)
 
@@ -84,6 +101,11 @@ def page_not_found(e):
 # Diego: Para que funcione esta parte, desactiva el debug a False (Modo desarrollador False)
 @app.errorhandler(500)
 def interval_server_error(e):
+    return render_template('500.html'), 500
+
+@app.errorhandler(TemplateError)
+def handle_template_error(e):
+    # Intercepta errores de diseño para enviar a la ventana 500
     return render_template('500.html'), 500
 
 @app.errorhandler(429)

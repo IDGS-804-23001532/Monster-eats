@@ -164,7 +164,8 @@ def editar_insumo():
                          edit_form=edit_form,
                          show_modal='editInsumoModal')
 
-#Eliminar un insumo
+from sqlalchemy.exc import IntegrityError
+
 @insumos.route('/eliminar_insumo', methods=['GET', 'POST'])
 def eliminar():
     unidades_medida = UnidadMedida.query.all()
@@ -201,14 +202,35 @@ def eliminar():
             flash('Insumo no encontrado para eliminar', 'error')
             return redirect(url_for('insumos.index'))
         
-        db.session.delete(insumo)
-        db.session.commit()
-        
-        # --- REGISTRO DE AUDITORÍA MONGO ---
-        audit.log_action("Insumos", "ELIMINACIÓN", details={
-            "id": insumo.id_insumo,
-            "nombre": insumo.nombre
-        })
-        
-        flash('Insumo eliminado correctamente', 'success')
+        try:
+            db.session.delete(insumo)
+            db.session.commit()
+            
+            # --- REGISTRO DE AUDITORÍA MONGO ---
+            audit.log_action("Insumos", "ELIMINACIÓN", details={
+                "id": insumo.id_insumo,
+                "nombre": insumo.nombre
+            })
+            
+            flash('Insumo eliminado correctamente', 'success')
+        except IntegrityError:
+            db.session.rollback()
+            audit.log_action("Insumos", "INTENTO FALLIDO ELIMINAR", details={
+                "id_insumo": insumo.id_insumo,
+                "nombre": insumo.nombre,
+                "motivo": "Violación de integridad (historial existente asociado al insumo)",
+                "usuario": current_user.email
+            })
+            flash('No se puede eliminar el insumo porque tiene historial asociado (ej. compras). Recomendación: desactívalo desde "Editar".', 'error')
+        except Exception as e:
+            db.session.rollback()
+            audit.log_action("Insumos", "ERROR ELIMINAR", details={
+                "id_insumo": insumo.id_insumo,
+                "nombre": insumo.nombre,
+                "error": str(e),
+                "usuario": current_user.email
+            })
+            flash(f'Error al eliminar el insumo: {str(e)}', 'error')
+            
         return redirect(url_for('insumos.index'))
+

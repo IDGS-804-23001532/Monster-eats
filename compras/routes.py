@@ -9,7 +9,6 @@ from audit_logger import audit
 from flask_security import login_required, current_user
 from flask_security.decorators import roles_required, roles_accepted
 
-
 @compras.route('/compras')
 @login_required
 @roles_accepted('Gerente', 'gerente')
@@ -117,12 +116,34 @@ def nueva_compra():
         detalles = []
         for i in range(len(insumos_ids)):
             if insumos_ids[i] and cantidades[i] and costos[i]:
+                cant = float(cantidades[i])
+                cost = float(costos[i])
+                
+                # Validación backend estricta anti-negativos
+                if cant <= 0 or cost < 0:
+                    compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
+                    insumos_list = Insumo.query.filter_by(activo=True).all()
+                    unidades_medida = UnidadMedida.query.all()
+                    flash('Alerta de seguridad: Las cantidades deben ser mayores a 0 y los costos no pueden ser negativos.', 'error')
+                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, show_modal='nuevaCompraModal')
+                
+                # Verificamos que la caducidad no venga vacía
+                if not caducidades[i] or caducidades[i].strip() == '':
+                    compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
+                    insumos_list = Insumo.query.filter_by(activo=True).all()
+                    unidades_medida = UnidadMedida.query.all()
+                    form.id_proveedor.errors.append('¡Aviso!: La Fecha de Caducidad es obligatoria para todos los insumos de la lista.')
+                    flash('Error: Falta asignar la fecha de caducidad en uno o más insumos.', 'error')
+                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, show_modal='nuevaCompraModal')
+                
+                caducidad_val = caducidades[i]
+                
                 detalles.append({
                     'id_insumo': int(insumos_ids[i]),
-                    'cantidad': float(cantidades[i]),
+                    'cantidad': cant,
                     'id_unidad': int(unidades[i]),
-                    'costo': float(costos[i]),
-                    'caducidad': caducidades[i]
+                    'costo': cost,
+                    'caducidad': caducidad_val
                 })
         
         if not detalles:
@@ -130,7 +151,9 @@ def nueva_compra():
             insumos_list = Insumo.query.filter_by(activo=True).all()
             unidades_medida = UnidadMedida.query.all()
             
-            flash('Debes agregar al menos un insumo con su cantidad y costo', 'error')
+            # Inyectamos el error directamente en el WTForm para que el macro lo dibuje en letras rojas
+            form.id_proveedor.errors.append('¡Aviso!: Llena todas las celdas de los insumos (Cantidad, Costo, Unidad, Caducidad) o elimina las líneas vacías.')
+            flash('Faltan datos de los insumos o no agregaste ninguno', 'error')
             return render_template('compras/index.html',
                                  compras=compras_list,
                                  search_query='',
@@ -158,6 +181,10 @@ def nueva_compra():
             "articulos": len(detalles)
         })
     except Exception as e:
+        audit.log_action("Compras", "ERROR NUEVA COMPRA", details={
+            "error": str(e),
+            "usuario": current_user.email
+        })
         flash(f'Error al registrar la compra: {str(e)}', 'error')
     
     return redirect(url_for('compras.index'))
@@ -183,6 +210,25 @@ def cancelar_compra():
             "id_compra": id_compra
         })
     except Exception as e:
-        flash(f'Error al cancelar la compra: {str(e)}', 'error')
+        error_msg = str(e)
+        
+        # Auditoría del intento de cancelación fallido
+        audit.log_action("Compras", "FALLO AL CANCELAR", details={
+            "id_compra_intentada": request.form.get('id_compra'),
+            "razon": error_msg,
+            "usuario": current_user.email
+        })
+        
+        # Limpiamos el texto crudo del error para mostrar mensajes elegantes
+        if 'La compra no existe' in error_msg:
+            flash('Error: La compra seleccionada no existe.', 'error')
+        elif 'La compra ya esta cancelada' in error_msg:
+            flash('Aviso: Esta compra ya había sido cancelada previamente.', 'error')
+        elif 'el lote ya fue consumido' in error_msg:
+            flash('Cancelación rechazada: Uno o más insumos adquiridos en esta compra ya comenzaron a utilizarse en producción.', 'error')
+        elif 'cannot be null' in error_msg:
+            flash('Error de Integridad: Hay registros con cantidades nulas en esta compra o lote. Verifica los datos en la base de datos.', 'error')
+        else:
+            flash(f'Error al cancelar la compra: {error_msg}', 'error')
     
     return redirect(url_for('compras.index'))

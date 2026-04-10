@@ -1,0 +1,394 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#f0edec",
+              "on-primary-fixed-variant": "#7f2b00",
+              "surface-bright": "#fcf9f8",
+              "secondary-fixed": "#d6e3ff",
+              "surface-tint": "#a63b00",
+              "on-secondary-container": "#3f5882",
+              "on-secondary-fixed": "#001b3c",
+              "primary-fixed": "#ffdbce",
+              "on-tertiary-fixed-variant": "#5e4200",
+              "on-primary-container": "#4f1800",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#ffba20",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed-variant": "#2d476f",
+              "inverse-primary": "#ffb599",
+              error: "#ba1a1a",
+              "tertiary-fixed": "#ffdea8",
+              "surface-container-highest": "#e5e2e1",
+              "on-surface-variant": "#594138",
+              "inverse-on-surface": "#f3f0ef",
+              "on-background": "#1c1b1b",
+              "error-container": "#ffdad6",
+              "on-secondary": "#ffffff",
+              background: "#fcf9f8",
+              surface: "#fcf9f8",
+              "secondary-fixed-dim": "#adc7f7",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "surface-dim": "#dcd9d9",
+              primary: "#a63b00",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-container": "#3a2700",
+              "surface-variant": "#e5e2e1",
+              outline: "#8d7166",
+              "surface-container-high": "#ebe7e7",
+              "on-primary-fixed": "#370e00",
+              tertiary: "#7c5800",
+              "primary-fixed-dim": "#ffb599",
+              "outline-variant": "#e1bfb3",
+              "secondary-container": "#b6d0ff",
+              secondary: "#455f88",
+              "primary-container": "#f26522",
+              "inverse-surface": "#313030",
+              "on-surface": "#1c1b1b",
+              "surface-container-low": "#f6f3f2",
+              "tertiary-container": "#bd8800",
+              "on-tertiary-fixed": "#271900",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            fontFamily: {
+              headline: ["Plus Jakarta Sans"],
+              body: ["Inter"],
+              label: ["Inter"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container"
+  >
+    <!-- TopAppBar -->
+    <header
+      class="bg-[#fcf9f8] dark:bg-stone-950 flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50"
+    >
+      <div class="flex items-center gap-4">
+        <button
+          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] p-2 hover:bg-[#e5e2e1] dark:hover:bg-stone-800 transition-colors rounded-full scale-95 active:duration-100"
+        >
+          menu
+        </button>
+        <span
+          class="text-2xl font-black italic tracking-tighter text-[#a63b00] dark:text-[#f26522]"
+          >Monster Eats</span
+        >
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="material-symbols-outlined text-[#a63b00] dark:text-[#f26522] p-2 hover:bg-[#e5e2e1] dark:hover:bg-stone-800 transition-colors rounded-full scale-95 active:duration-100"
+        >
+          shopping_cart
+        </button>
+      </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-12 min-h-screen">
+      <!-- Editorial Header -->
+      <section class="mb-16">
+        <div
+          class="flex flex-col md:flex-row md:items-end justify-between gap-6"
+        >
+          <div class="max-w-2xl">
+            <span
+              class="text-primary font-bold tracking-widest uppercase text-xs mb-4 block"
+              >Categories / Beverage Program</span
+            >
+            <h1
+              class="text-5xl md:text-7xl font-extrabold text-on-surface tracking-tighter leading-none mb-6"
+            >
+              Refrescos &amp; Bebidas
+            </h1>
+            <p class="text-on-surface-variant text-lg max-w-lg leading-relaxed">
+              Curated hydration for the modern palate. From house-made botanical
+              ferments to our signature nitrogen-infused cold brews.
+            </p>
+          </div>
+          <div class="hidden md:block">
+            <div class="flex items-center gap-4 text-sm font-medium">
+              <span class="text-on-surface-variant">Filter by</span>
+              <button
+                class="bg-surface-container-highest px-4 py-2 rounded-full hover:bg-outline-variant transition-colors"
+              >
+                Botanical
+              </button>
+              <button
+                class="bg-surface-container-highest px-4 py-2 rounded-full hover:bg-outline-variant transition-colors"
+              >
+                Caffeine
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Product Grid (Asymmetric Editorial Layout) -->
+      <section class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <!-- Featured Large Item -->
+        <div class="md:col-span-8 group cursor-pointer">
+          <div
+            class="relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9]"
+          >
+            <img
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              data-alt="Close up of a refreshing artisan lemonade with fresh mint leaves and lemon slices in a condensation-covered glass, bright natural sunlight"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlPQgB5CRwmNW7MN3nSrf25eNBDycPcpA8T8JTuRuW1jX07BMYxgga-0fp0V7Yt7z8UctZc_Z8PZkx706gC6XB7BQAE1zxsq2ilaeUD8qqQ4uo5gHg08f7Po0WXl6QJPaZuaZHTun_SrTeT_16vNXEZzDsCLoUJoVl38vkZPM6Cbee3T_Jj54pKCF2yCjzumaawW6g-I2FxFVz3QsQ--XNEYcyuCgMfKSxBB6hEVPVgNDcTCzbYYGrsYQBMmPtjtQnWp35OJ-aidCw"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8"
+            >
+              <div class="flex justify-between items-end">
+                <div>
+                  <h3 class="text-white text-3xl font-bold mb-2">
+                    Artisan Lemonade
+                  </h3>
+                  <p
+                    class="text-white/80 text-sm font-medium uppercase tracking-widest"
+                  >
+                    Starting from $4.50
+                  </p>
+                </div>
+                <span
+                  class="bg-primary text-on-primary p-4 rounded-full material-symbols-outlined shadow-lg scale-95 active:duration-100 hover:bg-primary-container transition-all"
+                >
+                  add
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Side Item 1 -->
+        <div class="md:col-span-4 group cursor-pointer">
+          <div class="flex flex-col h-full">
+            <div
+              class="relative overflow-hidden rounded-xl bg-surface-container-low flex-grow aspect-square mb-4"
+            >
+              <img
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                data-alt="Three colorful glass bottles of craft sodas with vintage labels on a wooden table, soft morning light"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCePw_EwmQM5zEgPeW_vVhu2yxiXc1ioAGZvqjCLUZpTAQPabPM1-rsBbHtuVZuUbAhAXhYPU53m_h_b4nUSPCT0SZocQoVmZlM2Z_ik3CXJCZrXrOctwC-pmaCExOx_rklJNhtFb2wLnxTbCPBZMfF8xlOFIVGvcxnDX6FaGJXADininUfvIlZExTgl2QFgnsbUeW2oJrS6STp_7TOXGS5YKdaAwHW0NvSKCs1AYxD2d1u9SbINxMY5LEVHybQ4fQf7TUcmLspn87k"
+              />
+            </div>
+            <div class="px-2">
+              <h3 class="text-xl font-bold text-on-surface">Craft Sodas</h3>
+              <p class="text-primary font-semibold text-sm">
+                Starting from $3.75
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Monster Grid Items -->
+        <div class="md:col-span-4 group cursor-pointer">
+          <div
+            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
+          >
+            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
+              <img
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                data-alt="Iced monster coffee with swirling milk and dark espresso, tall glass with ice cubes, dark moody lighting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN77zlsT-U5qWFzASd53bU4Hg1inDww2o6dS2LhqgryMJ5FbIX4-xK9Lb5zCMP_TexrXtTFFt3OcHNw4LwiOmCPigYQR3ZaniyrgJ3gW9k25EiIGwgYynyENGXw-f_Ah5tkoVNDJoBGJfL8mRG9W14T-udOS1eI13FpVZUweIQnC5GySty4lr6N1ZFNR8Y41CLc5pF8QVjQQXV9GYEn9aY134_rGAG554VZ229POGSro3TXZHxueXgLk-p3GikOeQjalNQMDyLLgkj"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-on-surface">
+              Iced Monster Coffee
+            </h3>
+            <p class="text-on-surface-variant text-sm mb-4">
+              Nitrogen infused, triple-shot reserve beans.
+            </p>
+            <div class="flex justify-between items-center">
+              <span class="text-primary font-bold">Starting from $5.25</span>
+              <span
+                class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm"
+                >bolt</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-4 group cursor-pointer">
+          <div
+            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
+          >
+            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
+              <img
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                data-alt="A tall glass of sparkling hibiscus iced tea with fresh berries and crushed ice, bright airy studio lighting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCosi1VAGINR5hLVQUGw9TQk4o_4SPkmeQnyssncTTzxZ_y02gxnrem5t2ZzzyTtigZlZZ2Gg_B3DRaoaEdZNJY4sLyY4hoMHwEETKTpMzRZoUJk3PyXJgdjdA9UK5t5MArc-c3X0lNs8g1yeFeoHR4Bjp8R-Udlfxs8eZqZBR05GV6ReOlvYXBfHCllIfkn7k8UgPEfYYCr4DBnmqQb2Xv4dB2oWesTd3tXJ0UXuZvU4kDzL6Cwx4xG6v8rJFTIJgFmswIfHsxj3y-"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-on-surface">
+              Sparkling Hibiscus
+            </h3>
+            <p class="text-on-surface-variant text-sm mb-4">
+              Organic petals with a hint of agave and lime.
+            </p>
+            <div class="flex justify-between items-center">
+              <span class="text-primary font-bold">Starting from $4.00</span>
+              <span
+                class="material-symbols-outlined text-on-tertiary-container bg-tertiary-container px-2 py-1 rounded-lg text-sm"
+                >eco</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-4 group cursor-pointer">
+          <div
+            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
+          >
+            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
+              <img
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                data-alt="Cold pressed orange and ginger juice in a glass bottle, vibrant orange color, minimalist aesthetic"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc1o33vsJsqkezZXkB2QSuaStI39Ut0XONT91V1VKjjPysCaJaY1_Ie3H2JGQa4eocOAQj_z9EJTtfVYCh6xE8lL_6sy8wRTxuCgvR5knm9fvX1-jPMV_n2DMdjL0MM_z_niJwEiU18EPtEN4htZjGuCm1GqoiwiijV4JrdO-NkNkCI8Qfrb_XwFO1l1XWAypQq__i3WfsYUpNnZZHStJxxW7JToYDr6GGfSSjv90EGCiot-II85Ui9aH7tWfq8EXdYhGuZweSBnK3"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-on-surface">
+              Fresh Pressed Citrus
+            </h3>
+            <p class="text-on-surface-variant text-sm mb-4">
+              Daily squeeze of seasonal blood orange and grapefruit.
+            </p>
+            <div class="flex justify-between items-center">
+              <span class="text-primary font-bold">Starting from $6.00</span>
+              <span
+                class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm"
+                >sunny</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Newsletter / Promo Section (Kinetic Design) -->
+      <section
+        class="mt-24 bg-secondary-container/30 backdrop-blur-md rounded-3xl p-12 relative overflow-hidden"
+      >
+        <div class="relative z-10 grid md:grid-cols-2 items-center gap-12">
+          <div>
+            <h2
+              class="text-4xl font-extrabold text-on-secondary-container tracking-tight mb-4"
+            >
+              Join the Monster Loyalty Circle
+            </h2>
+            <p class="text-secondary text-lg mb-8">
+              Get exclusive access to secret drink drops and zero-fee deliveries
+              on all liquid orders.
+            </p>
+            <div class="flex gap-2">
+              <input
+                class="bg-white border-none rounded-xl px-6 py-4 flex-grow focus:ring-2 focus:ring-primary"
+                placeholder="email@example.com"
+                type="email"
+              />
+              <button
+                class="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold transition-all hover:shadow-xl hover:scale-105 active:scale-95"
+              >
+                JOIN
+              </button>
+            </div>
+          </div>
+          <div class="hidden md:flex justify-end">
+            <div
+              class="w-64 h-64 bg-primary rounded-full blur-[80px] opacity-20 absolute -top-10 -right-10"
+            ></div>
+            <span
+              class="material-symbols-outlined text-[160px] text-on-secondary-container/10 select-none"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >local_drink</span
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer
+      class="bg-[#fcf9f8] dark:bg-stone-950 w-full flex flex-col md:flex-row justify-between items-center px-12 py-12 gap-8 border-t-0 bg-surface-container-low dark:bg-stone-900"
+    >
+      <div class="flex flex-col gap-2">
+        <span class="text-sm font-bold text-[#1c1b1b] dark:text-[#e5e2e1]"
+          >Monster Eats ERP</span
+        >
+        <span
+          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60"
+          >© 2024 Monster Eats ERP. Kinetic Sophistication System.</span
+        >
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <a
+          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
+          href="#"
+          >Privacy Policy</a
+        >
+        <a
+          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
+          href="#"
+          >Terms of Service</a
+        >
+        <a
+          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
+          href="#"
+          >System Status</a
+        >
+        <a
+          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
+          href="#"
+          >Contact Support</a
+        >
+      </div>
+      <div class="flex gap-4">
+        <span
+          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 cursor-pointer hover:opacity-100"
+          >language</span
+        >
+        <span
+          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 cursor-pointer hover:opacity-100"
+          >share</span
+        >
+      </div>
+    </footer>
+  </body>
+</html>
