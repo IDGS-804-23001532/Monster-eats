@@ -2379,6 +2379,12 @@
   .border-slate-600 {
     border-color: var(--color-slate-600);
   }
+  .border-slate-600\/30 {
+    border-color: color-mix(in srgb, oklch(44.6% 0.043 257.281) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-slate-600) 30%, transparent);
+    }
+  }
   .border-slate-600\/50 {
     border-color: color-mix(in srgb, oklch(44.6% 0.043 257.281) 50%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -2814,6 +2820,12 @@
   }
   .bg-slate-700 {
     background-color: var(--color-slate-700);
+  }
+  .bg-slate-700\/30 {
+    background-color: color-mix(in srgb, oklch(37.2% 0.044 257.287) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-slate-700) 30%, transparent);
+    }
   }
   .bg-slate-700\/40 {
     background-color: color-mix(in srgb, oklch(37.2% 0.044 257.287) 40%, transparent);
