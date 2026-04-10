@@ -105,11 +105,8 @@
                     {{ form.id_producto(value=prod.id_producto) }}
 
                     <div>
-                        {{ form.cantidad.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300")
-                        }}
-                        {{ form.cantidad(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                        focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
-                        dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Ej: -5 o 10") }}
+                        {{ form.cantidad.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300") }}
+                        {{ form.cantidad(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Ej: -5 o 10") }}
 
                         {% if form.cantidad.errors %}
                         {% for error in form.cantidad.errors %}
@@ -120,10 +117,7 @@
 
                     <div>
                         {{ form.motivo.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300") }}
-                        {{ form.motivo(rows="3", class="bg-gray-50 border border-gray-300 text-gray-900 text-sm
-                        rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700
-                        dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Motivo del
-                        cambio") }}
+                        {{ form.motivo(rows="3", class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Motivo del cambio") }}
 
                         {% if form.motivo.errors %}
                         {% for error in form.motivo.errors %}

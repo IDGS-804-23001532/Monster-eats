@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% import 'macros/_macros.html' as macros %} {%
-block content %}
+{% extends 'layout.html' %} {% import 'macros/_macros.html' as macros %} {% block content %}
 
 <div
   id="ventas-page"
@@ -249,30 +248,21 @@ block content %}
           </div>
 
           <div>
-            {{ macros.camposNuevos( form.metodo_pago, id="metodo_pago",
-            class="bg-slate-800 border border-slate-700 text-white text-sm
-            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
-            w-full p-3" ) }}
+            {{ macros.camposNuevos( form.metodo_pago, id="metodo_pago", class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3" ) }}
           </div>
 
           <div
             id="contenedor_numero_cuenta"
             class="{% if form.metodo_pago.data|string != id_tarjeta|string %}hidden{% endif %}"
           >
-            {{ macros.camposNuevos( form.numero_cuenta, id="numero_cuenta",
-            class="bg-slate-800 border border-slate-700 text-white text-sm
-            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
-            w-full p-3" ) }}
+            {{ macros.camposNuevos( form.numero_cuenta, id="numero_cuenta", class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3" ) }}
           </div>
 
           <div
             id="contenedor_monto_recibido"
             class="{%if form.metodo_pago.data|string != id_efectivo|string %}hidden{% endif %}"
           >
-            {{ macros.camposNuevos( form.monto_recibido, id="monto_recibido",
-            class="bg-slate-800 border border-slate-700 text-white text-sm
-            rounded-2xl focus:ring-orange-500 focus:border-orange-500 block
-            w-full p-3" ) }}
+            {{ macros.camposNuevos( form.monto_recibido, id="monto_recibido", class="bg-slate-800 border border-slate-700 text-white text-sm rounded-2xl focus:ring-orange-500 focus:border-orange-500 block w-full p-3" ) }}
           </div>
 
           <div

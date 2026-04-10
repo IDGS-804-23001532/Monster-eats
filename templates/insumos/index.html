@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% from "macros/macro_insumo.html" import
-camposNuevos %} {% block content %}
+{% extends 'layout.html' %} {% from "macros/macro_insumo.html" import camposNuevos %} {% block content %}
 
 <div
   class="w-full max-w-[1168px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center mt-10 md:mt-20 gap-6 px-4 xl:px-0"
@@ -248,30 +247,18 @@ camposNuevos %} {% block content %}
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
           <div class="col-span-2">
-            {{ camposNuevos(create_form.nombre, class_="bg-[#394E6D] text-white
-            text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00]
-            block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300",
-            placeholder="Nombre del insumo") }}
+            {{ camposNuevos(create_form.nombre, class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Nombre del insumo") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            {{ camposNuevos(create_form.costo_unitario, type="number",
-            step="any", class_="bg-[#394E6D] text-white text-sm rounded-base
-            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
-            shadow-xs placeholder:text-gray-300", placeholder="Precio", min="0", oninput="this.value = Math.abs(this.value)") }}
+            {{ camposNuevos(create_form.costo_unitario, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder="Precio", min="0", oninput="this.value = Math.abs(this.value)") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
             <div class="relative">
-              {{ camposNuevos(create_form.id_unidad_medida, class_="block w-full
-              bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs
-              focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10
-              cursor-pointer") }}
+              {{ camposNuevos(create_form.id_unidad_medida, class_="block w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10 cursor-pointer") }}
             </div>
           </div>
           <div class="col-span-2">
-            {{ camposNuevos(create_form.porcentaje_merma, type="number",
-            step="any", class_="bg-[#394E6D] text-white text-sm rounded-base
-            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
-            shadow-xs placeholder:text-gray-300", placeholder= "Porcentaje de merma", min="0", oninput="this.value = Math.abs(this.value)") }}
+            {{ camposNuevos(create_form.porcentaje_merma, type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", placeholder= "Porcentaje de merma", min="0", oninput="this.value = Math.abs(this.value)") }}
           </div>
         </div>
         <div
@@ -389,36 +376,21 @@ camposNuevos %} {% block content %}
         {{ edit_form.id_insumo(id="edit_id_insumo", type="hidden") }}
         <div class="grid gap-4 grid-cols-2 py-4 md:py-6">
           <div class="col-span-2">
-            {{ camposNuevos(edit_form.nombre, id="edit_nombre",
-            class_="bg-[#394E6D] text-white text-sm rounded-base
-            focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5
-            shadow-xs placeholder:text-gray-300") }}
+            {{ camposNuevos(edit_form.nombre, id="edit_nombre", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            {{ camposNuevos(edit_form.costo_unitario, id="edit_costo",
-            type="number", step="any", class_="bg-[#394E6D] text-white text-sm
-            rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block
-            w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", min="0", oninput="this.value = Math.abs(this.value)") }}
+            {{ camposNuevos(edit_form.costo_unitario, id="edit_costo", type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", min="0", oninput="this.value = Math.abs(this.value)") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
             <div class="relative">
-              {{ camposNuevos(edit_form.id_unidad_medida, id="edit_unidad",
-              class_="block w-full bg-[#394E6D] text-white text-sm rounded-base
-              px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00]
-              appearance-none pr-10 cursor-pointer") }}
+              {{ camposNuevos(edit_form.id_unidad_medida, id="edit_unidad", class_="block w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10 cursor-pointer") }}
             </div>
           </div>
           <div class="col-span-2 sm:col-span-1">
-            {{ camposNuevos(edit_form.porcentaje_merma, id="edit_merma",
-            type="number", step="any", class_="bg-[#394E6D] text-white text-sm
-            rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block
-            w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", min="0", oninput="this.value = Math.abs(this.value)") }}
+            {{ camposNuevos(edit_form.porcentaje_merma, id="edit_merma", type="number", step="any", class_="bg-[#394E6D] text-white text-sm rounded-base focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-300", min="0", oninput="this.value = Math.abs(this.value)") }}
           </div>
           <div class="col-span-2 sm:col-span-1">
-            {{ camposNuevos(edit_form.activo, id="edit_activo", class_="block
-            w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5
-            shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00]
-            appearance-none pr-10 cursor-pointer") }}
+            {{ camposNuevos(edit_form.activo, id="edit_activo", class_="block w-full bg-[#394E6D] text-white text-sm rounded-base px-3 py-2.5 shadow-xs focus:ring-[#FF6B00] focus:border-[#FF6B00] appearance-none pr-10 cursor-pointer") }}
           </div>
         </div>
         <div

@@ -1,3 +1,4 @@
+
 {% extends 'layout.html' %} {% block content %}
 <div class="bg-[#1e293b] border border-slate-700 rounded-[2rem] p-6 shadow-2xl">
   <div
@@ -40,49 +41,25 @@
           <option value="todos">Todos los estados</option>
           <option
             value="Pendiente"
-            {%
-            if
-            estado=""
-            ="Pendiente"
-            %}selected{%
-            endif
-            %}
+            {% if estado == "Pendiente" %}selected{% endif %}
           >
             Pendiente
           </option>
           <option
             value="En Proceso"
-            {%
-            if
-            estado=""
-            ="En Proceso"
-            %}selected{%
-            endif
-            %}
+            {% if estado == "En Proceso" %}selected{% endif %}
           >
             En Proceso
           </option>
           <option
             value="Completada"
-            {%
-            if
-            estado=""
-            ="Completada"
-            %}selected{%
-            endif
-            %}
+            {% if estado == "Completada" %}selected{% endif %}
           >
             Completada
           </option>
           <option
             value="Cancelada"
-            {%
-            if
-            estado=""
-            ="Cancelada"
-            %}selected{%
-            endif
-            %}
+            {% if estado == "Cancelada" %}selected{% endif %}
           >
             Cancelada
           </option>
@@ -176,8 +153,7 @@
               {% endif %}
             </td>
             <td class="px-6 py-4 text-slate-400 text-sm">
-              {{ orden.fecha_creacion.strftime('%d/%m/%Y %H:%M') if
-              orden.fecha_creacion else '-' }}
+              {{ orden.fecha_creacion.strftime('%d/%m/%Y %H:%M') if orden.fecha_creacion else '-' }}
             </td>
             <td class="px-6 py-4 text-center">
               <a

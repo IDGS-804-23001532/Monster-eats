@@ -68,11 +68,7 @@
                             </svg>
                         </div>
 
-                        {{ form.email(
-                        class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white
-                        placeholder:text-white/50 outline-none shadow-none focus:ring-0",
-                        placeholder="Correo"
-                        ) }}
+                        {{ form.email( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-0", placeholder="Correo" ) }}
                     </div>
 
                     {% for error in form.email.errors %}
@@ -89,11 +85,7 @@
                             </svg>
                         </div>
 
-                        {{ form.password(
-                        class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white
-                        placeholder:text-white/50 outline-none shadow-none focus:ring-0",
-                        placeholder="Contraseña"
-                        ) }}
+                        {{ form.password( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-0", placeholder="Contraseña" ) }}
                     </div>
 
                     {% for error in form.password.errors %}

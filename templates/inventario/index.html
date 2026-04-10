@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% from "macros/alert_wftForms_macro.html" import
-camposNuevos %} {% block content %}
+{% extends 'layout.html' %} {% from "macros/alert_wftForms_macro.html" import camposNuevos %} {% block content %}
 
 <div
   class="w-full max-w-[1168px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center mt-10 md:mt-20 gap-6 px-4 xl:px-0"
@@ -148,8 +147,7 @@ camposNuevos %} {% block content %}
             {{ item.porcentaje_merma }}%
           </td>
           <td data-label="Caducidad:" class="px-6 py-4">
-            {% if item.prox_caducidad %} {% set hoy =
-            import('datetime').date.today() if false else none %}
+            {% if item.prox_caducidad %} {% set hoy = import('datetime').date.today() if false else none %}
             <span class="text-white text-xs">
               {{ item.prox_caducidad.strftime('%d/%m/%Y') }}
             </span>
@@ -269,9 +267,7 @@ camposNuevos %} {% block content %}
 
       <div class="py-4 md:py-6 space-y-4 max-h-[500px] overflow-y-auto px-1">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {% for lote in lotes_all %} {% set es_caducado = lote.fecha_caducidad
-          and lote.fecha_caducidad < hoy %} {% set es_agotado =
-          (lote.cantidad_disponible or 0) <= 0 %}
+          {% for lote in lotes_all %} {% set es_caducado = lote.fecha_caducidad and lote.fecha_caducidad < hoy %} {% set es_agotado = (lote.cantidad_disponible or 0) <= 0 %}
           <div
             class="bg-[#394E6D] p-4 rounded-xl border border-gray-600 shadow-xs flex flex-col justify-between"
           >

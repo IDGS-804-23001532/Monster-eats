@@ -34,11 +34,8 @@
 
                     <div class="flex flex-col sm:flex-row gap-5 mb-5">
                         <div class="flex-1">
-                            {{ form_crear.nombre_combo.label(class="block mb-2 text-xs font-bold text-gray-500
-                            dark:text-gray-400 uppercase tracking-wider") }}
-                            {{ form_crear.nombre_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300
-                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
-                            focus:border-blue-500 block w-full p-3 transition-all") }}
+                            {{ form_crear.nombre_combo.label(class="block mb-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_crear.nombre_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-all") }}
 
                             {% if form_crear.nombre_combo.errors %}
                             {% for error in form_crear.nombre_combo.errors %}
@@ -54,11 +51,8 @@
                             {% endif %}
                         </div>
                         <div class="w-full sm:w-40">
-                            {{ form_crear.precio_combo.label(class="block mb-2 text-xs font-bold text-gray-500
-                            dark:text-gray-400 uppercase tracking-wider") }}
-                            {{ form_crear.precio_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300
-                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
-                            focus:border-blue-500 block w-full p-3 font-bold transition-all") }}
+                            {{ form_crear.precio_combo.label(class="block mb-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_crear.precio_combo(class="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 font-bold transition-all") }}
 
                             {% if form_crear.precio_combo.errors %}
                             {% for error in form_crear.precio_combo.errors %}
@@ -94,11 +88,8 @@
 
                     <div class="flex flex-col sm:flex-row gap-4 items-start">
                         <div class="flex-1 w-full">
-                            {{ form_vincular.id_hijo.label(class="block mb-2 text-xs font-bold text-gray-500
-                            dark:text-gray-400 uppercase tracking-wider") }}
-                            {{ form_vincular.id_hijo(class="bg-white dark:bg-gray-900 border border-gray-300
-                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
-                            focus:border-blue-500 block w-full p-3 transition-all") }}
+                            {{ form_vincular.id_hijo.label(class="block mb-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_vincular.id_hijo(class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-all") }}
 
                             {% if form_vincular.id_hijo.errors %}
                             {% for error in form_vincular.id_hijo.errors %}
@@ -115,11 +106,8 @@
                         </div>
 
                         <div class="w-full sm:w-28">
-                            {{ form_vincular.cantidad.label(class="block mb-2 text-xs font-bold text-gray-500
-                            dark:text-gray-400 uppercase tracking-wider") }}
-                            {{ form_vincular.cantidad(class="bg-white dark:bg-gray-900 border border-gray-300
-                            dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500
-                            focus:border-blue-500 block w-full p-3 text-center font-bold transition-all", value="1") }}
+                            {{ form_vincular.cantidad.label(class="block mb-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider") }}
+                            {{ form_vincular.cantidad(class="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 text-center font-bold transition-all", value="1") }}
 
                             {% if form_vincular.cantidad.errors %}
                             {% for error in form_vincular.cantidad.errors %}
@@ -156,8 +144,7 @@
                     {% for item in combo_temp.ingredientes %}
                     <div
                         class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ item.cantidad }}x {{
-                            item.nombre }}</span>
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ item.cantidad }}x {{ item.nombre }}</span>
                         <form action="{{ url_for('inventario_produccion.gestionar_combos') }}" method="POST">
                             <input type="hidden" name="action" value="eliminar_ingrediente">
                             <input type="hidden" name="id_eliminar" value="{{ item.id_producto }}">
@@ -217,10 +204,8 @@
 
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between items-start mb-2">
-                        <h5 class="text-xl font-black text-gray-900 dark:text-white uppercase leading-tight">{{
-                            combo.padre.nombre }}</h5>
-                        <span class="text-lg font-black text-orange-500 ml-2">${{
-                            "%.2f"|format(combo.padre.precio_venta) }}</span>
+                        <h5 class="text-xl font-black text-gray-900 dark:text-white uppercase leading-tight">{{ combo.padre.nombre }}</h5>
+                        <span class="text-lg font-black text-orange-500 ml-2">${{ "%.2f"|format(combo.padre.precio_venta) }}</span>
                     </div>
                     <span
                         class="text-xs font-bold uppercase tracking-wider {% if combo.padre.activo == 1 %} text-green-500 {% else %} text-red-500 {% endif %}">
@@ -233,8 +218,7 @@
                         {% for info in combo.hijos %}
                         <li class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center gap-3">
                             <span
-                                class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2.5 py-1 rounded-md text-xs">{{
-                                info.Combo.cantidad }}x</span>
+                                class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2.5 py-1 rounded-md text-xs">{{ info.Combo.cantidad }}x</span>
                             {{ info.Producto.nombre }}
                         </li>
                         {% endfor %}

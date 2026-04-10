@@ -379,8 +379,36 @@
             </a>
           </li>
 
-          {% endif %} {% if current_user.has_role('cliente') or
-          current_user.has_role('Cliente') %}
+          <li>
+            <a
+              href="{{ url_for('tablero_kds.principal') }}"
+              class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group"
+            >
+              <svg
+                class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m2-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
+                />
+              </svg>
+              <span class="flex-1 ms-3 whitespace-nowrap"
+                >Tablero de cocina</span
+              >
+            </a>
+          </li>
+          {% endif %} {% if current_user.has_role('cocina') or
+          current_user.has_role('Cocina') or current_user.has_role('cajero') or
+          current_user.has_role('Cajero') %}
           <li>
             <a
               href="{{ url_for('solicitud_produccion.principal') }}"
@@ -500,6 +528,7 @@
                   Salidas efectivo
                 </a>
               </li>
+
               {% endif %} {% if current_user.has_role('Gerente') or
               current_user.has_role('gerente') %}
               <li>
