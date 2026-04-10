@@ -5,12 +5,12 @@
 
     <div class="flex gap-4 mb-6">
         <a href="{{ url_for('inventario_produccion.principal') }}"
-            class="px-6 py-2.5 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors">
+            class="px-6 py-2.5 text-sm font-semibold text-white bg-orange-500 rounded-full shadow-md shadow-orange-500/30 transition-colors">
             Productos Terminados
         </a>
-        <a href="{{ url_for('inventario_produccion.combos_dinamicos') }}"
+        <a href="{{ url_for('combos.principal') }}"
             class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-            Combos Dinámicos
+            Estructura de Combos
         </a>
     </div>
 
@@ -19,7 +19,7 @@
             <thead class="text-xs text-white uppercase bg-slate-800 dark:bg-slate-800">
                 <tr>
                     <th scope="col" class="px-6 py-3">ID</th>
-                    <th scope="col" class="px-6 py-3">Producto</th>
+                    <th scope="col" class="px-6 py-3">Producto a Granel</th>
                     <th scope="col" class="px-6 py-3">Stock Disponible</th>
                     <th scope="col" class="px-6 py-3">Precio Venta</th>
                     <th scope="col" class="px-6 py-3 text-center">Estado</th>
@@ -37,7 +37,8 @@
                         {{ prod.nombre }}
                     </td>
                     <td class="px-6 py-4">
-                        {{ inv.stock_actual }} Unidades
+                        <span class="font-mono text-blue-600 dark:text-blue-400 font-bold">{{ inv.stock_actual }}</span>
+                        Unidades
                     </td>
                     <td class="px-6 py-4">
                         ${{ "%.2f"|format(prod.precio_venta) }}
@@ -69,7 +70,7 @@
                 {% else %}
                 <tr>
                     <td colspan="6" class="px-6 py-10 text-center text-gray-500 italic dark:text-gray-400">
-                        No hay productos registrados.
+                        No hay productos para producción en lotes registrados.
                     </td>
                 </tr>
                 {% endfor %}

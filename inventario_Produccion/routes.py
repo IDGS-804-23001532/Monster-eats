@@ -1,84 +1,70 @@
-from flask import Blueprint, render_template, request, flash, redirect, session, url_for
-from models import db, Producto, Combo, InventarioProducto
-from datetime import datetime
-from forms import AjusteStockForm, CrearComboForm, VincularComboForm
-from sqlalchemy import text
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from models import db, Producto, InventarioProducto
 from flask_security import login_required, roles_accepted, current_user
-from collections import namedtuple
-from audit_logger import audit
+from forms import AjusteStockForm  
+from audit_logger import audit  
 
 inventario_produccion = Blueprint('inventario_produccion', __name__, url_prefix='/inventario-produccion')
 
-# Creamos estructuras inmutables (Hashables) para engañar a WTForms y Jinja
-InvMock = namedtuple('InvMock', ['stock_actual'])
-ProdMock = namedtuple('ProdMock', ['id_producto', 'nombre', 'precio_venta'])
-
 @inventario_produccion.route('/', methods=['GET', 'POST'])
 @login_required
+<<<<<<< Updated upstream
 @roles_accepted('Cocina') # REGLA: Sólo el Cocina puede visualizar esto
+=======
+@roles_accepted('administrador', 'gerente', 'cocina', 'cocinero')
+>>>>>>> Stashed changes
 def principal():
-    form = AjusteStockForm() 
-    
-    if request.method == 'POST':
-        if form.validate_on_submit():
+    # Instanciamos el formulario de Flask-WTF
+    form = AjusteStockForm()
+
+    # ---------------------------------------------------------
+    # LÓGICA POST: Si el usuario envió el formulario del modal
+    # ---------------------------------------------------------
+    if form.validate_on_submit():
+        try:
             id_prod = form.id_producto.data
-            cantidad_ajuste = form.cantidad.data
+            cantidad_ajuste = form.cantidad.data  # Puede ser positivo (+5) o negativo (-2)
             motivo = form.motivo.data
+
+            # Buscamos el registro de inventario actual
+            inventario = InventarioProducto.query.filter_by(id_producto=id_prod).first()
             
-            try:
-                # Obtenemos el usuario autenticado actualmente
-                user_id = current_user.id_usuario
-                
-                # Ejecutamos el Stored Procedure
-                db.session.execute(
-                    text("CALL sp_ajustar_stock_producto(:p_id, :p_cant, :p_motivo, :p_usr)"),
-                    {'p_id': id_prod, 'p_cant': cantidad_ajuste, 'p_motivo': motivo, 'p_usr': user_id}
-                )
-                db.session.commit()
-                
-                # REGISTRO DE AUDITORÍA: Ajuste de stock
-                # Creará y guardará en la colección "logs_inventario"
-                audit.log_action(
-                    module_name="logs_inventario",
-                    action="Ajuste de Stock Manual", 
-                    details={
-                        "id_producto_afectado": id_prod, 
-                        "cantidad_ajustada": cantidad_ajuste, 
-                        "motivo_declarado": motivo
-                    }, 
-                    level="CRITICAL"
-                )
-                
-                flash('Cambio guardado de forma correcta.', 'success')
-                
-            except Exception as e:
-                db.session.rollback()
-                error_msg = str(e)
-                # Manejamos el error específico del Stored Procedure
-                if "Error_Stock_Negativo" in error_msg:
-                    flash('No puedes restar más unidades de las que tienes disponibles.', 'error')
-                else:
-                    flash('Fallo al intentar guardar en BD.', 'error')
-                    
+            # Si no existía un registro previo, lo creamos desde cero
+            if not inventario:
+                inventario = InventarioProducto(id_producto=id_prod, stock_actual=0)
+                db.session.add(inventario)
+            
+            # Aplicamos la suma algebraica (si ingresó -5, se restará. Si ingresó 10, se sumará)
+            inventario.stock_actual += cantidad_ajuste
+
+            db.session.commit()
+
+            # Guardamos el movimiento en la bitácora de auditoría (MongoDB)
+            audit.log_action(
+                module_name="inventario_produccion", 
+                action="Ajuste Manual de Stock", 
+                details={
+                    "id_producto": id_prod, 
+                    "ajuste": cantidad_ajuste, 
+                    "stock_resultante": inventario.stock_actual,
+                    "motivo": motivo
+                },
+                level="INFO"
+            )
+
+            flash('¡Stock ajustado correctamente!', 'success')
             return redirect(url_for('inventario_produccion.principal'))
 
-    productos_stock = []
-    try:
-        # Obtenemos los datos desde la Vista SQL de forma directa
-        query = text("SELECT id_producto, nombre, precio_venta, stock_actual FROM vw_inventario_productos")
-        # Usamos fetchall() directo para que devuelva tuplas puras en lugar de diccionarios
-        resultados = db.session.execute(query).fetchall()
-        
-        for r in resultados:
-            # Construimos nuestros objetos inmutables apuntando al índice (0=id, 1=nombre, 2=precio, 3=stock)
-            inv = InvMock(stock_actual=r[3])
-            prod = ProdMock(id_producto=r[0], nombre=r[1], precio_venta=r[2])
-            productos_stock.append((inv, prod))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al ajustar stock en producción: {e}")
+            flash('Error en la base de datos al guardar el ajuste.', 'error')
             
-    except Exception as e:
-        print(f"CRÍTICO EN GET: {e}")
-        flash('Asegúrate de haber ejecutado las Vistas y SPs en la base de datos.', 'error')
+    elif request.method == 'POST':
+        # Si el form se envió pero no pasó las validaciones de WTF
+        flash('Error en los datos ingresados. Revisa el formulario.', 'error')
 
+<<<<<<< Updated upstream
     return render_template('inventario_Produccion/principal.html', 
                            productos_stock=productos_stock, 
                            form=form)
@@ -285,3 +271,29 @@ def eliminar_hijo_combo(id_padre, id_hijo):
         db.session.rollback()
         flash('Fallo al quitar.', 'error')
     return redirect(url_for('inventario_produccion.gestionar_combos'))
+=======
+    # 1. Filtramos inteligentemente: Solo productos activos que NO son combos y NO se hacen al momento
+    productos_lote = Producto.query.filter_by(
+        activo=True, 
+    ).all()
+    
+    # 2. Armamos las parejas (tuplas) que tu HTML necesita
+    productos_stock = []
+    for prod in productos_lote:
+        inv = InventarioProducto.query.filter_by(id_producto=prod.id_producto).first()
+        
+        # Si el producto es nuevo y aún no tiene registro de stock, creamos un objeto temporal en 0
+        # (Nota: No lo guardamos en la base de datos aún, solo es para que el HTML pueda pintarlo sin errores)
+        if not inv:
+            inv = InventarioProducto(id_producto=prod.id_producto, stock_actual=0)
+            
+        # Agregamos la pareja exacta (inv, prod) a la lista
+        productos_stock.append((inv, prod))
+    
+    # Mandamos los datos al HTML, incluyendo el formulario para los modales
+    return render_template(
+        'inventario_Produccion/principal.html', 
+        productos_stock=productos_stock, 
+        form=form
+    )
+>>>>>>> Stashed changes

@@ -9,19 +9,31 @@ solicitud_produccion = Blueprint('solicitud_produccion', __name__, url_prefix='/
 
 @solicitud_produccion.route('/')
 @login_required
+<<<<<<< Updated upstream
 @roles_accepted('Gerente', 'Cajero', 'Cocina')
+=======
+@roles_accepted('gerente', 'cajero', 'cocina')
+>>>>>>> Stashed changes
 def principal():
     # Obtenemos productos activos para el formulario de petición
     productos = Producto.query.filter_by(activo=1).all()
     
     # LÓGICA DE VISTAS POR ROL
+<<<<<<< Updated upstream
     if current_user.has_role('Cocina'):
+=======
+    if current_user.has_role('cocina'):
+>>>>>>> Stashed changes
         # La cocina ve todas las peticiones pendientes para aprobarlas
         solicitudes = SolicitudProduccion.query.filter(
             SolicitudProduccion.estado.in_(['Pendiente', 'En Proceso'])
         ).order_by(SolicitudProduccion.fecha_solicitud.desc()).all()
     else:
+<<<<<<< Updated upstream
         # El Cajero ve solo las peticiones que él ha hecho para saber si ya le hicieron caso
+=======
+        # El cajero ve solo las peticiones que él ha hecho para saber si ya le hicieron caso
+>>>>>>> Stashed changes
         solicitudes = SolicitudProduccion.query.filter_by(
             id_usuario_solicita=current_user.id_usuario
         ).order_by(SolicitudProduccion.fecha_solicitud.desc()).limit(20).all()
@@ -30,7 +42,11 @@ def principal():
 
 @solicitud_produccion.route('/crear', methods=['POST'])
 @login_required
+<<<<<<< Updated upstream
 @roles_accepted('Gerente', 'Cajero')
+=======
+@roles_accepted('gerente', 'cajero')
+>>>>>>> Stashed changes
 def crear_solicitud():
     id_producto = request.form.get('id_producto')
     cantidad = request.form.get('cantidad')
@@ -47,7 +63,11 @@ def crear_solicitud():
         db.session.commit()
 
         audit.log_action(module_name="logs_solicitud_produccion", action="Crear Petición Reabastecimiento", details={"id_producto": id_producto, "cantidad": cantidad})
+<<<<<<< Updated upstream
         flash('Petición de reabastecimiento enviada a cocina.', 'success')
+=======
+        flash('Petición de reabastecimiento enviada a Cocina.', 'success')
+>>>>>>> Stashed changes
     except Exception as e:
         db.session.rollback()
         print(e)
@@ -57,7 +77,11 @@ def crear_solicitud():
 
 @solicitud_produccion.route('/aprobar/<int:id_solicitud>', methods=['POST'])
 @login_required
+<<<<<<< Updated upstream
 @roles_accepted('Gerente', 'Cocina')
+=======
+@roles_accepted('gerente', 'cocina')
+>>>>>>> Stashed changes
 def aprobar_solicitud(id_solicitud):
     solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     
@@ -89,7 +113,11 @@ def aprobar_solicitud(id_solicitud):
 
 @solicitud_produccion.route('/rechazar/<int:id_solicitud>', methods=['POST'])
 @login_required
+<<<<<<< Updated upstream
 @roles_accepted('Gerente', 'Cocina')
+=======
+@roles_accepted('gerente', 'cocina')
+>>>>>>> Stashed changes
 def rechazar_solicitud(id_solicitud):
     solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     try:

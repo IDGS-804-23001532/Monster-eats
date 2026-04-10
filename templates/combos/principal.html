@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Combos</h2>
+        <button data-modal-target="modalCrearCombo" data-modal-toggle="modalCrearCombo"
+            class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm">
+            + Estructurar Nuevo Combo
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for combo in combos %}
+        <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ combo.nombre }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ combo.descripcion }}</p>
+                </div>
+                <span
+                    class="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full border border-green-200">
+                    ${{ "%.2f"|format(combo.precio_venta) }}
+                </span>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Contiene:</h4>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    {% for detalle in combo.detalles %}
+                    <li><strong class="text-blue-600">{{ detalle.cantidad }}x</strong> {{ detalle.producto.nombre }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="modalCrearCombo" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/80">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-white rounded-xl shadow dark:bg-gray-800">
+            <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Nuevo Combo</h3>
+                <button type="button" data-modal-hide="modalCrearCombo"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto">X</button>
+            </div>
+
+            <form action="{{ url_for('combos.crear') }}" method="POST" class="p-6">
+                <div class="grid grid-cols-2 gap-4 mb-6 border-b pb-4 dark:border-gray-700">
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre del
+                            Combo</label>
+                        <input type="text" name="nombre" required
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Precio de Venta
+                            ($)</label>
+                        <input type="number" step="0.01" name="precio_venta" required
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descripción</label>
+                        <input type="text" name="descripcion"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Productos que incluye (llena los
+                    necesarios):</h4>
+                <div class="space-y-3 mb-6">
+                    {% for i in range(5) %}
+                    <div class="flex gap-3">
+                        <div class="w-3/4">
+                            <select name="id_producto[]"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 dark:bg-gray-700 dark:text-white">
+                                <option value="">-- Dejar vacío si no se usa --</option>
+                                {% for prod in productos %}
+                                <option value="{{ prod.id_producto }}">{{ prod.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="number" name="cantidad[]" value="" placeholder="Cant." min="1"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 text-center dark:bg-gray-700 dark:text-white">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit"
+                    class="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Guardar
+                    Combo</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

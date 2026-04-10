@@ -209,6 +209,47 @@ class ActualizarCompraForm(Form):
         validators.DataRequired(message='El estado de la compra es requerido')
     ], coerce=str)
 
+<<<<<<< Updated upstream
+=======
+class AjusteStockForm(FlaskForm):
+    id_producto = HiddenField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad (sumar/restar)', validators=[
+        DataRequired(message="Ingresa un número válido")
+    ])
+    motivo = TextAreaField('Motivo del ajuste', validators=[
+        DataRequired(message="El motivo es obligatorio para la auditoría")
+    ])
+    submit = SubmitField('Guardar Ajuste')
+
+class ComboForm(FlaskForm):
+    nombre = StringField('Nombre del Combo', validators=[
+        validators.DataRequired(message='El nombre es obligatorio'),
+        validators.Length(min=3, max=100, message='El nombre debe tener entre 3 y 100 caracteres')
+    ])
+    
+    descripcion = StringField('Descripción', validators=[
+        validators.Optional(),
+        validators.Length(max=255, message='La descripción no puede exceder los 255 caracteres')
+    ])
+    
+    precio_venta = DecimalField('Precio de Venta ($)', validators=[
+        validators.DataRequired(message='El precio es obligatorio'),
+        validators.NumberRange(min=0.01, message='El precio debe ser mayor a 0')
+    ])
+
+class VincularComboForm(FlaskForm):
+    id_padre = SelectField('Combo Base', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un combo base')
+    ])
+    id_hijo = SelectField('Ingrediente Físico', coerce=int, validators=[
+        validators.DataRequired(message='Debes seleccionar un ingrediente')
+    ])
+    cantidad = IntegerField('Cantidad', [
+        validators.DataRequired(message='La cantidad es obligatoria'),
+        validators.NumberRange(min=1, message='La cantidad mínima es 1')
+    ])
+
+>>>>>>> Stashed changes
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [
         validators.DataRequired(message='El nombre de la categoria es requerida')
