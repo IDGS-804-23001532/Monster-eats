@@ -209,8 +209,6 @@ class ActualizarCompraForm(Form):
         validators.DataRequired(message='El estado de la compra es requerido')
     ], coerce=str)
 
-<<<<<<< Updated upstream
-=======
 class AjusteStockForm(FlaskForm):
     id_producto = HiddenField('ID Producto', validators=[DataRequired()])
     cantidad = IntegerField('Cantidad (sumar/restar)', validators=[
@@ -249,7 +247,6 @@ class VincularComboForm(FlaskForm):
         validators.NumberRange(min=1, message='La cantidad mínima es 1')
     ])
 
->>>>>>> Stashed changes
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [
         validators.DataRequired(message='El nombre de la categoria es requerida')
