@@ -3,100 +3,387 @@
 {% block content %}
 <div class="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
 
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Combos</h2>
-        <button data-modal-target="modalCrearCombo" data-modal-toggle="modalCrearCombo"
-            class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm">
-            + Estructurar Nuevo Combo
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-200 dark:border-gray-700 pb-5">
+        <div>
+            <h2 class="text-3xl font-black text-gray-800 dark:text-white uppercase tracking-wide">
+                Gestión de <span class="text-blue-600">Combos</span>
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                Crea paquetes (mínimo 2 productos) agrupando tus productos individuales.
+            </p>
+        </div>
+        <button type="button" data-modal-target="modalCrearCombo" data-modal-toggle="modalCrearCombo"
+            class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2">
+            <i class="fa-solid fa-box-open"></i> Estructurar Nuevo Combo
         </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {% for combo in combos %}
-        <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-            <div class="flex justify-between items-start mb-4">
+        <div
+            class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group flex flex-col">
+
+            <div
+                class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500 opacity-70 group-hover:opacity-100 transition-opacity">
+            </div>
+
+            <div class="flex justify-between items-start mb-4 pl-2">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ combo.nombre }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ combo.descripcion }}</p>
+                    <h3 class="text-xl font-black text-gray-900 dark:text-white leading-tight">{{ combo.nombre }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ combo.descripcion or 'Sin descripción'
+                        }}</p>
                 </div>
                 <span
-                    class="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full border border-green-200">
+                    class="bg-green-50 text-green-700 text-sm font-black px-4 py-1.5 rounded-lg border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 shadow-sm">
                     ${{ "%.2f"|format(combo.precio_venta) }}
                 </span>
             </div>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Contiene:</h4>
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4 pl-2 flex-grow">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Incluye:</h4>
                 <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     {% for detalle in combo.detalles %}
-                    <li><strong class="text-blue-600">{{ detalle.cantidad }}x</strong> {{ detalle.producto.nombre }}
+                    <li class="flex items-center gap-3">
+                        <span
+                            class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded dark:bg-blue-900/50 dark:text-blue-400 text-xs">
+                            {{ detalle.cantidad }}x
+                        </span>
+                        <span class="font-medium">{{ detalle.producto.nombre }}</span>
                     </li>
+                    {% else %}
+                    <li class="text-red-500 italic text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Combo
+                        vacío</li>
                     {% endfor %}
                 </ul>
             </div>
+
+            <div class="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-end pl-2">
+                <button type="button" data-modal-target="modalEditarCombo-{{ combo.id_combo }}"
+                    data-modal-toggle="modalEditarCombo-{{ combo.id_combo }}"
+                    class="text-sm font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:hover:bg-orange-900/40 px-4 py-2 rounded-lg transition-colors">
+                    <i class="fa-solid fa-pen mr-1"></i> Editar Combo
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div
+            class="col-span-full py-16 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <div class="text-gray-400 mb-3"><i class="fa-solid fa-boxes-stacked text-5xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">Aún no hay combos</h3>
+            <p class="text-gray-500 text-sm">Comienza creando tu primer paquete promocional.</p>
         </div>
         {% endfor %}
     </div>
 </div>
+{% endblock %}
 
+{% block modals %}
 <div id="modalCrearCombo" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/80">
+    class="{% if form.errors and not edit_error_id %}flex{% else %}hidden{% endif %} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/80 backdrop-blur-sm">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
-        <div class="relative bg-white rounded-xl shadow dark:bg-gray-800">
-            <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Nuevo Combo</h3>
+        <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+            <div
+                class="flex items-center justify-between p-5 border-b bg-gray-50 dark:bg-gray-700/50 dark:border-gray-700">
+                <h3 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-600"></i> Nuevo Combo
+                </h3>
+
                 <button type="button" data-modal-hide="modalCrearCombo"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto">X</button>
+                    onclick="const f=document.getElementById('formCrearCombo'); f.reset(); f.querySelectorAll('input[type=text], input[name=precio_venta]').forEach(i=>i.value=''); f.querySelectorAll('select').forEach(s=>s.selectedIndex=0); f.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false); f.querySelectorAll('input[name=\'cantidad[]\']').forEach(i=>i.value=1);"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
-            <form action="{{ url_for('combos.crear') }}" method="POST" class="p-6">
-                <div class="grid grid-cols-2 gap-4 mb-6 border-b pb-4 dark:border-gray-700">
+            <form id="formCrearCombo" action="{{ url_for('combos.crear') }}" method="POST" class="p-6" novalidate>
+                {{ form.csrf_token }}
+
+                <div class="grid grid-cols-2 gap-5 mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre del
-                            Combo</label>
-                        <input type="text" name="nombre" required
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if form.nombre.errors and not edit_error_id %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Nombre
+                            del Combo</label>
+                        {{ form.nombre(class="text-sm rounded-xl block w-full p-3 transition-colors " ~ ('bg-red-50
+                        border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-100
+                        dark:border-red-400' if form.nombre.errors and not edit_error_id else 'bg-gray-50
+                        border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900
+                        dark:border-gray-600 dark:text-white'), placeholder="Ej: Paquete Pareja") }}
+                        {% if not edit_error_id %}{% for error in form.nombre.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
                     </div>
+
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Precio de Venta
-                            ($)</label>
-                        <input type="number" step="0.01" name="precio_venta" required
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if form.precio_venta.errors and not edit_error_id %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Precio
+                            de Venta ($)</label>
+                        {{ form.precio_venta(type="number", step="0.01", class="text-sm rounded-xl block w-full p-3
+                        transition-colors " ~ ('bg-red-50 border-red-500 text-red-900 focus:ring-red-500
+                        focus:border-red-500 dark:bg-red-100 dark:border-red-400' if form.precio_venta.errors and not
+                        edit_error_id else 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500
+                        focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white'),
+                        placeholder="0.00") }}
+                        {% if not edit_error_id %}{% for error in form.precio_venta.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
                     </div>
+
                     <div class="col-span-2">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descripción</label>
-                        <input type="text" name="descripcion"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:text-white">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if form.descripcion.errors and not edit_error_id %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Descripción
+                            Breve (Opcional)</label>
+                        {{ form.descripcion(class="text-sm rounded-xl block w-full p-3 transition-colors " ~ ('bg-red-50
+                        border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-100
+                        dark:border-red-400' if form.descripcion.errors and not edit_error_id else 'bg-gray-50
+                        border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900
+                        dark:border-gray-600 dark:text-white'), placeholder="Ej: 2 Hamburguesas, 2 Papas") }}
+                        {% if not edit_error_id %}{% for error in form.descripcion.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
                     </div>
                 </div>
 
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Productos que incluye (llena los
-                    necesarios):</h4>
-                <div class="space-y-3 mb-6">
-                    {% for i in range(5) %}
-                    <div class="flex gap-3">
-                        <div class="w-3/4">
-                            <select name="id_producto[]"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 dark:bg-gray-700 dark:text-white">
-                                <option value="">-- Dejar vacío si no se usa --</option>
-                                {% for prod in productos %}
-                                <option value="{{ prod.id_producto }}">{{ prod.nombre }}</option>
-                                {% endfor %}
+                <h4 class="text-sm font-black text-gray-800 dark:text-white mb-2 uppercase tracking-wider">Armar
+                    Contenido</h4>
+                <p class="text-xs text-orange-600 dark:text-orange-400 mb-4 font-bold">Un combo debe llevar al menos 2
+                    productos.</p>
+
+                <div class="relative w-full mb-6">
+                    <input type="checkbox" id="chk3_crear" class="peer/chk3 hidden">
+                    <input type="checkbox" id="chk4_crear" class="peer/chk4 hidden">
+                    <input type="checkbox" id="chk5_crear" class="peer/chk5 hidden">
+
+                    {% for i in range(2) %}
+                    <div
+                        class="flex gap-3 items-center bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-200 dark:border-gray-600 mb-3">
+                        <div class="flex-grow">
+                            <select name="id_producto[]" required
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-pointer border-l-4 border-l-orange-500">
+                                <option value="" selected disabled>-- Producto Obligatorio {{ i+1 }} --</option>
+                                {% for prod in productos %}<option value="{{ prod.id_producto }}">{{ prod.nombre }}
+                                </option>{% endfor %}
                             </select>
                         </div>
-                        <div class="w-1/4">
-                            <input type="number" name="cantidad[]" value="" placeholder="Cant." min="1"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2 text-center dark:bg-gray-700 dark:text-white">
+                        <div class="w-24">
+                            <input type="number" name="cantidad[]" value="1" min="1" required
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-black rounded-lg block w-full p-2.5 text-center focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div class="w-10"></div>
+                    </div>
+                    {% endfor %}
+
+                    {% for idx in range(3, 6) %}
+                    <div
+                        class="hidden peer-checked/chk{{ idx }}:flex fila-producto gap-3 items-center bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-200 dark:border-gray-600 mb-3 transition-all">
+                        <div class="flex-grow">
+                            <select name="id_producto[]"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-pointer">
+                                <option value="" selected>-- Vacío --</option>
+                                {% for prod in productos %}<option value="{{ prod.id_producto }}">{{ prod.nombre }}
+                                </option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-24">
+                            <input type="number" name="cantidad[]" placeholder="1" min="1"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-black rounded-lg block w-full p-2.5 text-center focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div class="w-10 text-center">
+                            <label for="chk{{ idx }}_crear"
+                                onclick="const p = this.closest('.fila-producto'); p.querySelector('select').selectedIndex=0; p.querySelector('input[type=number]').value=1;"
+                                class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg cursor-pointer block transition-colors dark:hover:bg-red-900/30">
+                                <i class="fa-solid fa-trash"></i>
+                            </label>
                         </div>
                     </div>
                     {% endfor %}
+
+                    <label for="chk3_crear"
+                        class="peer-checked/chk3:hidden w-full py-3 mt-2 border-2 border-dashed border-blue-300 text-blue-600 bg-blue-50/50 hover:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-blue-400 rounded-xl text-sm font-bold flex justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar producto extra</label>
+                    <label for="chk4_crear"
+                        class="hidden peer-checked/chk3:flex peer-checked/chk4:hidden w-full py-3 mt-2 border-2 border-dashed border-blue-300 text-blue-600 bg-blue-50/50 hover:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-blue-400 rounded-xl text-sm font-bold justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar otro producto</label>
+                    <label for="chk5_crear"
+                        class="hidden peer-checked/chk4:flex peer-checked/chk5:hidden w-full py-3 mt-2 border-2 border-dashed border-blue-300 text-blue-600 bg-blue-50/50 hover:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-blue-400 rounded-xl text-sm font-bold justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar último producto</label>
                 </div>
 
-                <button type="submit"
-                    class="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Guardar
-                    Combo</button>
+                <div class="flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button type="button" data-modal-hide="modalCrearCombo"
+                        onclick="const f=document.getElementById('formCrearCombo'); f.reset(); f.querySelectorAll('input[type=text], input[name=precio_venta]').forEach(i=>i.value=''); f.querySelectorAll('select').forEach(s=>s.selectedIndex=0); f.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false); f.querySelectorAll('input[name=\'cantidad[]\']').forEach(i=>i.value=1);"
+                        class="px-5 py-2.5 text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl font-bold dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-2.5 text-white bg-green-600 hover:bg-green-700 rounded-xl font-black shadow-lg shadow-green-500/30 transition-colors">Guardar
+                        Combo</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+{% for combo in combos %}
+{% set is_edit_error = (edit_error_id == combo.id_combo) %}
+{% set num_detalles = combo.detalles|length %}
+
+<div id="modalEditarCombo-{{ combo.id_combo }}" tabindex="-1" aria-hidden="true"
+    class="{% if is_edit_error %}flex{% else %}hidden{% endif %} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/80 backdrop-blur-sm">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden">
+            <div
+                class="flex items-center justify-between p-5 border-b bg-orange-50 dark:bg-orange-900/20 dark:border-gray-700">
+                <h3 class="text-xl font-black text-orange-600 dark:text-orange-500 flex items-center gap-2">
+                    <i class="fa-solid fa-pen"></i> Editar Combo
+                </h3>
+                <button type="reset" data-modal-hide="modalEditarCombo-{{ combo.id_combo }}"
+                    onclick="this.closest('form').reset();"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ url_for('combos.editar', id_combo=combo.id_combo) }}" method="POST" class="p-6" novalidate>
+                {{ form.csrf_token }}
+
+                <div class="grid grid-cols-2 gap-5 mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
+                    <div class="col-span-2 md:col-span-1">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if is_edit_error and form.nombre.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Nombre
+                            del Combo</label>
+                        {{ form.nombre(value=(form.nombre.data if is_edit_error else combo.nombre), class="text-sm
+                        rounded-xl block w-full p-3 transition-colors " ~ ('bg-red-50 border-red-500 text-red-900
+                        focus:border-red-500 focus:ring-red-500 dark:bg-red-100 dark:border-red-400' if is_edit_error
+                        and form.nombre.errors else 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-orange-500
+                        focus:border-orange-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white')) }}
+                        {% if is_edit_error %}{% for error in form.nombre.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
+                    </div>
+
+                    <div class="col-span-2 md:col-span-1">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if is_edit_error and form.precio_venta.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Precio
+                            de Venta ($)</label>
+                        {{ form.precio_venta(value=(form.precio_venta.data if is_edit_error else
+                        "%.2f"|format(combo.precio_venta)), type="number", step="0.01", class="text-sm rounded-xl block
+                        w-full p-3 transition-colors " ~ ('bg-red-50 border-red-500 text-red-900 focus:border-red-500
+                        dark:bg-red-100 dark:border-red-400' if is_edit_error and form.precio_venta.errors else
+                        'bg-gray-50 border-gray-300 text-gray-900 focus:border-orange-500 dark:bg-gray-900
+                        dark:border-gray-600 dark:text-white')) }}
+                        {% if is_edit_error %}{% for error in form.precio_venta.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
+                    </div>
+
+                    <div class="col-span-2">
+                        <label
+                            class="block mb-2 text-sm font-bold {% if is_edit_error and form.descripcion.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Descripción
+                            Breve</label>
+                        {{ form.descripcion(value=(form.descripcion.data if is_edit_error else combo.descripcion or ''),
+                        class="text-sm rounded-xl block w-full p-3 transition-colors " ~ ('bg-red-50 border-red-500
+                        text-red-900 dark:bg-red-100 dark:border-red-400' if is_edit_error and form.descripcion.errors
+                        else 'bg-gray-50 border-gray-300 text-gray-900 focus:border-orange-500 dark:bg-gray-900
+                        dark:border-gray-600 dark:text-white')) }}
+                        {% if is_edit_error %}{% for error in form.descripcion.errors %}<p
+                            class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
+                    </div>
+                </div>
+
+                <h4 class="text-sm font-black text-gray-800 dark:text-white mb-2 uppercase tracking-wider">Modificar
+                    Contenido</h4>
+
+                <div class="relative w-full mb-6">
+                    <input type="checkbox" id="chk3_{{ combo.id_combo }}" class="peer/chk3 hidden" {% if num_detalles>=
+                    3 %}checked{% endif %}>
+                    <input type="checkbox" id="chk4_{{ combo.id_combo }}" class="peer/chk4 hidden" {% if num_detalles>=
+                    4 %}checked{% endif %}>
+                    <input type="checkbox" id="chk5_{{ combo.id_combo }}" class="peer/chk5 hidden" {% if num_detalles>=
+                    5 %}checked{% endif %}>
+
+                    {% for i in range(2) %}
+                    {% set detalle_actual = combo.detalles[i] if num_detalles > i else None %}
+                    <div
+                        class="flex gap-3 items-center bg-gray-50 dark:bg-gray-700/30 p-2.5 rounded-xl border border-gray-200 dark:border-gray-600 mb-3">
+                        <div class="flex-grow">
+                            <select name="id_producto[]" required
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-lg block w-full p-2.5 focus:ring-orange-500 focus:border-orange-500 cursor-pointer dark:bg-gray-800 dark:border-gray-600 dark:text-white border-l-4 border-l-orange-500">
+                                <option value="" disabled {% if not detalle_actual %}selected{% endif %}>-- Obligatorio
+                                    {{ i+1 }} --</option>
+                                {% for prod in productos %}
+                                <option value="{{ prod.id_producto }}" {% if detalle_actual and
+                                    detalle_actual.id_producto==prod.id_producto %}selected{% endif %}>{{ prod.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-24 relative">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs font-bold">X</span>
+                            <input type="number" name="cantidad[]"
+                                value="{{ detalle_actual.cantidad if detalle_actual else 1 }}" min="1" required
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-black rounded-lg block w-full p-2.5 pl-8 text-center focus:ring-orange-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div class="w-10"></div>
+                    </div>
+                    {% endfor %}
+
+                    {% for i in range(2, 5) %}
+                    {% set idx = i + 1 %}
+                    {% set detalle_actual = combo.detalles[i] if num_detalles > i else None %}
+                    <div
+                        class="hidden peer-checked/chk{{ idx }}:flex fila-producto gap-3 items-center bg-gray-50 dark:bg-gray-700/30 p-2.5 rounded-xl border border-gray-200 dark:border-gray-600 mb-3 transition-all">
+                        <div class="flex-grow">
+                            <select name="id_producto[]"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-lg block w-full p-2.5 focus:ring-orange-500 focus:border-orange-500 cursor-pointer dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                                <option value="" {% if not detalle_actual %}selected{% endif %}>-- Vacío --</option>
+                                {% for prod in productos %}
+                                <option value="{{ prod.id_producto }}" {% if detalle_actual and
+                                    detalle_actual.id_producto==prod.id_producto %}selected{% endif %}>{{ prod.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-24 relative">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-xs font-bold">X</span>
+                            <input type="number" name="cantidad[]"
+                                value="{{ detalle_actual.cantidad if detalle_actual else 1 }}" min="1"
+                                class="bg-white border border-gray-300 text-gray-900 text-sm font-black rounded-lg block w-full p-2.5 pl-8 text-center focus:ring-orange-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div class="w-10 text-center">
+                            <label for="chk{{ idx }}_{{ combo.id_combo }}"
+                                onclick="const p = this.closest('.fila-producto'); p.querySelector('select').selectedIndex=0; p.querySelector('input[type=number]').value=1;"
+                                class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg cursor-pointer block transition-colors dark:hover:bg-red-900/30">
+                                <i class="fa-solid fa-trash"></i>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <label for="chk3_{{ combo.id_combo }}"
+                        class="peer-checked/chk3:hidden w-full py-3 mt-2 border-2 border-dashed border-orange-300 text-orange-600 bg-orange-50/50 hover:bg-orange-100 dark:border-gray-600 dark:bg-gray-800 dark:text-orange-400 rounded-xl text-sm font-bold flex justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar producto extra</label>
+                    <label for="chk4_{{ combo.id_combo }}"
+                        class="hidden peer-checked/chk3:flex peer-checked/chk4:hidden w-full py-3 mt-2 border-2 border-dashed border-orange-300 text-orange-600 bg-orange-50/50 hover:bg-orange-100 dark:border-gray-600 dark:bg-gray-800 dark:text-orange-400 rounded-xl text-sm font-bold justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar otro producto</label>
+                    <label for="chk5_{{ combo.id_combo }}"
+                        class="hidden peer-checked/chk4:flex peer-checked/chk5:hidden w-full py-3 mt-2 border-2 border-dashed border-orange-300 text-orange-600 bg-orange-50/50 hover:bg-orange-100 dark:border-gray-600 dark:bg-gray-800 dark:text-orange-400 rounded-xl text-sm font-bold justify-center cursor-pointer transition-colors"><i
+                            class="fa-solid fa-plus-circle mr-2"></i> Agregar último producto</label>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button type="reset" data-modal-hide="modalEditarCombo-{{ combo.id_combo }}"
+                        class="px-5 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-xl font-bold dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors">Cancelar</button>
+                    <button type="submit"
+                        class="px-6 py-2.5 text-white bg-orange-500 hover:bg-orange-600 rounded-xl font-black shadow-lg shadow-orange-500/30 transition-colors"><i
+                            class="fa-solid fa-save mr-2"></i> Actualizar Combo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}
