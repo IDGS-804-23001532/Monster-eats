@@ -1,0 +1,135 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="p-6">
+  <h2 class="text-xl font-semibold text-white mb-4">Merma por Insumo (serie mensual)</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+    <div>
+      <label class="text-xs text-gray-300">Insumo</label>
+      <select id="selectInsumo" class="block w-full bg-[#394E6D] text-white text-sm rounded-lg px-3 py-2">
+        <option value="0">-- Todos --</option>
+        {% for ins in insumos %}
+        <option value="{{ ins.id_insumo }}">{{ ins.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-gray-300">Desde (mes)</label>
+      <input id="startMonth" type="month" class="block w-full bg-[#394E6D] text-white text-sm rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="text-xs text-gray-300">Hasta (mes)</label>
+      <input id="endMonth" type="month" class="block w-full bg-[#394E6D] text-white text-sm rounded-lg px-3 py-2" />
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <button id="btnLoad" class="bg-[#FF6B00] text-white px-4 py-2 rounded">Cargar</button>
+  </div>
+
+  <div class="bg-[#0B1D33] rounded-lg p-4 border border-gray-700">
+    <canvas id="chartMerma" height="120"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const selectInsumo = document.getElementById('selectInsumo');
+  const startMonth = document.getElementById('startMonth');
+  const endMonth = document.getElementById('endMonth');
+  const btnLoad = document.getElementById('btnLoad');
+  const ctx = document.getElementById('chartMerma').getContext('2d');
+  let chart = null;
+
+  function fetchData() {
+    const params = new URLSearchParams();
+    params.append('insumo_id', selectInsumo.value || 0);
+    if (startMonth.value) params.append('start', startMonth.value);
+    if (endMonth.value) params.append('end', endMonth.value);
+    return fetch('/mermas/data?' + params.toString(), { credentials: 'same-origin' })
+      .then(async (res) => {
+        const ct = res.headers.get('content-type') || '';
+        const text = await res.text();
+        if (!res.ok) {
+          console.error('mermas/data error', res.status, text);
+          throw new Error(`HTTP ${res.status}: ${text.substring(0,200)}`);
+        }
+        if (ct.includes('application/json')) {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            console.error('JSON parse error for /mermas/data response:', text);
+            throw e;
+          }
+        }
+        // If we get HTML (login page / error page), dump to console for debugging
+        console.error('Unexpected non-JSON response from /mermas/data:', text);
+        throw new Error('Servidor devolvió HTML en lugar de JSON (posible redirect a login o error). Revisa la consola para más detalles.');
+      });
+  }
+
+  function renderChart(data) {
+    const labels = data.periods.map(p => p.substring(0,7));
+
+    // If multiple datasets, render aggregated merma serie and allow selection
+    const datasets = [];
+
+    data.datasets.forEach((ds, idx) => {
+      const colorHue = (idx * 60) % 360;
+      datasets.push({
+        label: ds.nombre + ' - Merma',
+        data: ds.merma,
+        backgroundColor: `hsl(${colorHue} 80% 55% / 0.9)`,
+        borderColor: `hsl(${colorHue} 80% 40%)`,
+        borderWidth: 1,
+        yAxisID: 'y'
+      });
+      // acumulada rendered as a line on top
+      datasets.push({
+        label: ds.nombre + ' - Acumulada',
+        data: ds.acumulada,
+        type: 'line',
+        borderDash: [6,4],
+        borderColor: `hsl(${colorHue} 80% 30%)`,
+        backgroundColor: 'transparent',
+        fill: false,
+        yAxisID: 'y2'
+      });
+    });
+
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        interaction: {mode: 'index', intersect: false},
+        stacked: false,
+        scales: {
+          y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Merma' } },
+          y2: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Acumulada' }, grid: { drawOnChartArea: false } }
+        }
+      }
+    });
+  }
+
+  btnLoad.addEventListener('click', function () {
+    fetchData().then(json => renderChart(json)).catch(err => alert('Error cargando datos: ' + err));
+  });
+
+  // load default (last 6 months)
+  const now = new Date();
+  const last = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  startMonth.value = last.toISOString().slice(0,7);
+  endMonth.value = now.toISOString().slice(0,7);
+  btnLoad.click();
+});
+</script>
+{% endblock %}
