@@ -11,8 +11,9 @@ combos = Blueprint('combos', __name__, url_prefix='/combos')
 def principal():
     lista_combos = Combo.query.filter_by(activo=True).all()
     productos = Producto.query.filter_by(activo=True).all()
-    form = ComboForm()
-    return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, edit_error_id=None)
+    
+    # Enviamos dos formularios limpios independientes
+    return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=ComboForm(), form_edit=ComboForm(), edit_error_id=None)
 
 @combos.route('/crear', methods=['POST'])
 @login_required
@@ -37,10 +38,9 @@ def crear():
                         detalles_a_guardar.append({'id_prod': int(id_prod), 'cant': int(cant)})
                         productos_validos += 1
             
-            # Validación backend: Mínimo 2 productos
             if productos_validos < 2:
                 flash('Un combo debe contener al menos 2 productos válidos.', 'error')
-                return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, edit_error_id=None)
+                return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, form_edit=ComboForm(), edit_error_id=None)
 
             nuevo_combo = Combo(
                 nombre=form.nombre.data, 
@@ -70,18 +70,19 @@ def crear():
             
     else:
         flash('Corrige los campos marcados en rojo.', 'error')
-        return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, edit_error_id=None)
+        # Si crear falla, form retiene los errores, y form_edit va limpio
+        return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, form_edit=ComboForm(), edit_error_id=None)
 
 
 @combos.route('/editar/<int:id_combo>', methods=['POST'])
 @login_required
 @roles_accepted('administrador', 'gerente')
 def editar(id_combo):
-    form = ComboForm(request.form)
+    form_edit = ComboForm(request.form) # <--- Usamos form_edit
     lista_combos = Combo.query.filter_by(activo=True).all()
     productos = Producto.query.filter_by(activo=True).all()
 
-    if form.validate():
+    if form_edit.validate():
         try:
             ids_productos = request.form.getlist('id_producto[]')
             cantidades = request.form.getlist('cantidad[]')
@@ -100,15 +101,14 @@ def editar(id_combo):
                         ))
                         productos_validos += 1
                         
-            # Validación backend: Mínimo 2 productos al editar
             if productos_validos < 2:
                 flash('Error: Un combo debe contener al menos 2 productos válidos.', 'error')
-                return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, edit_error_id=id_combo)
+                return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=ComboForm(), form_edit=form_edit, edit_error_id=id_combo)
 
             combo_existente = Combo.query.get_or_404(id_combo)
-            combo_existente.nombre = form.nombre.data
-            combo_existente.precio_venta = form.precio_venta.data
-            combo_existente.descripcion = form.descripcion.data
+            combo_existente.nombre = form_edit.nombre.data
+            combo_existente.precio_venta = form_edit.precio_venta.data
+            combo_existente.descripcion = form_edit.descripcion.data
             
             DetalleCombo.query.filter_by(id_combo=id_combo).delete()
             for det in detalles_a_guardar:
@@ -124,6 +124,6 @@ def editar(id_combo):
             flash('Hubo un error al actualizar el combo.', 'error')
             return redirect(url_for('combos.principal'))
     else:
-        # Si la validación de WTForms falla, regresamos el HTML con la variable edit_error_id
         flash('Corrige los errores en rojo del combo.', 'error')
-        return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, edit_error_id=id_combo)
+        # Si editar falla, form_edit retiene los errores, y form (Crear) va completamente en blanco
+        return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=ComboForm(), form_edit=form_edit, edit_error_id=id_combo)
