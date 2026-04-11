@@ -82,7 +82,6 @@ class Compra(db.Model):
     fecha_compra = db.Column(db.DateTime, nullable=False, default=func.now(), index=True)
     total = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     estado_compra = db.Column(db.Enum('Completada', 'Cancelada', name='estado_compra_enum'), nullable=False, default='Completada', index=True)
-
     # Relaciones
     proveedor = db.relationship('Proveedor', backref='compras', lazy=True)
     usuario = db.relationship('Usuario', backref='compras', lazy=True)
@@ -159,6 +158,7 @@ class DetalleCompra(db.Model):
         CheckConstraint('costo_unitario >= 0', name='chk_detalle_compras_costo'),
         UniqueConstraint('id_compra', 'id_insumo', name='uq_detalle_compras'),
     )
+    
 # ==========================================================================
 # MÓDULO DE INVENTARIO DE MATERIA PRIMA - LOTE INSUMO
 # ==========================================================================

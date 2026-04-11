@@ -146,7 +146,7 @@ def ventas():
 
         except (OperationalError, DBAPIError) as e:
             db.session.rollback()
-
+            print(e)
             mensaje_usuario = 'Ocurrio un error al procesar la operación'
 
             try:

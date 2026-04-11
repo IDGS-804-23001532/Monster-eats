@@ -84,15 +84,15 @@ def detalle(id):
                 p.precio_venta,
                 c.nombre AS categoria,
                 p.activo,
-                COALESCE(SUM(r.cantidad_requerida * i.costo_unitario), 0) AS costo_total
+                COALESCE(SUM(r.cantidad_requerida * i.costo_unitario), 0) AS costo_total,
+                p.imagen
             FROM productos p
             JOIN categorias c ON p.id_categoria = c.id_categoria
             LEFT JOIN recetas r ON p.id_producto = r.id_producto
             LEFT JOIN insumos i ON r.id_insumo = i.id_insumo
             WHERE p.id_producto = :id
-            GROUP BY p.id_producto, p.nombre, p.precio_venta, c.nombre, p.activo
+            GROUP BY p.id_producto, p.nombre, p.precio_venta, c.nombre, p.activo, p.imagen
         """)
-        
         producto_result = db.session.execute(query_producto, {'id': id}).fetchone()
         db.session.commit()
         
@@ -107,7 +107,8 @@ def detalle(id):
             'precio_venta': float(producto_result[2]),
             'categoria': producto_result[3],
             'activo': producto_result[4],
-            'costo_total': float(producto_result[5])
+            'costo_total': float(producto_result[5]),
+            'imagen': producto_result[6]
         }
         
         # 2. Obtener insumos de la receta

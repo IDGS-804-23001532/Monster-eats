@@ -9,10 +9,6 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-      rel="stylesheet"
-    />
     <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
 
     <script>
@@ -23,13 +19,6 @@
     </script>
 
     <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 0,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 24;
-      }
       .editorial-shadow {
         box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
       }
@@ -74,9 +63,7 @@
             id="menu-toggle"
           >
             <!-- Icono devuelto a un tamaño estético y manejable -->
-            <span class="material-symbols-outlined text-[35px] md:text-[40px] font-bold drop-shadow-md"
-              >menu</span
-            >
+            <svg class="w-10 h-10 inline-block drop-shadow-md text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           </button>
           
           <a href="/" class="cursor-pointer">
@@ -155,12 +142,12 @@
             class="bg-gray-900/80 backdrop-blur-md p-2 rounded-full flex gap-2 mb-8 editorial-shadow border border-gray-700/50"
           >
             <button
-              class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:scale-105 active:scale-95"
+               class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:scale-105 active:scale-95"
             >
               Monster Delivery
             </button>
             <button
-              class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-800 transition-all"
+               class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-800 transition-all"
             >
               Recoger aquí
             </button>
@@ -169,9 +156,7 @@
             <div
               class="flex-1 bg-gray-900/90 backdrop-blur-md rounded-xl flex items-center px-6 py-4 editorial-shadow border border-gray-700 focus-within:ring-2 ring-[#FF6B00]"
             >
-              <span class="material-symbols-outlined text-gray-400 mr-3"
-                >location_on</span
-              >
+              <svg class="w-6 h-6 inline-block text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
               <input
                 class="bg-transparent border-none outline-none w-full text-lg font-medium text-white focus:ring-0 placeholder-gray-500"
                 placeholder="Busca una dirección de entrega"
@@ -179,7 +164,7 @@
               />
             </div>
             <button
-              class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]"
+               class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]"
             >
               Comenzar
             </button>
@@ -195,118 +180,97 @@
           <div
             class="flex flex-wrap md:flex-nowrap overflow-x-auto justify-center gap-6 pb-4 scrollbar-hide"
           >
-            <div
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >lunch_dining</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="7" ry="3" stroke-width="2"></ellipse><path stroke-width="2" stroke-linecap="round" d="M5 14h14v2a4 4 0 01-14 0v-2z"></path><path stroke-width="2" stroke-linecap="round" d="M12 11h.01"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Hamburguesas</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Papas') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >egg</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 6V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v2M7 10v10a1 1 0 001 1h8a1 1 0 001-1V10M8 6v4m4-4v4m4-4v4"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Papas</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Desayunos') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >restaurant</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4v16M7 4H5v7a3 3 0 006 0V4H9v7H7V4zm12 0h-2c-1.105 0-2 .895-2 2v5c0 1.105.895 2 2 2h2V4zm-2 9v7h2v-7h-2z"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Desayunos</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Bebidas') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >local_drink</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 3h12l-1.5 18h-9L6 3z"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Bebidas</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Postres') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >icecream</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 12c0-2-1.5-4-4-4s-4 2-4 4l4 10 4-10z"></path><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4c-3 0-5 2.5-5 5h10c0-2.5-2-5-5-5z"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Postres</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Hot Dogs') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >egg_alt</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="8" rx="4" stroke-width="2"></rect><path stroke-width="2" stroke-linecap="round" d="M2 12h20"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Hot Dogs</span
               >
-            </div>
-            <div
+            </a>
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Combos') }}"
               class="flex flex-col items-center gap-3 group cursor-pointer min-w-[100px]"
             >
               <div
                 class="w-20 h-20 rounded-full bg-gray-100 dark:bg-[#1F2937] border border-gray-200 dark:border-gray-700 flex items-center justify-center editorial-shadow group-hover:bg-[#FF6B00]/10 dark:group-hover:bg-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 transition-colors"
               >
-                <span
-                  class="material-symbols-outlined text-3xl text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors"
-                  >featured_seasonal_and_gifts</span
-                >
+                <svg class="w-8 h-8 inline-block text-[#FF6B00] group-hover:text-[#E65A00] dark:group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
               </div>
               <span
                 class="font-bold text-sm text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
                 >Combos</span
               >
-            </div>
+            </a>
           </div>
         </div>
       </section>
@@ -425,10 +389,7 @@
                   A la puerta de tu casa en menos de 30 minutos, calientito.
                 </p>
               </div>
-              <span
-                class="material-symbols-outlined text-8xl absolute -bottom-4 -right-4 text-[#FF6B00]/10 group-hover:scale-110 group-hover:text-[#FF6B00]/20 transition-all"
-                >rocket_launch</span
-              >
+              <svg class="w-32 h-32 absolute -bottom-4 -right-4 text-[#FF6B00]/10 group-hover:scale-110 group-hover:text-[#FF6B00]/20 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.59 14.37a6 6 0 01-5.84 7.36c-5.91.54-7.5-3.5-7.5-3.5a18.27 18.27 0 014.24-5.4A18.27 18.27 0 0111 8.5c0 0-4.04-1.58-3.5-7.5a6 6 0 017.36-5.84l4.24 4.24c3.5 1 5.5 3 5.5 3l-4.24.47-5.77-5.77-1.41 1.41 5.77 5.77-.47 4.24s-2 2-3 5.5l-4.24-4.24z"></path></svg>
             </div>
 
             <div
@@ -448,9 +409,7 @@
                 </p>
               </div>
               <div class="flex gap-2 items-center cursor-pointer">
-                <span class="material-symbols-outlined text-[#FF6B00]"
-                  >smartphone</span
-                >
+                <svg class="w-5 h-5 inline-block text-[#FF6B00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 <span class="font-bold text-[#FF6B00]">Descargar</span>
               </div>
             </div>
@@ -505,10 +464,7 @@
                 class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
                 >¿Qué medios de pago acepta Monster Eats?</span
               >
-              <span
-                class="material-symbols-outlined text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                >expand_more</span
-              >
+              <svg class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
           </div>
           <div
@@ -521,10 +477,7 @@
                 class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
                 >¿Cómo puedo cancelar mi pedido?</span
               >
-              <span
-                class="material-symbols-outlined text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                >expand_more</span
-              >
+              <svg class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
           </div>
           <div
@@ -537,10 +490,7 @@
                 class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
                 >Seguimiento del estado de mi pedido</span
               >
-              <span
-                class="material-symbols-outlined text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                >expand_more</span
-              >
+              <svg class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
           </div>
         </div>
@@ -629,7 +579,7 @@
                 class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent flex items-center justify-center hover:bg-[#FF6B00] dark:hover:bg-[#FF6B00] hover:text-white transition-all text-gray-500 dark:text-gray-400"
                 href="#"
               >
-                <span class="material-symbols-outlined text-xl">share</span>
+                <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
               </a>
             </div>
           </div>

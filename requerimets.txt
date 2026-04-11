@@ -19,7 +19,7 @@ Flask-Principal==0.4.0
 Flask-Security==5.6.2
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
-greenlet>=3.1.1
+greenlet==3.1.1
 idna==3.6
 importlib_resources==6.5.2
 itsdangerous==2.1.2
@@ -41,4 +41,3 @@ tomli==2.4.0
 typing_extensions==4.15.0
 Werkzeug==3.0.1
 wrapt==2.1.2
-WTForms==3.1.2

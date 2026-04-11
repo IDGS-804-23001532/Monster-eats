@@ -61,8 +61,7 @@
       <p>TOTAL: ${{ "%.2f"|format(cabecera.total) }}</p>
       <p>Método: {{ cabecera.metodo_pago }}</p>
       <p>
-        RECIBIDO: ${{ "%.2f"|format(cabecera.monto_recibido or cabecera.total)
-        }}
+        RECIBIDO: ${{ "%.2f"|format(cabecera.monto_recibido or cabecera.total) }}
       </p>
       <p>CAMBIO: ${{ "%.2f"|format(cabecera.cambio) }}</p>
     </div>
