@@ -137,18 +137,18 @@
           class="flex flex-col md:flex-row md:items-end justify-between gap-6"
         >
           <div class="max-w-2xl">
+          <div class="max-w-2xl">
             <span
               class="text-primary font-bold tracking-widest uppercase text-xs mb-4 block"
-              >Categories / Beverage Program</span
+              >Menú / {{ categoria_nombre }}</span
             >
             <h1
               class="text-5xl md:text-7xl font-extrabold text-on-surface tracking-tighter leading-none mb-6"
             >
-              Refrescos &amp; Bebidas
+              {{ categoria_nombre }}
             </h1>
             <p class="text-on-surface-variant text-lg max-w-lg leading-relaxed">
-              Curated hydration for the modern palate. From house-made botanical
-              ferments to our signature nitrogen-infused cold brews.
+              Explora nuestra selección especialmente preparada de {{ categoria_nombre|lower }}. Calidad y sabor genuinamente monstruoso en cada bocado.
             </p>
           </div>
           <div class="hidden md:block">
@@ -170,138 +170,63 @@
       </section>
       <!-- Product Grid (Asymmetric Editorial Layout) -->
       <section class="grid grid-cols-1 md:grid-cols-12 gap-8">
-        <!-- Featured Large Item -->
-        <div class="md:col-span-8 group cursor-pointer">
-          <div
-            class="relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9]"
-          >
-            <img
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              data-alt="Close up of a refreshing artisan lemonade with fresh mint leaves and lemon slices in a condensation-covered glass, bright natural sunlight"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlPQgB5CRwmNW7MN3nSrf25eNBDycPcpA8T8JTuRuW1jX07BMYxgga-0fp0V7Yt7z8UctZc_Z8PZkx706gC6XB7BQAE1zxsq2ilaeUD8qqQ4uo5gHg08f7Po0WXl6QJPaZuaZHTun_SrTeT_16vNXEZzDsCLoUJoVl38vkZPM6Cbee3T_Jj54pKCF2yCjzumaawW6g-I2FxFVz3QsQ--XNEYcyuCgMfKSxBB6hEVPVgNDcTCzbYYGrsYQBMmPtjtQnWp35OJ-aidCw"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8"
-            >
-              <div class="flex justify-between items-end">
-                <div>
-                  <h3 class="text-white text-3xl font-bold mb-2">
-                    Artisan Lemonade
-                  </h3>
-                  <p
-                    class="text-white/80 text-sm font-medium uppercase tracking-widest"
-                  >
-                    Starting from $4.50
-                  </p>
+        {% if not productos %}
+           <div class="md:col-span-12 py-20 text-center text-on-surface-variant flex flex-col items-center">
+              <span class="material-symbols-outlined text-6xl text-primary/30 mb-4">restaurant_menu</span>
+              <h2 class="text-2xl font-bold mb-2">Aún estamos cocinando...</h2>
+              <p>Actualmente no contamos con elementos activos en la categoría <strong>{{ categoria_nombre }}</strong>.</p>
+           </div>
+        {% else %}
+          {% for producto in productos %}
+            {% if loop.index == 1 %}
+            <!-- Featured Large Item -->
+            <div class="md:col-span-8 group cursor-pointer">
+              <div class="relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9]">
+                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
+                  <div class="flex justify-between items-end">
+                    <div>
+                      <h3 class="text-white text-3xl font-bold mb-2">{{ producto.nombre }}</h3>
+                      <p class="text-white/80 text-sm font-medium uppercase tracking-widest">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
+                    </div>
+                    <span class="bg-primary text-on-primary p-4 rounded-full material-symbols-outlined shadow-lg scale-95 active:duration-100 hover:bg-primary-container transition-all">add</span>
+                  </div>
                 </div>
-                <span
-                  class="bg-primary text-on-primary p-4 rounded-full material-symbols-outlined shadow-lg scale-95 active:duration-100 hover:bg-primary-container transition-all"
-                >
-                  add
-                </span>
               </div>
             </div>
-          </div>
-        </div>
-        <!-- Side Item 1 -->
-        <div class="md:col-span-4 group cursor-pointer">
-          <div class="flex flex-col h-full">
-            <div
-              class="relative overflow-hidden rounded-xl bg-surface-container-low flex-grow aspect-square mb-4"
-            >
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                data-alt="Three colorful glass bottles of craft sodas with vintage labels on a wooden table, soft morning light"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCePw_EwmQM5zEgPeW_vVhu2yxiXc1ioAGZvqjCLUZpTAQPabPM1-rsBbHtuVZuUbAhAXhYPU53m_h_b4nUSPCT0SZocQoVmZlM2Z_ik3CXJCZrXrOctwC-pmaCExOx_rklJNhtFb2wLnxTbCPBZMfF8xlOFIVGvcxnDX6FaGJXADininUfvIlZExTgl2QFgnsbUeW2oJrS6STp_7TOXGS5YKdaAwHW0NvSKCs1AYxD2d1u9SbINxMY5LEVHybQ4fQf7TUcmLspn87k"
-              />
+            {% elif loop.index == 2 %}
+            <!-- Side Item 1 -->
+            <div class="md:col-span-4 group cursor-pointer">
+              <div class="flex flex-col h-full">
+                <div class="relative overflow-hidden rounded-xl bg-surface-container-low flex-grow aspect-square mb-4 border border-outline-variant/30">
+                  <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
+                </div>
+                <div class="px-2">
+                  <h3 class="text-xl font-bold text-on-surface">{{ producto.nombre }}</h3>
+                  <p class="text-primary font-semibold text-sm mt-1">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
+                </div>
+              </div>
             </div>
-            <div class="px-2">
-              <h3 class="text-xl font-bold text-on-surface">Craft Sodas</h3>
-              <p class="text-primary font-semibold text-sm">
-                Starting from $3.75
-              </p>
+            {% else %}
+            <!-- Monster Grid Items -->
+            <div class="md:col-span-4 group cursor-pointer">
+              <div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/20 transition-all hover:bg-surface-container-low hover:border-outline-variant shadow-sm hover:shadow-md">
+                <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
+                  <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
+                </div>
+                <h3 class="text-lg font-bold text-on-surface leading-tight">{{ producto.nombre }}</h3>
+                <div class="flex justify-between items-center mt-3">
+                  <span class="text-primary font-black">${{ "%.2f"|format(producto.precio_venta|float) }}</span>
+                  <span class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm transition-colors hover:brightness-110">add_shopping_cart</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <!-- Monster Grid Items -->
-        <div class="md:col-span-4 group cursor-pointer">
-          <div
-            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
-          >
-            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                data-alt="Iced monster coffee with swirling milk and dark espresso, tall glass with ice cubes, dark moody lighting"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN77zlsT-U5qWFzASd53bU4Hg1inDww2o6dS2LhqgryMJ5FbIX4-xK9Lb5zCMP_TexrXtTFFt3OcHNw4LwiOmCPigYQR3ZaniyrgJ3gW9k25EiIGwgYynyENGXw-f_Ah5tkoVNDJoBGJfL8mRG9W14T-udOS1eI13FpVZUweIQnC5GySty4lr6N1ZFNR8Y41CLc5pF8QVjQQXV9GYEn9aY134_rGAG554VZ229POGSro3TXZHxueXgLk-p3GikOeQjalNQMDyLLgkj"
-              />
-            </div>
-            <h3 class="text-lg font-bold text-on-surface">
-              Iced Monster Coffee
-            </h3>
-            <p class="text-on-surface-variant text-sm mb-4">
-              Nitrogen infused, triple-shot reserve beans.
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-primary font-bold">Starting from $5.25</span>
-              <span
-                class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm"
-                >bolt</span
-              >
-            </div>
-          </div>
-        </div>
-        <div class="md:col-span-4 group cursor-pointer">
-          <div
-            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
-          >
-            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                data-alt="A tall glass of sparkling hibiscus iced tea with fresh berries and crushed ice, bright airy studio lighting"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCosi1VAGINR5hLVQUGw9TQk4o_4SPkmeQnyssncTTzxZ_y02gxnrem5t2ZzzyTtigZlZZ2Gg_B3DRaoaEdZNJY4sLyY4hoMHwEETKTpMzRZoUJk3PyXJgdjdA9UK5t5MArc-c3X0lNs8g1yeFeoHR4Bjp8R-Udlfxs8eZqZBR05GV6ReOlvYXBfHCllIfkn7k8UgPEfYYCr4DBnmqQb2Xv4dB2oWesTd3tXJ0UXuZvU4kDzL6Cwx4xG6v8rJFTIJgFmswIfHsxj3y-"
-              />
-            </div>
-            <h3 class="text-lg font-bold text-on-surface">
-              Sparkling Hibiscus
-            </h3>
-            <p class="text-on-surface-variant text-sm mb-4">
-              Organic petals with a hint of agave and lime.
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-primary font-bold">Starting from $4.00</span>
-              <span
-                class="material-symbols-outlined text-on-tertiary-container bg-tertiary-container px-2 py-1 rounded-lg text-sm"
-                >eco</span
-              >
-            </div>
-          </div>
-        </div>
-        <div class="md:col-span-4 group cursor-pointer">
-          <div
-            class="bg-surface-container-lowest rounded-xl p-4 transition-all hover:bg-surface-container-low"
-          >
-            <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                data-alt="Cold pressed orange and ginger juice in a glass bottle, vibrant orange color, minimalist aesthetic"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc1o33vsJsqkezZXkB2QSuaStI39Ut0XONT91V1VKjjPysCaJaY1_Ie3H2JGQa4eocOAQj_z9EJTtfVYCh6xE8lL_6sy8wRTxuCgvR5knm9fvX1-jPMV_n2DMdjL0MM_z_niJwEiU18EPtEN4htZjGuCm1GqoiwiijV4JrdO-NkNkCI8Qfrb_XwFO1l1XWAypQq__i3WfsYUpNnZZHStJxxW7JToYDr6GGfSSjv90EGCiot-II85Ui9aH7tWfq8EXdYhGuZweSBnK3"
-              />
-            </div>
-            <h3 class="text-lg font-bold text-on-surface">
-              Fresh Pressed Citrus
-            </h3>
-            <p class="text-on-surface-variant text-sm mb-4">
-              Daily squeeze of seasonal blood orange and grapefruit.
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-primary font-bold">Starting from $6.00</span>
-              <span
-                class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm"
-                >sunny</span
-              >
-            </div>
-          </div>
-        </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </section>
       <!-- Newsletter / Promo Section (Kinetic Design) -->
       <section
