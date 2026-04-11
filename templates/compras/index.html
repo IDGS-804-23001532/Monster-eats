@@ -317,6 +317,7 @@ camposNuevos %} {% block content %}
         id="formNuevaCompra"
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <div id="formErrorCompra" class="hidden text-sm text-red-400 mb-2"></div>
 
         <div class="py-4 md:py-6 space-y-4">
           <!-- Proveedor -->
@@ -518,7 +519,7 @@ camposNuevos %} {% block content %}
               <th class="px-4 py-2">Insumo</th>
               <th class="px-4 py-2">Cantidad</th>
               <th class="px-4 py-2">Unidad</th>
-              <th class="px-4 py-2">Costo Unit.</th>
+              <th class="px-4 py-2">Precio</th>
               <th class="px-4 py-2">Subtotal</th>
             </tr>
           </thead>
@@ -762,7 +763,7 @@ camposNuevos %} {% block content %}
                 <th class="px-3 py-2">Insumo</th>
                 <th class="px-3 py-2">Cantidad</th>
                 <th class="px-3 py-2">Unidad</th>
-                <th class="px-3 py-2">Costo U.</th>
+                <th class="px-3 py-2">Precio</th>
                 <th class="px-3 py-2">Subtotal</th>
               </tr>
             </thead>
@@ -849,6 +850,12 @@ camposNuevos %} {% block content %}
       {% endfor %}
     ];
 
+    const conversionsData = [
+      {% for c in conversions %}
+      { id_insumo: {{ c.id_insumo }}, id_unidad_compra: {{ c.id_unidad_compra }}, cantidad_equivalente_base: {{ c.cantidad_equivalente_base }} },
+      {% endfor %}
+    ];
+
     function crearLinea() {
       lineaCount++;
       const div = document.createElement("div");
@@ -886,6 +893,7 @@ camposNuevos %} {% block content %}
             <select name="unidad_id[]" class="select-unidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required>
               ${optionsUnidad}
             </select>
+            <p class="equiv-note text-xs text-gray-300 mt-1"></p>
           </div>
         </div>
         <div class="grid grid-cols-4 gap-2">
@@ -894,8 +902,8 @@ camposNuevos %} {% block content %}
             <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
           </div>
           <div>
-            <label class="block mb-1 text-xs text-gray-400">Costo U.</label>
-            <input type="number" name="costo_unit[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
+            <label class="block mb-1 text-xs text-gray-400">Precio</label>
+            <input type="number" name="precio[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
           </div>
           <div>
             <label class="block mb-1 text-xs text-gray-400">Caducidad</label>
@@ -921,11 +929,117 @@ camposNuevos %} {% block content %}
           inputCosto.value = selected.dataset.costo;
           calcularSubtotal(div);
         }
-        // Auto-seleccionar la unidad base del insumo
-        if (selected.dataset.unidad) {
-          selectUnidad.value = selected.dataset.unidad;
+        // Filtrar unidades según conversión y unidad base
+        const insumoId = selected.value ? parseInt(selected.value) : null;
+        const baseUnit = selected.dataset.unidad ? parseInt(selected.dataset.unidad) : null;
+        populateUnits(selectUnidad, insumoId, baseUnit);
+        // Auto-seleccionar la unidad base del insumo si existe
+        if (baseUnit) {
+          selectUnidad.value = baseUnit;
         }
+        // store insumo/base on select for later use
+        if (insumoId) selectUnidad.dataset.insumoId = insumoId;
+        if (baseUnit) selectUnidad.dataset.baseUnit = baseUnit;
+        // Update equivalence note
+        const note = div.querySelector('.equiv-note');
+        updateEquivalence(selectUnidad, note);
       });
+
+      // update equivalence when unit selection changes
+      selectUnidad.addEventListener('change', function () {
+        const note = div.querySelector('.equiv-note');
+        updateEquivalence(this, note);
+      });
+
+      function populateUnits(selectElem, insumoId, baseUnitId) {
+        // Preserve previously selected value if still valid
+        const prev = selectElem.value;
+        selectElem.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '-- Unidad --';
+        selectElem.appendChild(placeholder);
+
+        if (!insumoId) {
+          unidadesData.forEach(function (um) {
+            const opt = document.createElement('option');
+            opt.value = um.id;
+            opt.textContent = um.nombre;
+            selectElem.appendChild(opt);
+          });
+          if (prev) selectElem.value = prev;
+          return;
+        }
+
+        // Add base unit first
+        if (baseUnitId) {
+          const base = unidadesData.find(u => u.id === baseUnitId);
+          if (base) {
+            const opt = document.createElement('option');
+            opt.value = base.id;
+            opt.textContent = base.nombre;
+            selectElem.appendChild(opt);
+          }
+        }
+
+        // Add converted units for this insumo
+        conversionsData.forEach(function (conv) {
+          if (conv.id_insumo === insumoId) {
+            // don't duplicate base unit
+            if (conv.id_unidad_compra === baseUnitId) return;
+            const um = unidadesData.find(u => u.id === conv.id_unidad_compra);
+            if (um) {
+              const opt = document.createElement('option');
+              opt.value = um.id;
+              opt.textContent = um.nombre;
+              selectElem.appendChild(opt);
+            }
+          }
+        });
+
+        if (prev) {
+          const stillValid = Array.from(selectElem.options).some(o => o.value == prev);
+          if (stillValid) selectElem.value = prev;
+        }
+        // ensure dataset updated
+        if (insumoId) selectElem.dataset.insumoId = insumoId;
+        if (baseUnitId) selectElem.dataset.baseUnit = baseUnitId;
+      }
+
+      function updateEquivalence(selectElem, noteElem) {
+        // Clear previous invalid state
+        selectElem.classList.remove('ring-2', 'ring-red-600');
+        selectElem.classList.remove('invalid-unit');
+        if (!noteElem) return;
+        const insumoId = selectElem.dataset.insumoId ? parseInt(selectElem.dataset.insumoId) : null;
+        const baseUnitId = selectElem.dataset.baseUnit ? parseInt(selectElem.dataset.baseUnit) : null;
+        const sel = selectElem.value ? parseInt(selectElem.value) : null;
+        if (!insumoId || !sel) {
+          noteElem.textContent = '';
+          return;
+        }
+
+        if (baseUnitId && sel === baseUnitId) {
+          noteElem.textContent = 'Unidad base';
+          return;
+        }
+
+        // find conversion
+        const conv = conversionsData.find(c => c.id_insumo === insumoId && c.id_unidad_compra === sel);
+        const selUnit = unidadesData.find(u => u.id === sel);
+        const baseUnit = unidadesData.find(u => u.id === baseUnitId);
+        if (conv && selUnit && baseUnit) {
+          // format number with up to 4 decimals trimmed
+          const val = parseFloat(conv.cantidad_equivalente_base);
+          const valStr = Number.isInteger(val) ? val.toString() : val.toFixed(4).replace(/0+$/,'').replace(/\.$/, '');
+          noteElem.textContent = `1 ${selUnit.nombre} = ${valStr} ${baseUnit.nombre}`;
+          return;
+        }
+
+        // no conversion found -> mark invalid
+        noteElem.textContent = 'No existe conversión';
+        selectElem.classList.add('ring-2', 'ring-red-600', 'invalid-unit');
+      }
 
       // Calcular subtotal al cambiar cantidad o costo
       div.querySelector(".input-cantidad").addEventListener("input", () => calcularSubtotal(div));
@@ -960,6 +1074,33 @@ camposNuevos %} {% block content %}
 
     // Agregar primera línea automáticamente
     crearLinea();
+
+    // Validación antes de enviar: bloquear si hay unidades inválidas
+    form.addEventListener('submit', function (e) {
+      const invalidUnits = document.querySelectorAll('.select-unidad.invalid-unit');
+      const errorDiv = document.getElementById('formErrorCompra');
+      if (invalidUnits.length > 0) {
+        e.preventDefault();
+        errorDiv.textContent = 'Error: Hay una o más unidades sin conversión válida. Corrige antes de enviar.';
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('block');
+        invalidUnits[0].focus();
+        return false;
+      }
+      // Ensure at least one detail line
+      const lineas = document.querySelectorAll('#lineasCompra > div');
+      if (!lineas || lineas.length === 0) {
+        e.preventDefault();
+        errorDiv.textContent = 'Agrega al menos una línea de insumo antes de registrar la compra.';
+        errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('block');
+        return false;
+      }
+      // hide previous error
+      errorDiv.classList.add('hidden');
+      errorDiv.classList.remove('block');
+      return true;
+    });
   });
 </script>
 

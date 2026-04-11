@@ -4231,6 +4231,9 @@
   .ring-blue-500 {
     --tw-ring-color: var(--color-blue-500);
   }
+  .ring-red-600 {
+    --tw-ring-color: var(--color-red-600);
+  }
   .outline {
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
