@@ -3,73 +3,73 @@
 {% block content %}
 <div class="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
 
-    <div class="flex gap-4 mb-6">
+    <div class="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700 pb-5">
         <a href="{{ url_for('inventario_produccion.principal') }}"
-            class="px-6 py-2.5 text-sm font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors">
-            Productos Terminados
-        </a>
-        <a href="{{ url_for('inventario_produccion.combos_dinamicos') }}"
-            class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
-            Combos Dinámicos
+            class="px-6 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl shadow-md shadow-orange-500/30 transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked"></i> Productos Terminados
         </a>
     </div>
 
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-sm sm:rounded-2xl border border-gray-100 dark:border-gray-700">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-white uppercase bg-slate-800 dark:bg-slate-800">
+            <thead class="text-xs text-white uppercase bg-slate-800 dark:bg-slate-900">
                 <tr>
-                    <th scope="col" class="px-6 py-3">ID</th>
-                    <th scope="col" class="px-6 py-3">Producto</th>
-                    <th scope="col" class="px-6 py-3">Stock Disponible</th>
-                    <th scope="col" class="px-6 py-3">Precio Venta</th>
-                    <th scope="col" class="px-6 py-3 text-center">Estado</th>
-                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                    <th scope="col" class="px-6 py-4 rounded-tl-lg">ID</th>
+                    <th scope="col" class="px-6 py-4">Producto Terminado</th>
+                    <th scope="col" class="px-6 py-4">Stock en Cocina</th>
+                    <th scope="col" class="px-6 py-4">Precio Venta</th>
+                    <th scope="col" class="px-6 py-4 text-center">Estado</th>
+                    <th scope="col" class="px-6 py-4 text-center rounded-tr-lg">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for inv, prod in productos_stock %}
                 <tr
-                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        {{ prod.id_producto }}
+                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td class="px-6 py-4 font-black text-gray-900 whitespace-nowrap dark:text-white">
+                        #{{ prod.id_producto }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                    <td class="px-6 py-4 font-bold text-gray-800 dark:text-white">
                         {{ prod.nombre }}
                     </td>
                     <td class="px-6 py-4">
-                        {{ inv.stock_actual }} Unidades
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-lg text-blue-600 dark:text-blue-400 font-black">{{
+                                inv.stock_actual }}</span>
+                            <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Unidades</span>
+                        </div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 font-medium text-green-600 dark:text-green-400">
                         ${{ "%.2f"|format(prod.precio_venta) }}
                     </td>
                     <td class="px-6 py-4 text-center">
                         {% if inv.stock_actual > 0 %}
                         <span
-                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-green-800 bg-green-100 rounded-full dark:bg-green-900/40 dark:text-green-400 border border-green-300 dark:border-green-800">
-                            <span class="w-2 h-2 mr-1.5 bg-green-500 rounded-full"></span>
-                            Disponible
+                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-green-800 bg-green-100 rounded-lg dark:bg-green-900/40 dark:text-green-400 border border-green-200 dark:border-green-800">
+                            <span class="w-1.5 h-1.5 mr-1.5 bg-green-500 rounded-full animate-pulse"></span> Disponible
                         </span>
                         {% else %}
                         <span
-                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-red-800 bg-red-100 rounded-full dark:bg-red-900/40 dark:text-red-400 border border-red-300 dark:border-red-800">
-                            <span class="w-2 h-2 mr-1.5 bg-red-500 rounded-full"></span>
-                            Agotado
+                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-red-800 bg-red-100 rounded-lg dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800">
+                            <span class="w-1.5 h-1.5 mr-1.5 bg-red-500 rounded-full"></span> Agotado
                         </span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button
+                        <button type="button"
                             onclick="document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.remove('hidden'); document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.add('flex');"
-                            class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-4 py-2 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 shadow-sm transition-all"
-                            type="button">
-                            Ajustar Stock
+                            class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-xs px-4 py-2 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 shadow-sm transition-all flex items-center justify-center gap-2 mx-auto w-32">
+                            <i class="fa-solid fa-calculator"></i> Ajustar
                         </button>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 italic dark:text-gray-400">
-                        No hay productos registrados.
+                    <td colspan="6" class="px-6 py-16 text-center bg-gray-50 dark:bg-gray-800/50">
+                        <div class="text-gray-400 mb-3"><i class="fa-solid fa-boxes-stacked text-5xl"></i></div>
+                        <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">No hay productos terminados</h3>
+                        <p class="text-gray-500 text-sm mt-1">Aquí aparecerán los productos que se fabrican en lotes.
+                        </p>
                     </td>
                 </tr>
                 {% endfor %}
@@ -82,53 +82,90 @@
 {% set mostrar_modal = form.errors and request.form.get('id_producto')|string == prod.id_producto|string %}
 
 <div id="modalAjuste-{{ prod.id_producto }}" tabindex="-1" aria-hidden="true"
-    class="{% if mostrar_modal %}flex{% else %}hidden{% endif %} bg-gray-900/50 dark:bg-gray-900/80 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    class="{% if mostrar_modal %}flex{% else %}hidden{% endif %} bg-gray-900/70 dark:bg-gray-900/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full transition-all">
 
     <div class="relative p-4 w-full max-w-md max-h-full">
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div
+            class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
 
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Ajuste Manual: {{ prod.nombre }}
-                </h3>
+            <div
+                class="flex items-center justify-between p-4 md:p-5 border-b bg-gray-50 dark:bg-gray-700/50 dark:border-gray-700">
+                <div>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-blue-600"></i> Ajuste Manual
+                    </h3>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">{{ prod.nombre }}</p>
+                </div>
                 <button type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    onclick="document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.add('hidden'); document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.remove('flex');">
-                    Cerrar
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-colors dark:hover:bg-gray-600 dark:hover:text-white"
+                    onclick="const f=this.closest('.relative').querySelector('form'); f.reset(); document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.add('hidden'); document.getElementById('modalAjuste-{{ prod.id_producto }}').classList.remove('flex');">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                    <span class="sr-only">Cerrar</span>
                 </button>
             </div>
 
             <div class="p-4 md:p-5">
-                <form action="{{ url_for('inventario_produccion.principal') }}" method="POST" class="space-y-4"
+
+                <div
+                    class="flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 mb-5 border border-blue-100 dark:border-blue-800">
+                    <span class="text-sm font-bold text-blue-800 dark:text-blue-300">Stock Actual:</span>
+                    <span class="text-xl font-black text-blue-600 dark:text-blue-400">{{ inv.stock_actual }}</span>
+                </div>
+
+                <form action="{{ url_for('inventario_produccion.principal') }}" method="POST" class="space-y-5"
                     novalidate>
                     {{ form.csrf_token }}
                     {{ form.id_producto(value=prod.id_producto) }}
 
                     <div>
-                        {{ form.cantidad.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300") }}
-                        {{ form.cantidad(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Ej: -5 o 10") }}
+                        <label
+                            class="block mb-2 text-sm font-bold {% if mostrar_modal and form.cantidad.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
+                            Cantidad a ajustar
+                        </label>
+                        {{ form.cantidad(class="text-sm font-black text-center rounded-xl block w-full p-3
+                        transition-colors " ~ ('bg-red-50 border-red-500 text-red-900 focus:ring-red-500
+                        focus:border-red-500 dark:bg-red-100 dark:border-red-400' if mostrar_modal and
+                        form.cantidad.errors else 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500
+                        focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white'), placeholder="Ej:
+                        10 o -5") }}
 
-                        {% if form.cantidad.errors %}
+                        {% if mostrar_modal and form.cantidad.errors %}
                         {% for error in form.cantidad.errors %}
-                        <span class="text-xs text-red-600 mt-1 block">{{ error }}</span>
+                        <p class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
                         {% endfor %}
+                        {% else %}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                            <i class="fa-solid fa-info-circle text-blue-500"></i> Usa <span
+                                class="font-bold text-red-500">-</span> (menos) para registrar mermas o desperdicios.
+                        </p>
                         {% endif %}
                     </div>
 
                     <div>
-                        {{ form.motivo.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300") }}
-                        {{ form.motivo(rows="3", class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white", placeholder="Motivo del cambio") }}
 
-                        {% if form.motivo.errors %}
+                        <label
+                            class="block mb-2 text-sm font-bold {% if mostrar_modal and form.motivo.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
+                            Motivo / Justificación
+                        </label>
+                        {{ form.motivo(rows="3", class="text-sm rounded-xl block w-full p-3 transition-colors
+                        resize-none " ~ ('bg-red-50 border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500
+                        dark:bg-red-100 dark:border-red-400' if mostrar_modal and form.motivo.errors else 'bg-gray-50
+                        border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900
+                        dark:border-gray-600 dark:text-white'), placeholder="Ej: Merma por caída, sobrante de
+                        producción...") }}
+
+                        {% if mostrar_modal and form.motivo.errors %}
                         {% for error in form.motivo.errors %}
-                        <span class="text-xs text-red-600 mt-1 block">{{ error }}</span>
+                        <p class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
                         {% endfor %}
                         {% endif %}
                     </div>
 
                     <button type="submit"
-                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-sm">
-                        Guardar Ajuste
+                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-black rounded-xl text-sm px-5 py-3 text-center shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-check"></i> Guardar Ajuste
                     </button>
                 </form>
             </div>

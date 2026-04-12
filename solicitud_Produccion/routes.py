@@ -9,26 +9,21 @@ solicitud_produccion = Blueprint('solicitud_produccion', __name__, url_prefix='/
 
 @solicitud_produccion.route('/')
 @login_required
-@roles_accepted('Cliente', 'cliente', 'Cajero', 'cajero', 'Cocina', 'cocina', 'Gerente', 'gerente', 'cocinero')
+@roles_accepted('gerente', 'cajero', 'cocina')
 def principal():
     # Obtenemos productos activos para el formulario de petición
     productos = Producto.query.filter_by(activo=1).all()
     
-    # --- LOGICA DEL CARRITO (HEAD) ---
-    if 'carrito' not in session:
-        session['carrito'] = {}
-        
-    total_carrito = sum(item['precio'] * item['cantidad'] for item in session['carrito'].values())
-    ultimo_ticket = session.pop('ultimo_ticket', None)
-    
-    # --- LÓGICA DE VISTAS POR ROL (AXEL / REMOTE) ---
-    if current_user.has_role('Cocina') or current_user.has_role('cocina') or current_user.has_role('cocinero'):
+
+    # LÓGICA DE VISTAS POR ROL
+    if current_user.has_role('cocina'):
         # La cocina ve todas las peticiones pendientes para aprobarlas
         solicitudes = SolicitudProduccion.query.filter(
             SolicitudProduccion.estado.in_(['Pendiente', 'En Proceso'])
         ).order_by(SolicitudProduccion.fecha_solicitud.desc()).all()
     else:
-        # El Cajero o el Cliente ven solo las peticiones que ellos han hecho
+
+        # El cajero ve solo las peticiones que él ha hecho para saber si ya le hicieron caso
         solicitudes = SolicitudProduccion.query.filter_by(
             id_usuario_solicita=current_user.id_usuario
         ).order_by(SolicitudProduccion.fecha_solicitud.desc()).limit(20).all()
@@ -65,7 +60,7 @@ def agregar_carrito(id_producto):
 
 @solicitud_produccion.route('/crear', methods=['POST'])
 @login_required
-@roles_accepted('Gerente', 'gerente', 'Cajero', 'cajero')
+@roles_accepted('gerente', 'cajero')
 def crear_solicitud():
     id_producto = request.form.get('id_producto')
     cantidad = request.form.get('cantidad')
@@ -82,7 +77,7 @@ def crear_solicitud():
         db.session.commit()
 
         audit.log_action(module_name="logs_solicitud_produccion", action="Crear Petición Reabastecimiento", details={"id_producto": id_producto, "cantidad": cantidad})
-        flash('Petición de reabastecimiento enviada a cocina.', 'success')
+        flash('Petición de reabastecimiento enviada a Cocina.', 'success')
     except Exception as e:
         db.session.rollback()
         print(e)
@@ -92,7 +87,7 @@ def crear_solicitud():
 
 @solicitud_produccion.route('/aprobar/<int:id_solicitud>', methods=['POST'])
 @login_required
-@roles_accepted('Gerente', 'gerente', 'Cocina', 'cocina', 'cocinero')
+@roles_accepted('gerente', 'cocina')
 def aprobar_solicitud(id_solicitud):
     solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     
@@ -124,7 +119,7 @@ def aprobar_solicitud(id_solicitud):
 
 @solicitud_produccion.route('/rechazar/<int:id_solicitud>', methods=['POST'])
 @login_required
-@roles_accepted('Gerente', 'gerente', 'Cocina', 'cocina', 'cocinero')
+@roles_accepted('gerente', 'cocina')
 def rechazar_solicitud(id_solicitud):
     solicitud = SolicitudProduccion.query.get_or_404(id_solicitud)
     try:

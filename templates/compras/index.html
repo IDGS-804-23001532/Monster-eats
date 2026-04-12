@@ -856,6 +856,15 @@ camposNuevos %} {% block content %}
       {% endfor %}
     ];
 
+    // inferred conversions for common SI pairs (unit ids follow DB):
+    // 1: Kilogramo (kg), 2: Gramo (g), 3: Litro (l), 4: Mililitro (ml)
+    const INFERRED = {
+      '1:2': 1000.0,
+      '2:1': 0.001,
+      '3:4': 1000.0,
+      '4:3': 0.001
+    };
+
     function crearLinea() {
       lineaCount++;
       const div = document.createElement("div");
@@ -918,7 +927,7 @@ camposNuevos %} {% block content %}
 
       container.appendChild(div);
 
-      // Auto-fill costo y unidad al seleccionar insumo
+      //  Agregar eventos a los nuevos selects e inputs
       const selectInsumo = div.querySelector(".select-insumo");
       const selectUnidad = div.querySelector(".select-unidad");
       const inputCosto = div.querySelector(".input-costo");
@@ -949,7 +958,37 @@ camposNuevos %} {% block content %}
       selectUnidad.addEventListener('change', function () {
         const note = div.querySelector('.equiv-note');
         updateEquivalence(this, note);
+        // adjust displayed price to be per selected unit (price input is expected per selected unit)
+        try {
+          const insumoId = selectInsumo.value ? parseInt(selectInsumo.value) : null;
+          const baseUnitId = selectInsumo.options[selectInsumo.selectedIndex] ? parseInt(selectInsumo.options[selectInsumo.selectedIndex].dataset.unidad) : null;
+          const sel = this.value ? parseInt(this.value) : null;
+          const basePrice = parseFloat(selectInsumo.options[selectInsumo.selectedIndex].dataset.costo) || 0;
+          if (sel && baseUnitId && sel === baseUnitId) {
+            // selected is base unit -> price is basePrice
+            inputCosto.value = Number(basePrice.toFixed(4));
+            calcularSubtotal(div);
+          } else {
+            const factor = getConversionFactor(insumoId, sel, baseUnitId);
+            if (factor) {
+              const pricePerUnit = basePrice * factor;
+              inputCosto.value = Number(pricePerUnit.toFixed(4));
+              calcularSubtotal(div);
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
       });
+
+      function getConversionFactor(insumoId, selUnitId, baseUnitId) {
+        if (!insumoId || !selUnitId || !baseUnitId) return null;
+        const conv = conversionsData.find(c => c.id_insumo === insumoId && c.id_unidad_compra === selUnitId);
+        if (conv) return parseFloat(conv.cantidad_equivalente_base);
+        const key = `${selUnitId}:${baseUnitId}`;
+        if (INFERRED[key]) return parseFloat(INFERRED[key]);
+        return null;
+      }
 
       function populateUnits(selectElem, insumoId, baseUnitId) {
         // Preserve previously selected value if still valid
@@ -997,6 +1036,22 @@ camposNuevos %} {% block content %}
           }
         });
 
+        // Add inferred units if applicable (e.g., allow kg if base is g)
+        if (baseUnitId) {
+          unidadesData.forEach(function (um) {
+            const key = `${um.id}:${baseUnitId}`;
+            // only add if not already present and we have an inferred factor
+            const already = Array.from(selectElem.options).some(o => o.value == um.id);
+            if (!already && INFERRED[key]) {
+              const opt = document.createElement('option');
+              opt.value = um.id;
+              opt.textContent = um.nombre + ' (inferred)';
+              opt.dataset.inferred = '1';
+              selectElem.appendChild(opt);
+            }
+          });
+        }
+
         if (prev) {
           const stillValid = Array.from(selectElem.options).some(o => o.value == prev);
           if (stillValid) selectElem.value = prev;
@@ -1036,6 +1091,15 @@ camposNuevos %} {% block content %}
           return;
         }
 
+        // try inferred pairs
+        const inferKey = `${sel}:${baseUnitId}`;
+        if (!conv && INFERRED[inferKey] && selUnit && baseUnit) {
+          const val = parseFloat(INFERRED[inferKey]);
+          const valStr = Number.isInteger(val) ? val.toString() : val.toFixed(4).replace(/0+$/,'').replace(/\.$/, '');
+          noteElem.textContent = `(inferred) 1 ${selUnit.nombre} = ${valStr} ${baseUnit.nombre}`;
+          return;
+        }
+
         // no conversion found -> mark invalid
         noteElem.textContent = 'No existe conversión';
         selectElem.classList.add('ring-2', 'ring-red-600', 'invalid-unit');
@@ -1056,7 +1120,26 @@ camposNuevos %} {% block content %}
     function calcularSubtotal(linea) {
       const cantidad = parseFloat(linea.querySelector(".input-cantidad").value) || 0;
       const costo = parseFloat(linea.querySelector(".input-costo").value) || 0;
-      const subtotal = cantidad * costo;
+
+      // determine insumo base unit and selected unit
+      const selectInsumo = linea.querySelector('.select-insumo');
+      const selectUnidad = linea.querySelector('.select-unidad');
+      const baseUnitId = (selectInsumo && selectInsumo.options[selectInsumo.selectedIndex]) ? parseInt(selectInsumo.options[selectInsumo.selectedIndex].dataset.unidad) : null;
+      const selUnitId = selectUnidad && selectUnidad.value ? parseInt(selectUnidad.value) : null;
+
+      let precioUnitario;
+
+      // Special case: if the insumo's base unit is grams (id 2) and user selected grams,
+      // treat the entered "precio" as the TOTAL for the line (user entered e.g. price for 250g)
+      if (baseUnitId === 2 && selUnitId === 2) {
+        precioUnitario = (cantidad > 0) ? (costo / cantidad) : 0;
+      } else {
+        // otherwise precio input is considered unit price
+        precioUnitario = costo;
+      }
+
+      const subtotal = cantidad * precioUnitario;
+
       linea.querySelector(".subtotal-display").textContent = `$${subtotal.toFixed(2)}`;
       calcularTotal();
     }
@@ -1077,6 +1160,62 @@ camposNuevos %} {% block content %}
 
     // Validación antes de enviar: bloquear si hay unidades inválidas
     form.addEventListener('submit', function (e) {
+      // Hcemos las conversiones necesarias para envi
+      document.querySelectorAll('#lineasCompra > div').forEach(function (div) {
+        try {
+          const EsojeInsumo = div.querySelector('.select-insumo');
+          const  EscojeUnidad = div.querySelector('.select-unidad');
+          const inputCantidad = div.querySelector('.input-cantidad');
+          const inputCosto = div.querySelector('.input-costo');
+          if (!EsojeInsumo || !EscojeUnidad || !inputCantidad || !inputCosto) return;
+
+          const insumoId = EsojeInsumo.value ? parseInt(EsojeInsumo.value) : null;
+          const baseUnitId = EsojeInsumo.options[EsojeInsumo.selectedIndex] ? parseInt(EsojeInsumo.options[EsojeInsumo.selectedIndex].dataset.unidad) : null;
+          const selUnitId = EscojeUnidad.value ? parseInt(EscojeUnidad.value) : null;
+          const origCantidad = parseFloat(inputCantidad.value) || 0;
+          const basePrice = parseFloat(EsojeInsumo.options[EsojeInsumo.selectedIndex].dataset.costo) || 0;
+
+          // store originals for traceability
+          let origCantField = div.querySelector('input[name="orig_cantidad[]"]');
+          if (!origCantField) {
+            origCantField = document.createElement('input');
+            origCantField.type = 'hidden';
+            origCantField.name = 'orig_cantidad[]';
+            div.appendChild(origCantField);
+          }
+          origCantField.value = origCantidad;
+
+          let origUnidadField = div.querySelector('input[name="orig_unidad[]"]');
+          if (!origUnidadField) {
+            origUnidadField = document.createElement('input');
+            origUnidadField.type = 'hidden';
+            origUnidadField.name = 'orig_unidad[]';
+            div.appendChild(origUnidadField);
+          }
+          origUnidadField.value = selUnitId || '';
+
+          if (insumoId && baseUnitId && selUnitId && selUnitId !== baseUnitId) {
+            // get factor (base units per selected unit)
+            const conv = conversionsData.find(c => c.id_insumo === insumoId && c.id_unidad_compra === selUnitId);
+            const key = `${selUnitId}:${baseUnitId}`;
+            let factor = conv ? parseFloat(conv.cantidad_equivalente_base) : (INFERRED[key] ? parseFloat(INFERRED[key]) : null);
+            if (factor && factor > 0) {
+              const convertedQty = origCantidad * factor;
+              inputCantidad.value = Number(convertedQty.toFixed(4));
+              // set price to base price (per base unit)
+              inputCosto.value = Number(basePrice.toFixed(4));
+              // set unidad select value to base unit so backend receives base unit id
+              EscojeUnidad.value = baseUnitId;
+              // mark converted visually
+              const note = div.querySelector('.equiv-note');
+              if (note) note.textContent += ' (enviado convertido a base)';
+            }
+          }
+        } catch (err) {
+          // ignore per-line errors
+        }
+      });
+
       const invalidUnits = document.querySelectorAll('.select-unidad.invalid-unit');
       const errorDiv = document.getElementById('formErrorCompra');
       if (invalidUnits.length > 0) {

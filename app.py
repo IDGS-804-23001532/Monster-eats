@@ -24,11 +24,12 @@ from inventario.routes import inventario
 from compras.routes import compras 
 from dashboard import dashboard
 from insumos.routes import insumos
-from mermas import mermas
 from proveedores import proveedor
 from ventas import venta
 from inventario_Produccion.routes import inventario_produccion
+from combos.routes import combos
 from solicitud_Produccion.routes import solicitud_produccion
+from tablero_kds.routes import tablero_kds
 from costo_Utilidad.routes import costo_utilidad
 from tablero_kds.routes import tablero_kds
 from recetas import recetas_bp as recetas
@@ -84,8 +85,8 @@ app.register_blueprint(compras)
 app.register_blueprint(insumos)
 app.register_blueprint(proveedor)
 app.register_blueprint(venta)
-app.register_blueprint(mermas)
 app.register_blueprint(inventario_produccion)
+app.register_blueprint(combos)
 app.register_blueprint(solicitud_produccion)
 app.register_blueprint(costo_utilidad)
 app.register_blueprint(tablero_kds)

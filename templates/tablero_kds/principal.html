@@ -1,101 +1,84 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<meta http-equiv="refresh" content="15">
-
 <div class="p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
 
-    <div
-        class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-gray-700 gap-4">
-        <div class="flex items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-black text-gray-800 dark:text-white tracking-wide uppercase">
-                    KDS <span class="text-orange-500">Cocina</span>
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
-                    Órdenes en vivo provenientes de la Caja (Punto de Venta)
-                </p>
-            </div>
+    <div class="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl font-black text-gray-800 dark:text-white tracking-wide uppercase">
+                Tablero de <span class="text-blue-500">Cocina (KDS)</span>
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                Visualización unificada de Ventas y Reabastecimiento.
+            </p>
         </div>
-        <div
-            class="px-5 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-center">
-            <span class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Estado Servidor</span>
-            <span
-                class="block text-sm font-black text-green-500 animate-pulse flex items-center justify-center gap-1.5">
-                <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span> EN LÍNEA
+        <div class="flex gap-4">
+            <span class="flex items-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span> Ventas (Clientes)
+            </span>
+            <span class="flex items-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                <span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span> Producción (Interna)
             </span>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-        {% for c in comandas %}
-        <div
-            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm flex flex-col overflow-hidden relative transition-all duration-300 {% if c.estado_cocina == 'Preparando' %} ring-2 ring-blue-500 {% endif %}">
+        {% for comanda in comandas %}
+        <div class="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-md border-t-4 
+            {% if comanda.origen == 'Venta' %} border-blue-500 {% else %} border-orange-500 {% endif %} 
+            overflow-hidden hover:shadow-lg transition-shadow">
 
             <div
-                class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
+                class="bg-gray-50 dark:bg-gray-700/50 p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                 <span
-                    class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 font-black text-sm uppercase rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm">
-                    Orden #{{ c.numero_orden }}
+                    class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider text-white
+                    {% if comanda.origen == 'Venta' %} bg-blue-500 shadow-blue-500/30 {% else %} bg-orange-500 shadow-orange-500/30 {% endif %} shadow-sm">
+                    {{ comanda.origen }} #{{ comanda.folio }}
                 </span>
-                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
-                    <svg class="w-4 h-4 inline-block mr-1 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    {{ c.fecha_venta.strftime('%I:%M %p') }}
+                <span class="font-mono text-sm font-bold text-gray-500 dark:text-gray-400">
+                    <i class="fa-regular fa-clock mr-1"></i> {{ comanda.fecha_hora.strftime('%I:%M %p') }}
                 </span>
             </div>
 
-            <div class="p-5 flex-grow flex flex-col justify-center items-center text-center">
-                <span class="text-orange-500 font-black text-4xl mb-2">{{ c.cantidad }}x</span>
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white leading-tight">
-                    {{ c.platillo }}
-                </h3>
-            </div>
-
-            <div
-                class="px-5 pb-4 flex flex-col gap-2 border-t border-dashed border-gray-200 dark:border-gray-700 pt-4 mt-2">
-                <div class="flex justify-between items-center text-xs font-medium text-gray-500 dark:text-gray-400">
-                    <span>Cajero: <strong class="text-gray-700 dark:text-gray-300">{{ c.cajero.split('@')[0] }}</strong></span>
-                    <span
-                        class="uppercase tracking-wider font-black {% if c.estado_cocina == 'Pendiente' %}text-orange-500{% else %}text-blue-500{% endif %}">
-                        {{ c.estado_cocina }}
-                    </span>
+            <div class="p-6 flex-grow flex flex-col justify-center items-center text-center">
+                <span class="text-4xl font-black text-gray-900 dark:text-white mb-2">
+                    {{ comanda.cantidad }}x
+                </span>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 uppercase leading-tight">
+                    {{ comanda.platillo }}
+                </h2>
+                <div
+                    class="mt-4 inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300">
+                    <i class="fa-solid fa-user mr-2 opacity-50"></i> Solicita: {{ comanda.solicitante }}
                 </div>
             </div>
 
-            <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <form action="{{ url_for('tablero_kds.marcar_listo', id_detalle=c.id_detalle) }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <button type="submit"
-                        class="w-full py-3.5 bg-green-500 text-white font-black text-sm uppercase tracking-wider rounded-xl hover:bg-green-600 transition-colors shadow-md shadow-green-500/20 flex items-center justify-center gap-2 cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        ¡Platillo Listo!
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/30">
+                <form action="{{ url_for('tablero_kds.marcar_listo') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="id_origen" value="{{ comanda.id_origen }}">
+                    <input type="hidden" name="origen" value="{{ comanda.origen }}">
+                    <input type="hidden" name="cantidad" value="{{ comanda.cantidad }}">
+
+                    <button type="submit" class="w-full py-3 rounded-xl font-black text-white uppercase tracking-wider shadow-md transition-all 
+                        {% if comanda.origen == 'Venta' %} bg-blue-600 hover:bg-blue-700 shadow-blue-600/30 
+                        {% else %} bg-orange-600 hover:bg-orange-700 shadow-orange-600/30 {% endif %}">
+                        <i class="fa-solid fa-check-circle mr-2"></i> ¡Marcar Listo!
                     </button>
                 </form>
             </div>
         </div>
-
         {% else %}
         <div
-            class="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 shadow-sm">
-            <div
-                class="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mb-6">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+            class="col-span-full py-20 flex flex-col items-center justify-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+            <div class="w-24 h-24 mb-4 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                <i class="fa-solid fa-utensils text-4xl text-green-500"></i>
             </div>
-            <h3 class="text-3xl font-black text-gray-800 dark:text-white mb-3">¡Cocina al 100%!</h3>
-            <p class="text-gray-500 dark:text-gray-400 font-medium text-lg">No hay comandas pendientes. Todo está
-                entregado.</p>
+            <h3 class="text-xl font-black text-gray-800 dark:text-white">¡Cocina Despejada!</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">No hay órdenes pendientes de ventas ni de
+                producción.</p>
         </div>
         {% endfor %}
-
     </div>
 </div>
 {% endblock %}
