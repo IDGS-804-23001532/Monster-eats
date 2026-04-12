@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, url_for, redirect, flash
-from models import Compra, Proveedor, Insumo, UnidadMedida, DetalleCompra, db
+from models import Compra, Proveedor, Insumo, UnidadMedida, DetalleCompra, ConversionUnidadInsumo, db
 from . import compras
 from sqlalchemy import text
 import json
@@ -8,6 +8,14 @@ from forms import CompraForm
 from audit_logger import audit
 from flask_security import login_required, current_user
 from flask_security.decorators import roles_required, roles_accepted
+
+# Conversor  para el cambio de medida para los insumos.
+INFERRED_CONVERSIONS = {
+    (1, 2): 1000.0,  # kg -> g
+    (2, 1): 0.001,   # g -> kg
+    (3, 4): 1000.0,  # l -> ml
+    (4, 3): 0.001    # ml -> l
+}
 
 @compras.route('/compras')
 @login_required
@@ -30,6 +38,7 @@ def index():
     
     insumos_list = Insumo.query.filter_by(activo=True).all()
     unidades_medida = UnidadMedida.query.all()
+    conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
     
     # Ver detalle de una compra específica
     detalle_compra = None
@@ -68,6 +77,7 @@ def index():
                          form=form,
                          insumos=insumos_list,
                          unidades_medida=unidades_medida,
+                         conversions=conversions,
                          detalle_compra=detalle_compra,
                          cancel_compra=cancel_compra,
                          historial_compras=historial_compras,
@@ -90,16 +100,18 @@ def nueva_compra():
         compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
         insumos_list = Insumo.query.filter_by(activo=True).all()
         unidades_medida = UnidadMedida.query.all()
+        conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
         
         flash('Por favor corrige los errores del formulario', 'error')
         return render_template('compras/index.html',
-                             compras=compras_list,
-                             search_query='',
-                             proveedores=proveedores,
-                             form=form,
-                             insumos=insumos_list,
-                             unidades_medida=unidades_medida,
-                             show_modal='nuevaCompraModal')
+                     compras=compras_list,
+                     search_query='',
+                     proveedores=proveedores,
+                     form=form,
+                     insumos=insumos_list,
+                     unidades_medida=unidades_medida,
+                     conversions=conversions,
+                     show_modal='nuevaCompraModal')
 
     try:
         id_proveedor = form.id_proveedor.data
@@ -108,48 +120,106 @@ def nueva_compra():
         # Toma todas las listas del formulario
         insumos_ids = request.form.getlist('insumo_id[]')
         cantidades = request.form.getlist('cantidad[]')
-        costos = request.form.getlist('costo_unit[]')
+        precios = request.form.getlist('precio[]')
         unidades = request.form.getlist('unidad_id[]')
         caducidades = request.form.getlist('caducidad[]')
         
         # Armar el JSON que espera el SP
         detalles = []
         for i in range(len(insumos_ids)):
-            if insumos_ids[i] and cantidades[i] and costos[i]:
+            if insumos_ids[i] and cantidades[i] and precios[i]:
                 cant = float(cantidades[i])
-                cost = float(costos[i])
-                
+                precio = float(precios[i])
+                precio = float(precios[i])
                 # Validación backend estricta anti-negativos
-                if cant <= 0 or cost < 0:
+                if cant <= 0 or precio < 0:
                     compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
                     insumos_list = Insumo.query.filter_by(activo=True).all()
                     unidades_medida = UnidadMedida.query.all()
+                    conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
                     flash('Alerta de seguridad: Las cantidades deben ser mayores a 0 y los costos no pueden ser negativos.', 'error')
-                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, show_modal='nuevaCompraModal')
+                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
                 
                 # Verificamos que la caducidad no venga vacía
                 if not caducidades[i] or caducidades[i].strip() == '':
                     compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
                     insumos_list = Insumo.query.filter_by(activo=True).all()
                     unidades_medida = UnidadMedida.query.all()
+                    conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
                     form.id_proveedor.errors.append('¡Aviso!: La Fecha de Caducidad es obligatoria para todos los insumos de la lista.')
                     flash('Error: Falta asignar la fecha de caducidad en uno o más insumos.', 'error')
-                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, show_modal='nuevaCompraModal')
+                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
                 
                 caducidad_val = caducidades[i]
-                
-                detalles.append({
-                    'id_insumo': int(insumos_ids[i]),
-                    'cantidad': cant,
-                    'id_unidad': int(unidades[i]),
-                    'costo': cost,
-                    'caducidad': caducidad_val
-                })
+
+                # Validación: existe conversión si la unidad de compra difiere de la unidad base
+                insumo_obj = Insumo.query.get(int(insumos_ids[i]))
+                if not insumo_obj:
+                    flash('Error interno: insumo no encontrado.', 'error')
+                    conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
+                    return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
+                # E
+                if int(unidades[i]) != insumo_obj.id_unidad_medida:
+                    sel_unit_id = int(unidades[i])
+                    conv = ConversionUnidadInsumo.query.filter_by(id_insumo=insumo_obj.id_insumo, id_unidad_compra=sel_unit_id, activo=True).first()
+                    inferred = False
+                    factor = None
+                    if conv:
+                        factor = float(conv.cantidad_equivalente_base)
+                    else:
+                        # attempt inferred conversion for common pairs (kg<->g, l<->ml)
+                        pair = (sel_unit_id, insumo_obj.id_unidad_medida)
+                        if pair in INFERRED_CONVERSIONS:
+                            factor = float(INFERRED_CONVERSIONS[pair])
+                            inferred = True
+
+                    if factor is None or factor <= 0:
+                        # No conversion defined -> error (prevents mixing incompatible unit types)
+                        form.id_proveedor.errors.append(f'No existe conversión para el insumo "{insumo_obj.nombre}" con la unidad seleccionada.')
+                        flash(f'Error: No existe conversión para el insumo "{insumo_obj.nombre}" y la unidad seleccionada.', 'error')
+                        conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
+                        return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
+
+                    #  El precio se ajusta proporcionalmente al factor de conversión para reflejar el costo real por unidad base.
+                    cantidad_base = float(cant) * factor
+                    precio_por_base = float(precio) / factor if factor != 0 else 0.0
+
+                    detalles.append({
+                        'id_insumo': int(insumos_ids[i]),
+                        'cantidad': cantidad_base,
+                        'id_unidad': int(insumo_obj.id_unidad_medida),
+                        'costo': round(precio_por_base, 4),
+                        'caducidad': caducidad_val,
+                        'conversion_inferida': inferred
+                    })
+                else:
+                    # Si la unidad de compra es la misma que la unidad base, no se necesita conversión
+                    unidad_base_id = insumo_obj.id_unidad_medida
+                    if unidad_base_id == 2:
+                        precio_total = float(precio)
+                        precio_unitario = (precio_total / float(cant)) if float(cant) != 0 else 0.0
+                        detalles.append({
+                            'id_insumo': int(insumos_ids[i]),
+                            'cantidad': cant,
+                            'id_unidad': int(unidades[i]),
+                            'costo': round(precio_unitario, 4),
+                            'caducidad': caducidad_val,
+                            'precio_total': precio_total
+                        })
+                    else:
+                        detalles.append({
+                            'id_insumo': int(insumos_ids[i]),
+                            'cantidad': cant,
+                            'id_unidad': int(unidades[i]),
+                            'costo': precio,
+                            'caducidad': caducidad_val
+                        })
         
         if not detalles:
             compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
             insumos_list = Insumo.query.filter_by(activo=True).all()
             unidades_medida = UnidadMedida.query.all()
+            conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
             
             # Inyectamos el error directamente en el WTForm para que el macro lo dibuje en letras rojas
             form.id_proveedor.errors.append('¡Aviso!: Llena todas las celdas de los insumos (Cantidad, Costo, Unidad, Caducidad) o elimina las líneas vacías.')
@@ -161,6 +231,7 @@ def nueva_compra():
                                  form=form,
                                  insumos=insumos_list,
                                  unidades_medida=unidades_medida,
+                                 conversions=conversions,
                                  show_modal='nuevaCompraModal')
         
         detalles_json = json.dumps(detalles)

@@ -220,6 +220,20 @@ class ActualizarCompraForm(Form):
         validators.DataRequired(message='El estado de la compra es requerido')
     ], coerce=str)
 
+class ComboForm(FlaskForm):
+    nombre = StringField('Nombre del Combo', validators=[
+        validators.DataRequired(message='El nombre es obligatorio'),
+        validators.Length(min=3, max=100, message='El nombre debe tener entre 3 y 100 caracteres')
+    ])
+    descripcion = StringField('Descripción', validators=[
+        validators.Optional(),
+        validators.Length(max=255, message='La descripción no puede exceder los 255 caracteres')
+    ])
+    precio_venta = DecimalField('Precio de Venta ($)', validators=[
+        validators.DataRequired(message='El precio es obligatorio'),
+        validators.NumberRange(min=0.01, message='El precio debe ser mayor a 0')
+    ])
+
 
 class CategoriaProveedorForm(Form):
     nombre = StringField('Nombre de la categoria', [

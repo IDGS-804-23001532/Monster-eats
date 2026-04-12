@@ -286,6 +286,20 @@
               <span class="flex-1 ms-3 whitespace-nowrap">Recetas</span>
             </a>
           </li>
+            <li>
+          <a href="{{ url_for('combos.principal') }}"
+            class="flex items-center px-2 py-1.5 text-body dark:text-gray-300 rounded-base hover:bg-neutral-tertiary dark:hover:bg-gray-700 hover:text-fg-brand dark:hover:text-white group">
+            <svg
+              class="shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 transition duration-75 group-hover:text-fg-brand dark:group-hover:text-white"
+              aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+              viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 8h8M7 12h10M7 16h10M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" />
+            </svg>
+            <span class="flex-1 ms-3 whitespace-nowrap">Combos</span>
+          </a>
+        </li>
+        <li>
           <li>
             <a
               href="{{ url_for('costo_utilidad.principal') }}"
@@ -603,6 +617,7 @@
     >
       {% block content %} {% endblock %}
     </main>
+        {% block scripts %}{% endblock %}
 
     {% block modals %} {% endblock %}
 
