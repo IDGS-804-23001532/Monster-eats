@@ -9,6 +9,14 @@ from audit_logger import audit
 from flask_security import login_required, current_user
 from flask_security.decorators import roles_required, roles_accepted
 
+# Conversor  para el cambio de medida para los insumos.
+INFERRED_CONVERSIONS = {
+    (1, 2): 1000.0,  # kg -> g
+    (2, 1): 0.001,   # g -> kg
+    (3, 4): 1000.0,  # l -> ml
+    (4, 3): 0.001    # ml -> l
+}
+
 @compras.route('/compras')
 @login_required
 @roles_accepted('Gerente', 'gerente')
@@ -122,7 +130,7 @@ def nueva_compra():
             if insumos_ids[i] and cantidades[i] and precios[i]:
                 cant = float(cantidades[i])
                 precio = float(precios[i])
-                
+                precio = float(precios[i])
                 # Validación backend estricta anti-negativos
                 if cant <= 0 or precio < 0:
                     compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()
@@ -150,22 +158,62 @@ def nueva_compra():
                     flash('Error interno: insumo no encontrado.', 'error')
                     conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
                     return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
-
+                # E
                 if int(unidades[i]) != insumo_obj.id_unidad_medida:
-                    conv = ConversionUnidadInsumo.query.filter_by(id_insumo=insumo_obj.id_insumo, id_unidad_compra=int(unidades[i]), activo=True).first()
-                    if not conv:
+                    sel_unit_id = int(unidades[i])
+                    conv = ConversionUnidadInsumo.query.filter_by(id_insumo=insumo_obj.id_insumo, id_unidad_compra=sel_unit_id, activo=True).first()
+                    inferred = False
+                    factor = None
+                    if conv:
+                        factor = float(conv.cantidad_equivalente_base)
+                    else:
+                        # attempt inferred conversion for common pairs (kg<->g, l<->ml)
+                        pair = (sel_unit_id, insumo_obj.id_unidad_medida)
+                        if pair in INFERRED_CONVERSIONS:
+                            factor = float(INFERRED_CONVERSIONS[pair])
+                            inferred = True
+
+                    if factor is None or factor <= 0:
+                        # No conversion defined -> error (prevents mixing incompatible unit types)
                         form.id_proveedor.errors.append(f'No existe conversión para el insumo "{insumo_obj.nombre}" con la unidad seleccionada.')
                         flash(f'Error: No existe conversión para el insumo "{insumo_obj.nombre}" y la unidad seleccionada.', 'error')
                         conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
                         return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
 
-                detalles.append({
-                    'id_insumo': int(insumos_ids[i]),
-                    'cantidad': cant,
-                    'id_unidad': int(unidades[i]),
-                    'costo': precio,
-                    'caducidad': caducidad_val
-                })
+                    #  El precio se ajusta proporcionalmente al factor de conversión para reflejar el costo real por unidad base.
+                    cantidad_base = float(cant) * factor
+                    precio_por_base = float(precio) / factor if factor != 0 else 0.0
+
+                    detalles.append({
+                        'id_insumo': int(insumos_ids[i]),
+                        'cantidad': cantidad_base,
+                        'id_unidad': int(insumo_obj.id_unidad_medida),
+                        'costo': round(precio_por_base, 4),
+                        'caducidad': caducidad_val,
+                        'conversion_inferida': inferred
+                    })
+                else:
+                    # Si la unidad de compra es la misma que la unidad base, no se necesita conversión
+                    unidad_base_id = insumo_obj.id_unidad_medida
+                    if unidad_base_id == 2:
+                        precio_total = float(precio)
+                        precio_unitario = (precio_total / float(cant)) if float(cant) != 0 else 0.0
+                        detalles.append({
+                            'id_insumo': int(insumos_ids[i]),
+                            'cantidad': cant,
+                            'id_unidad': int(unidades[i]),
+                            'costo': round(precio_unitario, 4),
+                            'caducidad': caducidad_val,
+                            'precio_total': precio_total
+                        })
+                    else:
+                        detalles.append({
+                            'id_insumo': int(insumos_ids[i]),
+                            'cantidad': cant,
+                            'id_unidad': int(unidades[i]),
+                            'costo': precio,
+                            'caducidad': caducidad_val
+                        })
         
         if not detalles:
             compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()

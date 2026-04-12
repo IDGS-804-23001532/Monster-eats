@@ -145,8 +145,9 @@ class DetalleCompra(db.Model):
     cantidad_comprada = db.Column(db.Numeric(10, 4), nullable=False)
     id_unidad_medida = db.Column(db.Integer, db.ForeignKey('unidades_medida.id_unidad_medida'), nullable=False)
     costo_unitario = db.Column(db.Numeric(10, 2), nullable=False)
-    # Nota: SQLAlchemy no maneja columnas "GENERATED ALWAYS" nativamente de forma sencilla
-    # Lo ideal es calcularlo en la lógica de negocio antes de guardar
+    cantidad_base = db.Column(db.Numeric(10, 4), nullable=False)
+    costo_unitario_base = db.Column(db.Numeric(10, 2), nullable=False)
+
     costo_subtotal = db.Column(db.Numeric(10, 2), nullable=False)
 
     # Relaciones

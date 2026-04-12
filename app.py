@@ -24,7 +24,6 @@ from inventario.routes import inventario
 from compras.routes import compras 
 from dashboard import dashboard
 from insumos.routes import insumos
-from mermas import mermas
 from proveedores import proveedor
 from ventas import venta
 from inventario_Produccion.routes import inventario_produccion
@@ -84,7 +83,6 @@ app.register_blueprint(compras)
 app.register_blueprint(insumos)
 app.register_blueprint(proveedor)
 app.register_blueprint(venta)
-app.register_blueprint(mermas)
 app.register_blueprint(inventario_produccion)
 app.register_blueprint(solicitud_produccion)
 app.register_blueprint(costo_utilidad)
