@@ -1,319 +1,360 @@
 <!doctype html>
-
-<html class="light" lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <title>Monster Eats – {{ categoria_nombre }}</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
       rel="stylesheet"
+      href="{{ url_for('static', filename='dist/output.css') }}"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet"
-    />
-    <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "surface-container": "#f0edec",
-              "on-primary-fixed-variant": "#7f2b00",
-              "surface-bright": "#fcf9f8",
-              "secondary-fixed": "#d6e3ff",
-              "surface-tint": "#a63b00",
-              "on-secondary-container": "#3f5882",
-              "on-secondary-fixed": "#001b3c",
-              "primary-fixed": "#ffdbce",
-              "on-tertiary-fixed-variant": "#5e4200",
-              "on-primary-container": "#4f1800",
-              "on-error-container": "#93000a",
-              "tertiary-fixed-dim": "#ffba20",
-              "surface-container-lowest": "#ffffff",
-              "on-secondary-fixed-variant": "#2d476f",
-              "inverse-primary": "#ffb599",
-              error: "#ba1a1a",
-              "tertiary-fixed": "#ffdea8",
-              "surface-container-highest": "#e5e2e1",
-              "on-surface-variant": "#594138",
-              "inverse-on-surface": "#f3f0ef",
-              "on-background": "#1c1b1b",
-              "error-container": "#ffdad6",
-              "on-secondary": "#ffffff",
-              background: "#fcf9f8",
-              surface: "#fcf9f8",
-              "secondary-fixed-dim": "#adc7f7",
-              "on-primary": "#ffffff",
-              "on-error": "#ffffff",
-              "surface-dim": "#dcd9d9",
-              primary: "#a63b00",
-              "on-tertiary": "#ffffff",
-              "on-tertiary-container": "#3a2700",
-              "surface-variant": "#e5e2e1",
-              outline: "#8d7166",
-              "surface-container-high": "#ebe7e7",
-              "on-primary-fixed": "#370e00",
-              tertiary: "#7c5800",
-              "primary-fixed-dim": "#ffb599",
-              "outline-variant": "#e1bfb3",
-              "secondary-container": "#b6d0ff",
-              secondary: "#455f88",
-              "primary-container": "#f26522",
-              "inverse-surface": "#313030",
-              "on-surface": "#1c1b1b",
-              "surface-container-low": "#f6f3f2",
-              "tertiary-container": "#bd8800",
-              "on-tertiary-fixed": "#271900",
-            },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              full: "9999px",
-            },
-            fontFamily: {
-              headline: ["Plus Jakarta Sans"],
-              body: ["Inter"],
-              label: ["Inter"],
-            },
-          },
-        },
-      };
+
+    <script>
+      // Restore saved theme preference before paint (avoid flash)
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") document.documentElement.classList.add("dark");
+      else if (saved === "light")
+        document.documentElement.classList.remove("dark");
+      else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.classList.add("dark");
     </script>
-    <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 0,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 24;
-      }
-      body {
-        font-family: "Inter", sans-serif;
-      }
-      h1,
-      h2,
-      h3 {
-        font-family: "Plus Jakarta Sans", sans-serif;
-      }
-    </style>
   </head>
+
   <body
-    class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container"
+    class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans"
   >
-    <!-- TopAppBar -->
-    <header
-      class="bg-[#fcf9f8] dark:bg-stone-950 flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50"
+    <!-- ===== LOADER (visible por defecto, se oculta al cargar) ===== -->
+    <div
+      id="pageLoader"
+      class="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col items-center justify-center gap-3 z-[9999] transition-opacity duration-300"
     >
-      <div class="flex items-center gap-4">
-        <button
-          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] p-2 hover:bg-[#e5e2e1] dark:hover:bg-stone-800 transition-colors rounded-full scale-95 active:duration-100"
-        >
-          menu
-        </button>
-        <span
-          class="text-2xl font-black italic tracking-tighter text-[#a63b00] dark:text-[#f26522]"
-          >Monster Eats</span
-        >
-      </div>
-      <div class="flex items-center gap-2">
-        <button
-          class="material-symbols-outlined text-[#a63b00] dark:text-[#f26522] p-2 hover:bg-[#e5e2e1] dark:hover:bg-stone-800 transition-colors rounded-full scale-95 active:duration-100"
-        >
-          shopping_cart
-        </button>
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-700 border-t-orange-500"
+      ></div>
+      <p
+        class="text-sm font-semibold text-gray-400 dark:text-gray-500 tracking-wide"
+      >
+        Cargando...
+      </p>
+    </div>
+    <!-- ===== HEADER ===== -->
+    <header
+      class="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm"
+    >
+      <div
+        class="max-w-screen-xl mx-auto flex items-center justify-between px-6 py-3"
+      >
+        <!-- Logo + Menu -->
+        <div class="flex items-center gap-3">
+          <button
+            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <!-- Menu icon -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-auto h-14"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+          <img
+            src="{{ url_for('static', filename='img/monster_logo.png') }}"
+            alt="Monster Eats"
+            class="h-14 w-auto"
+          />
+        </div>
+
+        <!-- Right actions -->
+        <div class="flex items-center gap-2">
+          <!-- Cart -->
+          <button
+            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <svg
+              class="w-6 h-6 text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
-    <main class="max-w-7xl mx-auto px-6 py-12 min-h-screen">
-      <!-- Editorial Header -->
-      <section class="mb-16">
-        <div
-          class="flex flex-col md:flex-row md:items-end justify-between gap-6"
-        >
-          <div class="max-w-2xl">
-          <div class="max-w-2xl">
-            <span
-              class="text-primary font-bold tracking-widest uppercase text-xs mb-4 block"
-              >Menú / {{ categoria_nombre }}</span
-            >
-            <h1
-              class="text-5xl md:text-7xl font-extrabold text-on-surface tracking-tighter leading-none mb-6"
-            >
-              {{ categoria_nombre }}
-            </h1>
-            <p class="text-on-surface-variant text-lg max-w-lg leading-relaxed">
-              Explora nuestra selección especialmente preparada de {{ categoria_nombre|lower }}. Calidad y sabor genuinamente monstruoso en cada bocado.
-            </p>
-          </div>
-          <div class="hidden md:block">
-            <div class="flex items-center gap-4 text-sm font-medium">
-              <span class="text-on-surface-variant">Filter by</span>
-              <button
-                class="bg-surface-container-highest px-4 py-2 rounded-full hover:bg-outline-variant transition-colors"
-              >
-                Botanical
-              </button>
-              <button
-                class="bg-surface-container-highest px-4 py-2 rounded-full hover:bg-outline-variant transition-colors"
-              >
-                Caffeine
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <!-- Product Grid (Asymmetric Editorial Layout) -->
-      <section class="grid grid-cols-1 md:grid-cols-12 gap-8">
-        {% if not productos %}
-           <div class="md:col-span-12 py-20 text-center text-on-surface-variant flex flex-col items-center">
-              <span class="material-symbols-outlined text-6xl text-primary/30 mb-4">restaurant_menu</span>
-              <h2 class="text-2xl font-bold mb-2">Aún estamos cocinando...</h2>
-              <p>Actualmente no contamos con elementos activos en la categoría <strong>{{ categoria_nombre }}</strong>.</p>
-           </div>
-        {% else %}
-          {% for producto in productos %}
-            {% if loop.index == 1 %}
-            <!-- Featured Large Item -->
-            <div class="md:col-span-8 group cursor-pointer">
-              <div class="relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9]">
-                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
-                  <div class="flex justify-between items-end">
-                    <div>
-                      <h3 class="text-white text-3xl font-bold mb-2">{{ producto.nombre }}</h3>
-                      <p class="text-white/80 text-sm font-medium uppercase tracking-widest">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
-                    </div>
-                    <span class="bg-primary text-on-primary p-4 rounded-full material-symbols-outlined shadow-lg scale-95 active:duration-100 hover:bg-primary-container transition-all">add</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {% elif loop.index == 2 %}
-            <!-- Side Item 1 -->
-            <div class="md:col-span-4 group cursor-pointer">
-              <div class="flex flex-col h-full">
-                <div class="relative overflow-hidden rounded-xl bg-surface-container-low flex-grow aspect-square mb-4 border border-outline-variant/30">
-                  <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
-                </div>
-                <div class="px-2">
-                  <h3 class="text-xl font-bold text-on-surface">{{ producto.nombre }}</h3>
-                  <p class="text-primary font-semibold text-sm mt-1">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
-                </div>
-              </div>
-            </div>
-            {% else %}
-            <!-- Monster Grid Items -->
-            <div class="md:col-span-4 group cursor-pointer">
-              <div class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/20 transition-all hover:bg-surface-container-low hover:border-outline-variant shadow-sm hover:shadow-md">
-                <div class="relative overflow-hidden rounded-lg aspect-square mb-4">
-                  <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src="{{ url_for('static', filename='img/' + producto.imagen) if producto.imagen else url_for('static', filename='img/default_product.png') }}" />
-                </div>
-                <h3 class="text-lg font-bold text-on-surface leading-tight">{{ producto.nombre }}</h3>
-                <div class="flex justify-between items-center mt-3">
-                  <span class="text-primary font-black">${{ "%.2f"|format(producto.precio_venta|float) }}</span>
-                  <span class="material-symbols-outlined text-secondary-container bg-secondary px-2 py-1 rounded-lg text-sm transition-colors hover:brightness-110">add_shopping_cart</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </section>
-      <!-- Newsletter / Promo Section (Kinetic Design) -->
-      <section
-        class="mt-24 bg-secondary-container/30 backdrop-blur-md rounded-3xl p-12 relative overflow-hidden"
-      >
-        <div class="relative z-10 grid md:grid-cols-2 items-center gap-12">
-          <div>
-            <h2
-              class="text-4xl font-extrabold text-on-secondary-container tracking-tight mb-4"
-            >
-              Join the Monster Loyalty Circle
-            </h2>
-            <p class="text-secondary text-lg mb-8">
-              Get exclusive access to secret drink drops and zero-fee deliveries
-              on all liquid orders.
-            </p>
-            <div class="flex gap-2">
-              <input
-                class="bg-white border-none rounded-xl px-6 py-4 flex-grow focus:ring-2 focus:ring-primary"
-                placeholder="email@example.com"
-                type="email"
-              />
-              <button
-                class="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold transition-all hover:shadow-xl hover:scale-105 active:scale-95"
-              >
-                JOIN
-              </button>
-            </div>
-          </div>
-          <div class="hidden md:flex justify-end">
+
+    <main class="max-w-screen-xl mx-auto px-4 pb-20">
+      <!-- ===== CATEGORÍAS ===== -->
+      <nav class="py-4 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide justify-center">
+          {% set cat_imgs = { 'Hamburguesas': 'hamburguesa.png', 'Papas':
+          'papas.png', 'Desayunos': 'desayuno.png', 'Bebidas': 'bebidas.png',
+          'Postres': 'postre.png', 'Hot Dogs': 'hotdogs.png', 'Combos':
+          'combos.png' } %} {% set categorias_lista = [ 'Hamburguesas', 'Papas',
+          'Desayunos', 'Bebidas', 'Postres', 'Hot Dogs', 'Combos' ] %} {% for
+          cat_nombre in categorias_lista %} {% set is_active = (cat_nombre ==
+          categoria_nombre) %}
+          <a
+            href="{{ url_for('pagina.menu_categoria', categoria=cat_nombre) }}"
+            class="flex flex-col items-center gap-1 px-4 pb-3 pt-2 min-w-[80px] group relative"
+          >
+            <!-- Imagen sin contenedor -->
             <div
-              class="w-64 h-64 bg-primary rounded-full blur-[80px] opacity-20 absolute -top-10 -right-10"
-            ></div>
-            <span
-              class="material-symbols-outlined text-[160px] text-on-secondary-container/10 select-none"
-              style="font-variation-settings: &quot;FILL&quot; 1"
-              >local_drink</span
+              class="w-14 h-14 overflow-hidden flex items-center justify-center"
             >
-          </div>
+              <img
+                src="{{ url_for('static', filename='img/categorias_pag/' + cat_imgs[cat_nombre]) }}"
+                alt="{{ cat_nombre }}"
+                class="w-full h-full object-contain transition-transform duration-200 group-hover:scale-110"
+              />
+            </div>
+            <!-- Nombre -->
+            <span
+              class="text-xs text-center leading-tight
+              {{ 'font-bold text-gray-900 dark:text-white' if is_active else 'font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200' }}"
+            >
+              {{ cat_nombre }}
+            </span>
+            <!-- Línea naranja sólo en activo -->
+            {% if is_active %}
+            <div
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-orange-500"
+            ></div>
+            {% endif %}
+          </a>
+          {% endfor %}
         </div>
-      </section>
+      </nav>
+
+      <!-- ===== TÍTULO + BUSCADOR ===== -->
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8 mb-6"
+      >
+        <h1 class="text-3xl font-extrabold tracking-tight">
+          {{ categoria_nombre }}
+        </h1>
+
+        <form
+          method="get"
+          action="{{ url_for('pagina.menu_categoria', categoria=categoria_param) }}"
+        >
+          <div class="relative">
+            <!-- Lupa -->
+            <svg
+              class="w-6 h-6 text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="2"
+                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              />
+            </svg>
+
+            <input
+              name="q"
+              value="{{ q }}"
+              type="search"
+              placeholder="Buscar en {{ categoria_nombre }}…"
+              class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors w-72"
+            />
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== GRID DE PRODUCTOS ===== -->
+      {% if not productos %}
+      <div
+        class="py-24 flex flex-col items-center text-gray-400 dark:text-gray-500"
+      >
+        <!-- Empty state icon -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-20 h-20 mb-4 opacity-30"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
+        </svg>
+        <p class="text-xl font-semibold">Aún estamos cocinando...</p>
+        <p class="text-sm mt-2">
+          No hay productos activos en
+          <strong>{{ categoria_nombre }}</strong> todavía.
+        </p>
+      </div>
+
+      {% else %}
+      <div
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+      >
+        {% for producto in productos %} {# -- URL del detalle según tipo -- #}
+        {% if producto is mapping %} {% if producto.id_combo %} {% set
+        detalle_url = url_for('pagina.combo_detalle',
+        id_combo=producto.id_combo) %} {% else %} {% set detalle_url = '#' %} {%
+        endif %} {% else %} {% set detalle_url =
+        url_for('pagina.producto_detalle', id_producto=producto.id_producto) %}
+        {% endif %}
+
+        <a
+          href="{{ detalle_url }}"
+          class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer block"
+        >
+          <!-- Imagen -->
+          <div
+            class="bg-gray-50 dark:bg-gray-800 aspect-square overflow-hidden flex items-center justify-center"
+          >
+            {% if producto.imagen %} {% if producto is mapping %}
+            <img
+              src="{{ url_for('static', filename='img/combos/' + producto.imagen) }}"
+              alt="{{ producto.nombre }}"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {% else %}
+            <img
+              src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}"
+              alt="{{ producto.nombre }}"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {% endif %} {% else %}
+            <!-- Fallback icon (no image) -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-16 h-16 text-gray-300 dark:text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"
+              />
+            </svg>
+            {% endif %}
+          </div>
+
+          <!-- Info -->
+          <div class="p-3">
+            <h3
+              class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2"
+            >
+              {{ producto.nombre }}
+            </h3>
+            <p class="text-orange-500 font-bold text-sm mt-1">
+              ${{ "%.2f"|format(producto.precio_venta|float) }}
+            </p>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
     </main>
-    <!-- Footer -->
+
+    <!-- ===== FOOTER ===== -->
     <footer
-      class="bg-[#fcf9f8] dark:bg-stone-950 w-full flex flex-col md:flex-row justify-between items-center px-12 py-12 gap-8 border-t-0 bg-surface-container-low dark:bg-stone-900"
+      class="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 py-8 mt-12"
     >
-      <div class="flex flex-col gap-2">
-        <span class="text-sm font-bold text-[#1c1b1b] dark:text-[#e5e2e1]"
-          >Monster Eats ERP</span
+      <div
+        class="max-w-screen-xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400 dark:text-gray-500"
+      >
+        <span class="font-bold text-gray-700 dark:text-gray-300"
+          >Monster Eats</span
         >
-        <span
-          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60"
-          >© 2024 Monster Eats ERP. Kinetic Sophistication System.</span
-        >
-      </div>
-      <div class="flex flex-wrap justify-center gap-6">
-        <a
-          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
-          href="#"
-          >Privacy Policy</a
-        >
-        <a
-          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
-          href="#"
-          >Terms of Service</a
-        >
-        <a
-          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
-          href="#"
-          >System Status</a
-        >
-        <a
-          class="font-['Inter'] text-xs uppercase tracking-widest text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 hover:opacity-100 hover:text-[#a63b00] dark:hover:text-[#f26522] transition-opacity"
-          href="#"
-          >Contact Support</a
-        >
-      </div>
-      <div class="flex gap-4">
-        <span
-          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 cursor-pointer hover:opacity-100"
-          >language</span
-        >
-        <span
-          class="material-symbols-outlined text-[#1c1b1b] dark:text-[#e5e2e1] opacity-60 cursor-pointer hover:opacity-100"
-          >share</span
-        >
+        <span>© 2025 Monster Eats ERP. Todos los derechos reservados.</span>
+        <div class="flex gap-6">
+          <a href="#" class="hover:text-orange-500 transition-colors"
+            >Privacidad</a
+          >
+          <a href="#" class="hover:text-orange-500 transition-colors"
+            >Términos</a
+          >
+          <a href="#" class="hover:text-orange-500 transition-colors"
+            >Soporte</a
+          >
+        </div>
       </div>
     </footer>
+
+    <script>
+      function updateThemeIcons() {
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("iconSun").classList.toggle("hidden", isDark);
+        document.getElementById("iconMoon").classList.toggle("hidden", !isDark);
+      }
+      function toggleTheme() {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          document.documentElement.classList.contains("dark")
+            ? "dark"
+            : "light",
+        );
+        updateThemeIcons();
+      }
+      updateThemeIcons();
+    </script>
+
+    <script>
+      const _loader = document.getElementById("pageLoader");
+
+      // Ocultar el loader cuando la página ya terminó de cargar
+      function _hideLoader() {
+        _loader.style.opacity = "0";
+        _loader.style.pointerEvents = "none";
+      }
+
+      // Mostrar el loader (al cambiar de categoría o buscar)
+      function _showLoader() {
+        _loader.style.opacity = "1";
+        _loader.style.pointerEvents = "auto";
+      }
+
+      // Ocultar al terminar de cargar (cubre parpadeo inicial)
+      window.addEventListener("load", _hideLoader);
+
+      // También ocultar en bfcache (botón atrás/adelante)
+      window.addEventListener("pageshow", function (e) {
+        _hideLoader();
+      });
+
+      // Mostrar al hacer click en categoría
+      document.querySelectorAll("nav a").forEach(function (link) {
+        link.addEventListener("click", _showLoader);
+      });
+
+      // Mostrar al buscar
+      var searchForm = document.querySelector("form[method='get']");
+      if (searchForm) searchForm.addEventListener("submit", _showLoader);
+    </script>
   </body>
 </html>
