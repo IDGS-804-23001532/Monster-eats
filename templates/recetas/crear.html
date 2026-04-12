@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="py-8 max-w-3xl mx-auto">
+    
+    <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-black/50">
+
+        <div class="mb-8 border-b border-slate-700/50 pb-6">
+            <h2 class="text-3xl font-black text-white tracking-tight flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-orange-500 shadow-inner">
+                    <i class="fas fa-hamburger text-xl"></i>
+                </div>
+                Crear Nuevo Producto
+            </h2>
+            <p class="text-slate-400 mt-3 ml-[4.25rem]">Registra los datos base del producto para armar su receta.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-slate-300 ml-2">Nombre del Producto</label>
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-signature text-slate-500 group-focus-within:text-orange-500 transition-colors"></i>
+                    </div>
+                    {{ form.nombre(class="w-full pl-12 pr-4 py-3 rounded-2xl border border-transparent bg-slate-900/60 text-white placeholder-slate-500 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all outline-none backdrop-blur-md", placeholder="Ej. Hamburguesa Doble Monster") }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-300 ml-2">Precio de Venta</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-dollar-sign text-slate-500 group-focus-within:text-orange-500 transition-colors"></i>
+                        </div>
+                        {{ form.precio_venta(class="w-full pl-10 pr-4 py-3 rounded-2xl border border-transparent bg-slate-900/60 text-white placeholder-slate-500 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all outline-none backdrop-blur-md", placeholder="0.00") }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-300 ml-2">Categoría</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-tags text-slate-500 group-focus-within:text-orange-500 transition-colors"></i>
+                        </div>
+                        {{ form.id_categoria(class="w-full pl-12 pr-10 py-3 rounded-2xl border border-transparent bg-slate-900/60 text-white placeholder-slate-500 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all outline-none backdrop-blur-md appearance-none") }}
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-slate-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-slate-300 ml-2">Fotografía del Producto</label>
+                <div class="relative w-full rounded-2xl border-2 border-dashed border-slate-700/50 bg-slate-900/40 p-6 hover:border-orange-500/50 hover:bg-slate-900/60 transition-all duration-300 group text-center cursor-pointer flex flex-col items-center justify-center">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 group-hover:text-orange-500 mb-3 transition-colors duration-300"></i>
+                    
+                    {{ form.imagen(class="block w-full max-w-xs text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-orange-500/10 file:text-orange-500 hover:file:bg-orange-500/20 file:transition-all file:cursor-pointer cursor-pointer mx-auto") }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-slate-700/50">
+                <a href="{{ url_for('recetas.index') }}" 
+                   class="px-6 py-3 rounded-2xl font-bold text-slate-300 bg-slate-700/40 hover:bg-slate-700 hover:text-white transition-all duration-300 border border-transparent hover:border-slate-600">
+                    <i class="fas fa-times mr-2"></i> Cancelar
+                </a>
+                
+                <button type="submit" class="group flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-orange-500/20 hover:scale-105">
+                    <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform duration-300"></i>
+                    <span>Crear y Agregar Insumos</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

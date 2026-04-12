@@ -1,0 +1,115 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="py-8">
+    <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-black/50">
+
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="flex items-center gap-6">
+                <div>
+                    <h2 class="text-3xl font-black text-white tracking-tight">
+                        <i class="fas fa-utensils text-orange-500 mr-2"></i> Recetas y Fórmulas
+                    </h2>
+                    <p class="text-slate-400 mt-1">Gestión de costos y utilidad por producto.</p>
+                </div>
+                {% if current_user.has_role('gerente') %}
+                <a href="{{ url_for('recetas.crear') }}"
+                    class="group flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-orange-500/20 hover:scale-105">
+                    <i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
+                    <span>Nueva Receta</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <form action="{{ url_for('recetas.index') }}" method="GET" class="w-full md:w-1/3">
+                <div class="relative group">
+                    <input type="text" name="search" placeholder="Buscar producto..." value="{{ search }}"
+                        class="w-full pl-12 pr-4 py-3 rounded-2xl border-none bg-slate-900/60 text-white placeholder-slate-500 focus:ring-2 focus:ring-orange-500 transition-all outline-none backdrop-blur-md">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-500 group-focus-within:text-orange-500 transition-colors"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="relative overflow-x-auto rounded-3xl border border-slate-700/50 bg-slate-900/20">
+            <table class="w-full text-sm text-left text-slate-300">
+                <thead class="text-xs text-slate-400 uppercase bg-slate-900/50 font-black tracking-widest">
+                    <tr>
+                        <th class="px-6 py-5">Producto</th>
+                        <th class="px-6 py-5">Categoría</th>
+                        <th class="px-6 py-5">Precio Venta</th>
+                        <th class="px-6 py-5">Costo Prod.</th>
+                        <th class="px-6 py-5">Utilidad</th>
+                        <th class="px-6 py-5 text-center">Insumos</th>
+                        <th class="px-6 py-5">Estado</th>
+                        <th class="px-6 py-5 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/30">
+                    {% for r in recetas %}
+                    <tr class="hover:bg-orange-500/5 transition-all duration-200 group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                <div class="relative flex-shrink-0">
+                                    <div class="absolute -inset-1 bg-orange-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-300">
+                                    </div>
+                                    <img src="{{ url_for('static', filename='img/productos/' + (r.imagen if r.imagen else 'default_product.png')) }}"
+                                        alt="{{ r.producto }}"
+                                        class="relative w-12 h-12 rounded-xl object-cover border border-slate-700/50 shadow-lg">
+                                </div>
+                                <div class="font-bold text-white group-hover:text-orange-400 transition-colors">
+                                    {{ r.producto }}
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-slate-400 font-medium">{{ r.categoria }}</td>
+
+                        <td class="px-6 py-4 font-mono text-slate-200">
+                            <span class="text-xs text-slate-500 mr-1">$</span>{{ "%.2f"|format(r.precio_venta) }}
+                        </td>
+
+                        <td class="px-6 py-4 font-mono text-slate-400">
+                            <span class="text-xs text-slate-600 mr-1">$</span>{{ "%.2f"|format(r.costo_produccion) }}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <span class="font-mono font-bold {% if r.utilidad < 0 %}text-red-400{% else %}text-green-400{% endif %}">
+                                ${{ "%.2f"|format(r.utilidad) }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <span class="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold border border-slate-600/50">
+                                {{ r.total_insumos }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4">
+                            {% if r.estado_receta == 'Completa' %}
+                            <span class="inline-flex items-center gap-1.5 bg-green-500/10 text-green-400 px-3 py-1.5 rounded-full text-[10px] font-black border border-green-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                                COMPLETA
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 bg-yellow-500/10 text-yellow-400 px-3 py-1.5 rounded-full text-[10px] font-black border border-yellow-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                SIN RECETA
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            <a href="{{ url_for('recetas.detalle', id=r.id_producto) }}"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 shadow-lg shadow-orange-500/10">
+                                <i class="fas fa-eye text-lg"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

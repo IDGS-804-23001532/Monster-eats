@@ -14,7 +14,7 @@ from audit_logger import audit
 
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
-@roles_required('Cajero')
+@roles_accepted('Cajero', 'Gerente', 'gerente')
 @limiter.limit('20 per minute') # 8 request por minuto
 def ventas():
     create_form = forms.VentasForm(request.form)
@@ -146,7 +146,7 @@ def ventas():
 
         except (OperationalError, DBAPIError) as e:
             db.session.rollback()
-
+            print(e)
             mensaje_usuario = 'Ocurrio un error al procesar la operación'
             print(f'Error ventas {e}')
 
@@ -210,12 +210,11 @@ def ventas():
     # Extraemos el id de la sesion del ticket de la venta y al final queremos que se borre
     # Automaticamente
     ticket_a_imprimir = session.pop('ticket_a_imprimir', None)
-
     return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen, ticket_a_imprimir = ticket_a_imprimir)
 
 @venta.route('/ticket/<int:id_venta>')
 @login_required
-@roles_required('Cajero')
+@roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def ver_ticket(id_venta):
     cabecera = db.session.execute(
@@ -236,7 +235,7 @@ def ver_ticket(id_venta):
 
 @venta.route('/historial', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Cajero', 'Gerente')
+@roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def historial():
     create_form = forms.FiltroFechaForm(request.args)
@@ -254,7 +253,7 @@ def historial():
 
 @venta.route('/CorteCaja', methods=['GET', 'POST'])
 @login_required
-@roles_required('Cajero')
+@roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def corte_caja():
     form = forms.Form()
@@ -343,7 +342,7 @@ def corte_caja():
 
 @venta.route('/salidaCaja', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Cajero', 'Gerente')
+@roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def salida_caja():
     create_form = forms.SalidaEfectivoForm(request.form)
@@ -408,7 +407,7 @@ def salida_caja():
 
 @venta.route('/solicitudProduccionVenta', methods=['GET', 'POST'])
 @login_required
-@roles_required('Cajero')
+@roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def solicitud_produccion_venta():
     create_form = forms.SolicitudProduccionVentasForm(request.form)
@@ -472,7 +471,7 @@ def solicitud_produccion_venta():
 
 @venta.route('/utilidad_diaria', methods=['GET', 'POST'])
 @login_required
-@roles_required('Gerente')
+@roles_accepted('Gerente', 'gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def utilidad_diaria():
     form = forms.FiltroFechaForm(request.args)

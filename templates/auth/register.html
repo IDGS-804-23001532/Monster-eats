@@ -57,10 +57,7 @@
                                 </svg>
                             </div>
                             
-                            {{ form.nombre(
-                            class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                            placeholder="Nombre(s)"
-                            ) }}
+                            {{ form.nombre( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder="Nombre(s)" ) }}
 
                             {% for error in form.nombre.errors %}
                                 <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -74,10 +71,7 @@
                                 </svg>
                             </div>
 
-                            {{ form.apellido_pa(
-                            class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                            placeholder="A. Paterno"
-                            ) }}
+                            {{ form.apellido_pa( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder="A. Paterno" ) }}
 
                             {% for error in form.apellido_pa.errors %}
                                 <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -91,10 +85,7 @@
                                 </svg>
                             </div>
 
-                            {{ form.apellido_ma(
-                            class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                            placeholder="A. Materno"
-                            ) }}
+                            {{ form.apellido_ma( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder="A. Materno" ) }}
 
                             {% for error in form.apellido_ma.errors %}
                                 <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -108,13 +99,7 @@
                                 </svg>
                             </div>
 
-                            {{form.fecha_nac(
-                                class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all 
-                                    [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer",
-                                placeholder = "Fecha de nacimiento",
-                                onfocus="(this.type='date')", 
-                                onblur="(this.type='text')"
-                            )}}
+                            {{form.fecha_nac( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer", placeholder = "Fecha de nacimiento", onfocus="(this.type='date')", onblur="(this.type='text')" )}}
 
                             {% for error in form.apellido_ma.errors %}
                                 <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -128,8 +113,7 @@
                                 </svg>
                             </div>
 
-                            {{form.telefono(class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                            placeholder = "Telefono")}}
+                            {{form.telefono(class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder = "Telefono")}}
 
                             {% for error in form.apellido_ma.errors %}
                                 <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -143,10 +127,7 @@
                             </svg>
                         </div>
 
-                        {{ form.email(
-                        class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                        placeholder="Correo electrónico"
-                        ) }}
+                        {{ form.email( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder="Correo electrónico" ) }}
 
                         {% for error in form.email.errors %}
                             <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>
@@ -160,10 +141,7 @@
                             </svg>
                         </div>
 
-                        {{ form.password(
-                        class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all",
-                        placeholder="Crea una contraseña segura"
-                        ) }}
+                        {{ form.password( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-1 focus:ring-orange-500 transition-all", placeholder="Crea una contraseña segura" ) }}
 
                         {% for error in form.password.errors %}
                             <p class="text-red-300 text-xs ml-4 mt-1 absolute">{{ error }}</p>

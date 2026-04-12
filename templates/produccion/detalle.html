@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="bg-[#1e293b] border border-slate-700 rounded-[2rem] p-6 shadow-2xl">
+
+    <div class="mb-6">
+        <a href="{{ url_for('produccion.index') }}" class="text-orange-400 hover:text-orange-300 transition-colors inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Información de la orden -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="bg-[#111827] rounded-xl p-5 border border-slate-700">
+            <div class="text-sm text-slate-400 mb-1">
+                <i class="fas fa-box text-orange-500 text-xs mr-1"></i> Producto
+            </div>
+            <div class="text-xl font-bold text-white">{{ orden.producto }}</div>
+        </div>
+        
+        <div class="bg-[#111827] rounded-xl p-5 border border-slate-700">
+            <div class="text-sm text-slate-400 mb-1">
+                <i class="fas fa-chart-line text-orange-500 text-xs mr-1"></i> Estado
+            </div>
+            <div>
+                {% if orden.estado == 'Pendiente' %}
+                    <span class="inline-flex items-center bg-yellow-500/10 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full border border-yellow-500/20">
+                        <span class="w-2 h-2 mr-2 bg-yellow-500 rounded-full animate-pulse"></span> Pendiente
+                    </span>
+                {% elif orden.estado == 'En Proceso' %}
+                    <span class="inline-flex items-center bg-blue-500/10 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/20">
+                        <span class="w-2 h-2 mr-2 bg-blue-500 rounded-full animate-pulse"></span> En Proceso
+                    </span>
+                {% elif orden.estado == 'Completada' %}
+                    <span class="inline-flex items-center bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20">
+                        <i class="fas fa-check-circle mr-2 text-xs"></i> Completada
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center bg-rose-500/10 text-rose-400 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/20">
+                        <i class="fas fa-times-circle mr-2 text-xs"></i> Cancelada
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="bg-[#111827] rounded-xl p-5 border border-slate-700">
+            <div class="text-sm text-slate-400 mb-1">
+                <i class="fas fa-hashtag text-orange-500 text-xs mr-1"></i> Cantidad
+            </div>
+            <div class="text-xl font-bold text-white">{{ orden.cantidad_programada }} unidades</div>
+            {% if orden.cantidad_producida %}
+            <div class="text-sm text-slate-400 mt-1">Producido: {{ orden.cantidad_producida }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Validación de stock -->
+    {% if orden.estado == 'Pendiente' %}
+    <div class="mb-8 p-4 rounded-xl {% if stock_suficiente %}bg-emerald-500/10 border border-emerald-500/20{% else %}bg-rose-500/10 border border-rose-500/20{% endif %}">
+        <div class="flex items-center gap-3">
+            {% if stock_suficiente %}
+                <i class="fas fa-check-circle text-emerald-400 text-xl"></i>
+                <span class="text-emerald-400 font-medium">{{ mensaje_stock if mensaje_stock else 'Stock suficiente para iniciar producción' }}</span>
+            {% else %}
+                <i class="fas fa-exclamation-triangle text-rose-400 text-xl"></i>
+                <span class="text-rose-400 font-medium">{{ mensaje_stock if mensaje_stock else 'No hay suficiente stock de materia prima para esta producción' }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tabla de insumos necesarios -->
+    <div class="mb-8">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i class="fas fa-clipboard-list text-orange-500"></i> Insumos necesarios
+        </h3>
+        <div class="relative overflow-hidden rounded-xl border border-slate-700 bg-[#111827]/50">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-300">
+                    <thead class="text-xs text-slate-400 uppercase bg-[#111827]">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">Insumo</th>
+                            <th class="px-6 py-4 font-semibold">Cantidad por unidad</th>
+                            <th class="px-6 py-4 font-semibold">Cantidad total</th>
+                            <th class="px-6 py-4 font-semibold">Unidad</th>
+                            <th class="px-6 py-4 font-semibold">Costo unitario</th>
+                            <th class="px-6 py-4 font-semibold">Costo total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                        {% for insumo in insumos %}
+                        <tr class="hover:bg-slate-800/40 transition-colors">
+                            <td class="px-6 py-3 font-medium text-white">{{ insumo.insumo }}</td>
+                            <td class="px-6 py-3">{{ "%.4f"|format(insumo.cantidad_requerida) }}</td>
+                            <td class="px-6 py-3 font-mono text-orange-400">{{ "%.4f"|format(insumo.cantidad_total) }}</td>
+                            <td class="px-6 py-3">{{ insumo.abreviatura }}</td>
+                            <td class="px-6 py-3">${{ "%.2f"|format(insumo.costo_unitario) }}</td>
+                            <td class="px-6 py-3 font-medium">${{ "%.2f"|format(insumo.costo_total) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex flex-wrap gap-3">
+        {% if orden.estado == 'Pendiente' and stock_suficiente %}
+        <form action="{{ url_for('produccion.iniciar', id=orden.id_orden_produccion) }}" method="POST" 
+              onsubmit="return confirm('¿Iniciar producción? Se descontarán los insumos del inventario.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center gap-2">
+                <i class="fas fa-play"></i> Iniciar Producción
+            </button>
+        </form>
+        {% endif %}
+
+        {% if orden.estado == 'En Proceso' %}
+        <form action="{{ url_for('produccion.finalizar', id=orden.id_orden_produccion) }}" method="POST" 
+              onsubmit="return confirm('¿Finalizar producción? Se agregarán los productos al inventario.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="flex flex-wrap gap-2 items-center">
+                <input type="number" name="cantidad_producida" placeholder="Cantidad" 
+                       value="{{ orden.cantidad_programada }}" min="1" max="{{ orden.cantidad_programada }}"
+                       class="w-36 px-4 py-2.5 rounded-full border border-slate-600 bg-[#111827] text-slate-200 focus:ring-2 focus:ring-orange-500 text-center" required>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-2">
+                    <i class="fas fa-check"></i> Finalizar
+                </button>
+            </div>
+        </form>
+        {% endif %}
+
+        {% if orden.estado == 'Pendiente' %}
+        <form action="{{ url_for('produccion.cancelar', id=orden.id_orden_produccion) }}" method="POST"
+              onsubmit="return confirm('¿Cancelar esta orden de producción?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="motivo" value="Cancelada por usuario">
+            <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 flex items-center gap-2">
+                <i class="fas fa-times"></i> Cancelar Orden
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

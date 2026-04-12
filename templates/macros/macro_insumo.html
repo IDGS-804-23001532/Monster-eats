@@ -1,0 +1,14 @@
+{% macro camposNuevos(field) %}
+<!-- este macro se utiliza para renderizar los campos de los formularios de insumos -->
+  <label for="{{ field.id }}" class="block mb-2.5 text-sm font-medium text-white">{{ field.label }}</label>
+  
+  <div>{{ field(**kwargs) | safe }}</div>
+
+  {% if field.errors %}
+    <ul class="mt-1">
+      {% for error in field.errors %}
+        <li class="text-red-500 text-xs font-semibold">{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}

@@ -1,0 +1,209 @@
+{% extends "layout.html" %} {% block content %}
+<div class="p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+  <div class="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <h1
+      class="text-3xl font-black text-gray-800 dark:text-white tracking-wide uppercase"
+    >
+      Peticiones de <span class="text-orange-500">Reabastecimiento</span>
+    </h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+      Comunicación interna: El mostrador solicita lotes, la cocina aprueba y
+      produce.
+    </p>
+  </div>
+
+  {% if current_user.has_role('cajero') or current_user.has_role('gerente') %}
+  <div
+    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8"
+  >
+    <h2
+      class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
+    >
+      <svg
+        class="w-5 h-5 text-orange-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        ></path>
+      </svg>
+      Solicitar Nuevo Lote a Cocina
+    </h2>
+    <form
+      action="{{ url_for('solicitud_produccion.crear_solicitud') }}"
+      method="POST"
+      class="flex flex-col md:flex-row gap-4 items-end"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="flex-grow w-full">
+        <label
+          class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+          >Producto a Preparar</label
+        >
+        <select
+          name="id_producto"
+          required
+          class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 p-2.5 dark:bg-gray-900 dark:border-gray-600 dark:text-white font-bold cursor-pointer"
+        >
+          <option value="">Selecciona qué producto falta...</option>
+          {% for p in productos %}
+          <option value="{{ p.id_producto }}">{{ p.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="w-full md:w-48">
+        <label
+          class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+          >Cantidad (Unidades)</label
+        >
+        <input
+          type="number"
+          name="cantidad"
+          min="1"
+          required
+          class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 p-2.5 dark:bg-gray-900 dark:border-gray-600 dark:text-white font-black text-center"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full md:w-auto px-8 py-2.5 bg-orange-500 text-white font-black text-sm uppercase tracking-wider rounded-xl hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/20"
+      >
+        Enviar Petición
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div
+    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+  >
+    <div
+      class="p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50"
+    >
+      <h2
+        class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider"
+      >
+        {% if current_user.has_role('cajero') or current_user.has_role('cocina')
+        %} Bandeja de Peticiones {% else %} Mis Avisos a Cocina {% endif %}
+      </h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead
+          class="text-xs text-gray-400 uppercase bg-gray-50 dark:bg-gray-900 font-bold"
+        >
+          <tr>
+            <th scope="col" class="px-6 py-4">Folio</th>
+            <th scope="col" class="px-6 py-4">Producto</th>
+            <th scope="col" class="px-6 py-4">Petición</th>
+            <th scope="col" class="px-6 py-4">Estado</th>
+            <th scope="col" class="px-6 py-4">Hora</th>
+            {% if current_user.has_role('cajero') or
+            current_user.has_role('cocina') %}
+            <th scope="col" class="px-6 py-4 text-right">Acciones de Cocina</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for sol in solicitudes %}
+          <tr
+            class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          >
+            <td class="px-6 py-4 font-black">
+              #{{ "%04d"|format(sol.id_solicitud_prod) }}
+            </td>
+            <td class="px-6 py-4 font-black text-gray-900 dark:text-white">
+              {% for p in productos %} {% if p.id_producto == sol.id_producto
+              %}{{ p.nombre }}{% endif %} {% endfor %}
+            </td>
+            <td class="px-6 py-4 font-bold text-orange-500">
+              {{ sol.cantidad }} unidades
+            </td>
+
+            <td class="px-6 py-4">
+              <span
+                class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider {% if sol.estado == 'Pendiente' %} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500 {% elif sol.estado == 'En Proceso' %} bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500 {% elif sol.estado == 'Completada' %} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 {% else %} bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500 {% endif %}"
+              >
+                {{ sol.estado }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 font-medium">
+              {{ sol.fecha_solicitud.strftime('%I:%M %p') }}
+            </td>
+
+            {% if (current_user.has_role('cajero') or
+            current_user.has_role('cocina')) %} {% if sol.estado == 'Pendiente'
+            %}
+            <td class="px-6 py-4 text-right flex justify-end gap-2">
+              <form
+                action="{{ url_for('solicitud_produccion.aprobar_solicitud', id_solicitud=sol.id_solicitud_prod) }}"
+                method="POST"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <button
+                  type="submit"
+                  class="text-white bg-green-600 hover:bg-green-700 font-bold rounded-lg text-xs px-4 py-2 transition-colors shadow-sm cursor-pointer"
+                >
+                  Aprobar y Preparar
+                </button>
+              </form>
+              <form
+                action="{{ url_for('solicitud_produccion.rechazar_solicitud', id_solicitud=sol.id_solicitud_prod) }}"
+                method="POST"
+                onsubmit="
+                  return confirm(
+                    '¿Seguro que deseas rechazar y cancelar esta petición?',
+                  );
+                "
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <button
+                  type="submit"
+                  class="text-white bg-red-600 hover:bg-red-700 font-bold rounded-lg text-xs px-4 py-2 transition-colors shadow-sm cursor-pointer"
+                >
+                  Ignorar
+                </button>
+              </form>
+            </td>
+            {% else %}
+            <td
+              class="px-6 py-4 text-right text-gray-400 text-xs italic font-bold"
+            >
+              {{ "Orden Generada" if sol.estado == 'En Proceso' else "Cerrada"
+              }}
+            </td>
+            {% endif %} {% endif %}
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+              <p class="font-bold text-lg text-gray-400">
+                No hay peticiones activas.
+              </p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,558 @@
+{% extends 'layout.html' %} {% from "macros/alert_wftForms_macro.html" import camposNuevos %} {% block content %}
+
+<div
+  class="w-full max-w-[1168px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center mt-10 md:mt-20 gap-6 px-4 xl:px-0"
+>
+  <form
+    action="{{ url_for('inventario.index') }}"
+    method="GET"
+    class="flex flex-nowrap items-center gap-2 w-full lg:w-auto"
+  >
+    <!-- Input -->
+    <div class="relative flex-1 sm:flex-none">
+      <label for="search-inventario" class="sr-only">Buscar</label>
+      <input
+        type="text"
+        name="search_query"
+        value="{{ search_query }}"
+        id="search-inventario"
+        placeholder="Buscar insumo..."
+        class="w-full sm:w-[300px] p-2 pl-4 border border-gray-600 rounded-full focus:border-gray-700 focus:outline-none px-4 py-2 bg-[#3b4252] text-white placeholder-gray-400"
+      />
+    </div>
+
+    <!-- Botón buscar -->
+    <button
+      type="submit"
+      class="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] border-2 border-[#FF6B00] hover:bg-orange-600 transition"
+    >
+      <svg
+        class="w-5 h-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-width="2"
+          d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+        />
+      </svg>
+    </button>
+  </form>
+
+  <div
+    class="flex flex-col sm:flex-row flex-wrap gap-4 w-full lg:w-auto justify-start lg:justify-end"
+  >
+    <button
+      type="button"
+      data-modal-target="historialMermaModal"
+      data-modal-toggle="historialMermaModal"
+      class="w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-red-600/20 border-2 border-red-600/30 hover:bg-red-600 transition text-white whitespace-nowrap gap-2"
+    >
+      <svg
+        class="w-4 h-4"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      Ver Historial Merma
+    </button>
+    <button
+      type="button"
+      onclick="window.location.href = '{{ url_for('inventario.limpiar_busqueda') }}'"
+      class="w-full sm:w-auto flex items-center justify-center px-6 h-10 rounded-full bg-[#101828] border-2 border-[#101828] hover:bg-orange-600 transition text-white whitespace-nowrap"
+    >
+      Limpiar Búsqueda
+    </button>
+  </div>
+</div>
+
+<!-- ==================== TABLA DE INVENTARIO ==================== -->
+<div class="px-4 xl:px-0">
+  <div
+    class="table-container w-full max-w-[1168px] mx-auto bg-[#0B1D33] shadow-xs rounded-xl border border-[#ffffff] mt-6 mb-10 overflow-x-auto"
+  >
+    <table
+      class="mobile-cards w-full text-sm text-left rtl:text-right text-body whitespace-nowrap"
+    >
+      <thead class="bg-[#1E2939] text-white border-b border-[#ffffff]">
+        <tr class="divide-x divide-[#ffffff]">
+          <th scope="col" class="px-6 py-3 font-medium text-white">Insumo</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Stock Actual
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Unidad</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Costo Unitario
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">Merma</th>
+          <th scope="col" class="px-6 py-3 font-medium text-white">
+            Próx. Caducidad
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white text-center">
+            Estado
+          </th>
+          <th scope="col" class="px-6 py-3 font-medium text-white text-center">
+            Acciones
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in inventario %}
+        <tr
+          class="odd:bg-[#0B1D33] text-white even:bg-[#0B1D33] border-b border-[#ffffff] divide-x divide-[#ffffff]"
+        >
+          <th
+            scope="row"
+            class="px-6 py-4 font-bold text-white whitespace-nowrap text-lg md:text-base"
+          >
+            {{ item.nombre }}
+          </th>
+          <td data-label="Stock:" class="px-6 py-4">
+            {% if item.stock_actual <= 0 %}
+            <span
+              class="bg-red-500/20 text-red-400 font-bold px-3 py-1 rounded-full text-xs shadow-sm border border-red-500/30"
+            >
+              Sin stock
+            </span>
+            {% elif item.stock_actual < 10 %}
+            <span
+              class="bg-yellow-500/20 text-yellow-400 font-bold px-3 py-1 rounded-full text-xs shadow-sm border border-yellow-500/30"
+            >
+              {{ item.stock_actual }}
+            </span>
+            {% else %}
+            <span class="font-semibold text-white">
+              {{ item.stock_actual }}
+            </span>
+            {% endif %}
+          </td>
+          <td data-label="Unidad:" class="px-6 py-4">
+            {{ item.unidad }} ({{ item.abreviatura }})
+          </td>
+          <td data-label="Costo:" class="px-6 py-4">
+            ${{ item.costo_unitario }}
+          </td>
+          <td data-label="Merma:" class="px-6 py-4">
+            {{ item.porcentaje_merma }}%
+          </td>
+          <td data-label="Caducidad:" class="px-6 py-4">
+            {% if item.prox_caducidad %} {% set hoy = import('datetime').date.today() if false else none %}
+            <span class="text-white text-xs">
+              {{ item.prox_caducidad.strftime('%d/%m/%Y') }}
+            </span>
+            {% else %}
+            <span class="text-gray-500 text-xs">Sin lotes</span>
+            {% endif %}
+          </td>
+          <td data-label="Estado:" class="px-6 py-4">
+            {% if item.activo %}
+            <span
+              class="bg-green-500/20 text-[#00B40C] font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-green-500/30"
+              >Activo</span
+            >
+            {% else %}
+            <span
+              class="bg-red-500/20 text-red-500 font-semibold px-3 py-1 rounded-full text-xs shadow-sm border border-red-500/30"
+              >Inactivo</span
+            >
+            {% endif %}
+          </td>
+          <td data-label="Acciones:" class="px-6 py-4 text-center">
+            <a
+              href="{{ url_for('inventario.index', ver=item.id_insumo) }}"
+              class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm border border-blue-500/30"
+              title="Ver detalle de lotes"
+            >
+              <svg
+                class="w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-width="2"
+                  d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+                />
+                <path
+                  stroke="currentColor"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+            </a>
+          </td>
+        </tr>
+        {% endfor %} {% if inventario | length == 0 %}
+        <tr>
+          <td colspan="8" class="px-6 py-8 text-center text-gray-400">
+            <div class="flex flex-col items-center gap-2">
+              <svg
+                class="w-12 h-12 text-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
+                />
+              </svg>
+              <p class="text-sm">No hay insumos en inventario</p>
+              <p class="text-xs text-gray-500">
+                Registra compras en el módulo de Compras para generar stock
+              </p>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %} {% block modals %}
+<!-- ==================== MODAL DETALLE DE INSUMO ==================== -->
+<div
+  id="detalleInsumoModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[70] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-4xl max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          {{ detalle_insumo.nombre if detalle_insumo else 'Detalle de Lotes' }}
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="detalleInsumoModal"
+        >
+          <svg
+            class="w-4 h-4 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="py-4 md:py-6 space-y-4 max-h-[500px] overflow-y-auto px-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {% for lote in lotes_all %} {% set es_caducado = lote.fecha_caducidad and lote.fecha_caducidad < hoy %} {% set es_agotado = (lote.cantidad_disponible or 0) <= 0 %}
+          <div
+            class="bg-[#394E6D] p-4 rounded-xl border border-gray-600 shadow-xs flex flex-col justify-between"
+          >
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-white font-semibold">Lote #{{ lote.id_lote }}</span>
+              {% if es_caducado %}
+              <span class="text-red-400 font-bold text-xs uppercase italic">Caducado</span>
+              {% elif es_agotado %}
+              <span class="text-gray-400 font-bold text-xs uppercase italic">Agotado</span>
+              {% else %}
+              <span class="text-green-400 font-bold text-xs uppercase italic">Vigente</span>
+              {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+              <div class="bg-black/20 p-2 rounded-lg">
+                <span class="text-gray-400 block text-[10px]">Disponible</span>
+                <span class="text-white font-bold">{{ lote.cantidad_disponible }} {{ detalle_insumo.abreviatura }}</span>
+              </div>
+              <div class="bg-black/20 p-2 rounded-lg">
+                <span class="text-gray-400 block text-[10px]">Caducidad</span>
+                <span class="text-white font-bold">{{ lote.fecha_caducidad.strftime('%d/%m/%Y') if lote.fecha_caducidad else 'S/N' }}</span>
+              </div>
+            </div>
+
+            <button
+              onclick="openMermaModal('{{ lote.id_lote }}', '{{ detalle_insumo.id_insumo if detalle_insumo else '' }}', '{{ lote.cantidad_disponible }}')"
+              class="w-full py-2 bg-[#FF6B00] hover:brightness-110 text-white font-semibold rounded-full text-xs transition active:scale-95 shadow-sm"
+            >
+              Registrar Merma
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-center border-t border-gray-600 pt-4 md:pt-6">
+        <button
+          data-modal-hide="detalleInsumoModal"
+          type="button"
+          class="flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none shadow-xs"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL REGISTRAR MERMA ==================== -->
+<div
+  id="mermaModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-[80] hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative w-full max-w-md max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4"
+      >
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Registrar Merma
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="mermaModal"
+        >
+          <svg
+            class="w-4 h-4 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <form
+        action="{{ url_for('inventario.registrar_merma') }}"
+        method="POST"
+        class="py-4 md:py-6 space-y-4"
+      >
+        {{ merma_form.csrf_token }} {{ merma_form.id_lote(id="merma_id_lote") }}
+        {{ merma_form.id_insumo(id="merma_id_insumo") }}
+
+        <div class="bg-[#394E6D] p-3 rounded-lg border border-gray-600 flex justify-between items-center">
+          <span class="text-gray-300 text-xs font-semibold">Lote Seleccionado:</span>
+          <span id="merma_lote_display" class="text-[#FF6B00] font-bold"></span>
+        </div>
+
+        <div>
+          <label class="block mb-1.5 text-sm font-medium text-white">Cantidad a retirar</label>
+          {{ merma_form.cantidad(class="bg-[#394E6D] text-white text-sm rounded-lg focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-400", id="merma_cantidad", placeholder="0.0") }}
+        </div>
+
+        <div>
+          <label class="block mb-1.5 text-sm font-medium text-white">Motivo</label>
+          {{ merma_form.motivo(class="bg-[#394E6D] text-white text-sm rounded-lg focus:ring-[#FF6B00] focus:border-[#FF6B00] block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-400", placeholder="Ej. Caducidad, daño...") }}
+        </div>
+
+        <!-- Botones -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-gray-600 pt-4 md:pt-6">
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#B22222] hover:brightness-110 transition shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            Confirmar Merma
+          </button>
+          <button
+            data-modal-hide="mermaModal"
+            type="button"
+            class="w-full sm:w-auto flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition shadow-xs font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL HISTORIAL DE MERMAS ==================== -->
+<div
+  id="historialMermaModal"
+  tabindex="-1"
+  aria-hidden="true"
+  class="fixed top-0 left-0 right-0 z-[90] hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative w-full max-w-5xl max-h-full">
+    <div
+      class="relative bg-[#1F2937] border border-[#ffffff] rounded-xl shadow-sm p-4 md:p-6"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between border-b border-[#ffffff] pb-4 md:pb-5"
+      >
+        <h3 class="text-lg font-medium text-white bold w-full text-center">
+          Historial de Mermas
+        </h3>
+        <button
+          type="button"
+          class="text-gray-400 bg-transparent hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+          data-modal-hide="historialMermaModal"
+        >
+          <svg
+            class="w-4 h-4 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabla del historial -->
+      <div class="py-4 max-h-[500px] overflow-y-auto px-1">
+        <div class="overflow-x-auto rounded-lg border border-gray-600">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-[#394E6D] text-white text-xs sticky top-0">
+              <tr>
+                <th class="px-4 py-2">Insumo</th>
+                <th class="px-4 py-2 text-center">Lote</th>
+                <th class="px-4 py-2 text-center">Cantidad</th>
+                <th class="px-4 py-2">Fecha / Hora</th>
+                <th class="px-4 py-2">Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in mermas_historial %}
+              <tr class="border-t border-gray-700 text-white hover:bg-white/5 transition-colors">
+                <td class="px-4 py-2 font-semibold">{{ m.insumo }}</td>
+                <td class="px-4 py-2 text-center font-mono text-xs text-gray-400">#{{ m.id_lote }}</td>
+                <td class="px-4 py-2 text-center font-bold text-red-400">-{{ "%.2f" | format(m.cantidad) }}</td>
+                <td class="px-4 py-2 text-xs text-gray-300">
+                  <div class="flex flex-col">
+                    <span>{{ m.fecha }}</span>
+                    <span class="text-[10px] text-gray-500">{{ m.hora }}</span>
+                  </div>
+                </td>
+                <td class="px-4 py-2 text-xs italic text-gray-400">{{ m.motivo if m.motivo else '--' }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="px-4 py-10 text-center text-gray-500 italic">
+                  No hay registros de mermas
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-center border-t border-gray-600 pt-4 md:pt-6">
+        <button
+          data-modal-hide="historialMermaModal"
+          type="button"
+          class="flex items-center justify-center text-white bg-[#394E6D] hover:bg-[#4a6080] transition font-medium rounded-full text-sm px-8 py-2.5 focus:outline-none shadow-xs"
+        >
+          Cerrar Historial
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCRIPTS DE CONTROL DE MODALES ==================== -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Auto-apertura si viene redireccionado con parámetro 'ver'
+    {% if show_modal == 'detalleInsumoModal' %}
+    const $modalDetalle = document.getElementById("detalleInsumoModal");
+    if ($modalDetalle) {
+      setTimeout(() => {
+        const modal = new Modal($modalDetalle);
+        modal.show();
+      }, 200);
+    }
+    {% endif %}
+
+    // 2. Manejo universal de cierre de modales
+    document.querySelectorAll("[data-modal-hide]").forEach((button) => {
+      button.addEventListener("click", function () {
+        const modalId = this.getAttribute("data-modal-hide");
+        const $modal = document.getElementById(modalId);
+        if ($modal) {
+          const modal = new Modal($modal);
+          modal.hide();
+        }
+      });
+    });
+  });
+
+  // 3. Función global para preparar el registro de mermas desde lotes
+  function openMermaModal(loteId, insumoId, maxCant) {
+    const inputLote = document.getElementById("merma_id_lote");
+    const inputInsumo = document.getElementById("merma_id_insumo");
+    const inputCantidad = document.getElementById("merma_cantidad");
+    const displayLote = document.getElementById("merma_lote_display");
+
+    if (inputLote) inputLote.value = loteId;
+    if (inputInsumo) inputInsumo.value = insumoId;
+    if (displayLote) displayLote.textContent = "#" + loteId;
+
+    if (inputCantidad) {
+      inputCantidad.max = maxCant;
+      inputCantidad.value = "";
+      inputCantidad.placeholder = "Máximo: " + maxCant;
+    }
+
+    const $target = document.getElementById("mermaModal");
+    if ($target) {
+      const modal = new Modal($target);
+      modal.show();
+    }
+  }
+</script>
+{% endblock %}
