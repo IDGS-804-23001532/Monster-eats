@@ -332,16 +332,25 @@ class InventarioProducto(db.Model):
 
 class Combo(db.Model):
     __tablename__ = 'combos'
-    id_combo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_producto_padre = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
-    id_producto_hijo = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
+    id_combo = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    descripcion = db.Column(db.String(255))
+    precio_venta = db.Column(db.Numeric(10, 2), nullable=False)
+    imagen = db.Column(db.String(255), default='default_combo.png')
+    activo = db.Column(db.Boolean, default=True)
+    
+    # Relación mágica: Al llamar combo.detalles, te traerá todos sus productos
+    detalles = db.relationship('DetalleCombo', backref='combo', cascade='all, delete-orphan')
+    
+class DetalleCombo(db.Model):
+    __tablename__ = 'detalle_combos'
+    id_detalle_combo = db.Column(db.Integer, primary_key=True)
+    id_combo = db.Column(db.Integer, db.ForeignKey('combos.id_combo'), nullable=False)
+    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
     cantidad = db.Column(db.Integer, nullable=False, default=1)
-
-    __table_args__ = (
-        CheckConstraint('cantidad >= 1', name='chk_combos_cantidad'),
-        CheckConstraint('id_producto_padre <> id_producto_hijo', name='chk_combos_distintos'),
-        UniqueConstraint('id_producto_padre', 'id_producto_hijo', name='uq_combos'),
-    )
+    
+    # Relación para poder imprimir el nombre del producto fácilmente en el HTML
+    producto = db.relationship('Producto')
 
 class MovimientoInventarioProducto(db.Model):
     __tablename__ = 'movimientos_inventario_productos'

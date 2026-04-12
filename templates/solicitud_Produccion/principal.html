@@ -13,24 +13,13 @@
   </div>
 
   {% if current_user.has_role('cajero') or current_user.has_role('gerente') %}
-  <div
-    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8"
-  >
-    <h2
-      class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
-    >
-      <svg
-        class="w-5 h-5 text-orange-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-        ></path>
+
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+        </path>
       </svg>
       Solicitar Nuevo Lote a Cocina
     </h2>
@@ -83,16 +72,10 @@
   {% endif %}
 
   <div
-    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-  >
-    <div
-      class="p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50"
-    >
-      <h2
-        class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider"
-      >
-        {% if current_user.has_role('cajero') or current_user.has_role('cocina')
-        %} Bandeja de Peticiones {% else %} Mis Avisos a Cocina {% endif %}
+    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+      <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider">
+        {% if current_user.has_role('cocina') %} Bandeja de Peticiones {% else %} Mis Avisos a cocina {% endif %}
       </h2>
     </div>
 
@@ -107,9 +90,9 @@
             <th scope="col" class="px-6 py-4">Petición</th>
             <th scope="col" class="px-6 py-4">Estado</th>
             <th scope="col" class="px-6 py-4">Hora</th>
-            {% if current_user.has_role('cajero') or
-            current_user.has_role('cocina') %}
-            <th scope="col" class="px-6 py-4 text-right">Acciones de Cocina</th>
+
+            {% if current_user.has_role('cocina') or current_user.has_role('gerente') %}
+            <th scope="col" class="px-6 py-4 text-right">Acciones de cocina</th>
             {% endif %}
           </tr>
         </thead>
@@ -141,9 +124,9 @@
               {{ sol.fecha_solicitud.strftime('%I:%M %p') }}
             </td>
 
-            {% if (current_user.has_role('cajero') or
-            current_user.has_role('cocina')) %} {% if sol.estado == 'Pendiente'
-            %}
+
+            {% if (current_user.has_role('cocina') or current_user.has_role('gerente')) %}
+            {% if sol.estado == 'Pendiente' %}
             <td class="px-6 py-4 text-right flex justify-end gap-2">
               <form
                 action="{{ url_for('solicitud_produccion.aprobar_solicitud', id_solicitud=sol.id_solicitud_prod) }}"
