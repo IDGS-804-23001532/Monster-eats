@@ -1,0 +1,61 @@
+<header
+  class="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm"
+>
+  <div
+    class="max-w-screen-xl mx-auto flex items-center justify-between px-6 py-3"
+  >
+    <div class="flex items-center gap-3">
+      {% if back_url is defined and back_url %}
+      <a
+        href="{{ back_url }}"
+        class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        title="Volver"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </a>
+      {% endif %}
+      <a href="/">
+        <img
+          src="{{ url_for('static', filename='img/monster_logo.png') }}"
+          alt="Monster Eats"
+          class="h-12 w-auto"
+        />
+      </a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="{{ url_for('pagina.carrito_ver') }}"
+        class="relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        title="Carrito"
+      >
+        <svg
+          class="w-6 h-6 text-gray-800 dark:text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+          />
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>

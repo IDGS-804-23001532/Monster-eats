@@ -1,6 +1,7 @@
-from flask import render_template, request, abort
+from flask import render_template, request, abort, session, redirect, url_for, flash
+from sqlalchemy.exc import OperationalError, DBAPIError
 from Pagina import pagina_bp
-from models import db, Producto, CategoriaProducto, Combo, Receta, Insumo, UnidadMedida
+from models import db, Producto, CategoriaProducto, Combo, Receta, Insumo, UnidadMedida, MetodoPago
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -109,4 +110,190 @@ def combo_detalle(id_combo):
         combo=combo,
         detalles=detalles,
         es_combo=True,
+    )
+
+
+# ── Carrito (sesión) ─────────────────────────────────────────────────────────
+
+def _get_carrito():
+    """Obtiene la lista de items del carrito desde la sesión."""
+    return session.get('carrito', [])
+
+def _save_carrito(carrito):
+    """Guarda la lista de items del carrito en la sesión."""
+    session['carrito'] = carrito
+
+
+@pagina_bp.route('/carrito/agregar', methods=['POST'])
+def carrito_agregar():
+    """Agrega un producto o combo al carrito desde la página de descripción."""
+    id_producto = request.form.get('id_producto', type=int)
+    id_combo    = request.form.get('id_combo', type=int)
+    cantidad    = request.form.get('cantidad', 1, type=int)
+
+    carrito = _get_carrito()
+
+    if id_combo:
+        combo = Combo.query.get_or_404(id_combo)
+        key = f'combo_{id_combo}'
+        # Buscar si ya existe en el carrito
+        for item in carrito:
+            if item['key'] == key:
+                item['cantidad'] += cantidad
+                _save_carrito(carrito)
+                flash(f'{combo.nombre} actualizado en tu pedido.', 'success')
+                return redirect(request.referrer or url_for('pagina.menu_categoria', categoria='Combos'))
+
+        carrito.append({
+            'key':       key,
+            'es_combo':  True,
+            'id':        id_combo,
+            'nombre':    combo.nombre,
+            'precio':    float(combo.precio_venta),
+            'imagen':    combo.imagen,
+            'carpeta':   'combos',
+            'cantidad':  cantidad,
+        })
+    elif id_producto:
+        producto = Producto.query.get_or_404(id_producto)
+        cat = CategoriaProducto.query.get(producto.id_categoria)
+        key = f'prod_{id_producto}'
+        for item in carrito:
+            if item['key'] == key:
+                item['cantidad'] += cantidad
+                _save_carrito(carrito)
+                flash(f'{producto.nombre} actualizado en tu pedido.', 'success')
+                return redirect(request.referrer or url_for('pagina.menu_categoria', categoria=cat.nombre if cat else 'Hamburguesas'))
+
+        carrito.append({
+            'key':       key,
+            'es_combo':  False,
+            'id':        id_producto,
+            'nombre':    producto.nombre,
+            'precio':    float(producto.precio_venta),
+            'imagen':    producto.imagen,
+            'carpeta':   'productos',
+            'cantidad':  cantidad,
+        })
+    else:
+        flash('Producto no encontrado.', 'error')
+        return redirect(request.referrer or '/')
+
+    _save_carrito(carrito)
+    flash('Producto añadido a tu pedido.', 'success')
+    return redirect(request.referrer or '/')
+
+
+@pagina_bp.route('/carrito/action', methods=['POST'])
+def carrito_action():
+    """Maneja las acciones del carrito: +1, -1, eliminar, vaciar, confirmar."""
+    accion   = request.form.get('accion')
+    item_key = request.form.get('item_key')
+    carrito  = _get_carrito()
+
+    if accion == 'agregar' and item_key:
+        for item in carrito:
+            if item['key'] == item_key:
+                item['cantidad'] += 1
+                break
+        _save_carrito(carrito)
+
+    elif accion == 'quitar_unidad' and item_key:
+        for item in carrito:
+            if item['key'] == item_key:
+                item['cantidad'] -= 1
+                if item['cantidad'] <= 0:
+                    carrito.remove(item)
+                break
+        _save_carrito(carrito)
+
+    elif accion == 'eliminar' and item_key:
+        carrito = [i for i in carrito if i['key'] != item_key]
+        _save_carrito(carrito)
+
+    elif accion == 'vaciar':
+        _save_carrito([])
+        flash('Carrito vaciado.', 'info')
+
+    elif accion == 'confirmar':
+        numero_cuenta = request.form.get('numero_cuenta', '').strip()
+        if not carrito:
+            flash('Tu carrito está vacío.', 'error')
+        elif not numero_cuenta or len(numero_cuenta) < 16 or not numero_cuenta.isdigit():
+            flash('Ingresa un número de tarjeta válido (16-20 dígitos).', 'error')
+        else:
+            try:
+                # Obtener id del método de pago "Tarjeta"
+                metodo_tarjeta = MetodoPago.query.filter(
+                    MetodoPago.nombre.ilike('tarjeta')
+                ).first()
+                if not metodo_tarjeta:
+                    flash('Método de pago no disponible.', 'error')
+                    return redirect(url_for('pagina.carrito_ver'))
+
+                # Usar un usuario genérico para pedidos web (id_usuario = 1 u otro)
+                id_usuario_web = 1
+
+                # 1) Limpiar carrito del usuario en BD (por si quedó algo)
+                db.session.execute(
+                    db.text("DELETE FROM carrito WHERE id_usuario = :uid"),
+                    {'uid': id_usuario_web}
+                )
+                db.session.commit()
+
+                # 2) Transferir items de la sesión al carrito de BD
+                for item in carrito:
+                    id_prod = item['id']
+                    cant = item['cantidad']
+                    db.session.execute(
+                        db.text("CALL sp_carrito_agregar(:id_usuario, :id_producto, :cantidad)"),
+                        {'id_usuario': id_usuario_web, 'id_producto': id_prod, 'cantidad': cant}
+                    )
+                    db.session.commit()
+
+                # 3) Completar la venta con tarjeta
+                result = db.session.execute(
+                    db.text("CALL sp_venta_completar(:id_usuario, :id_metodo_pago, :num_cuenta, :monto_recibido)"),
+                    {
+                        'id_usuario': id_usuario_web,
+                        'id_metodo_pago': metodo_tarjeta.id_metodo_pago,
+                        'num_cuenta': numero_cuenta,
+                        'monto_recibido': 0
+                    }
+                )
+                db.session.commit()
+
+                _save_carrito([])
+                flash('¡Pago procesado! Tu pedido está siendo preparado. Pasa por tu pedido al mostrador.', 'success')
+
+            except (OperationalError, DBAPIError) as e:
+                db.session.rollback()
+                mensaje = 'Error al procesar el pago.'
+                try:
+                    if e.orig.args[0] == 1644:
+                        mensaje = e.orig.args[1]
+                except Exception:
+                    pass
+                flash(mensaje, 'error')
+
+    return redirect(url_for('pagina.carrito_ver'))
+
+
+@pagina_bp.route('/carrito', methods=['GET'])
+def carrito_ver():
+    """Muestra la página del carrito."""
+    carrito = _get_carrito()
+
+    # Calcular subtotales
+    for item in carrito:
+        item['subtotal'] = item['precio'] * item['cantidad']
+
+    total = sum(i['subtotal'] for i in carrito)
+    total_items = sum(i['cantidad'] for i in carrito)
+
+    return render_template(
+        'Pagina/comprar.html',
+        carrito=carrito,
+        total=total,
+        total_items=total_items,
     )
