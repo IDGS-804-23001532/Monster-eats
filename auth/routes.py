@@ -474,3 +474,97 @@ def verify_2fa():
             return redirect(url_for('auth.verify_2fa'))
 
     return render_template("auth/verify_2fa.html", email=email_usuario)
+
+@auth.route("/restablecer-password", methods=['GET', 'POST'])
+def restablecer_password():
+    try:
+        reset_form = forms.RestablecerPassForm(request.form)
+
+        if request.method == 'POST' and reset_form.validate():
+            email = Sanitizador.limpiar_email(reset_form.email.data)
+            nueva_password = reset_form.nueva_password.data.strip()
+
+            usuario = Usuario.query.filter_by(email=email).first()
+            
+            # Verificamos si existe el correo
+            if not usuario:
+                logging.warning(f'Intento de recuperación con correo no registrado: {email}')
+                flash('Ese correo no está registrado. ¡Únete a la familia Monster Eats!', 'error')
+                return redirect(url_for('auth.restablecer_password'))
+
+            # Si existe, generamos código
+            codigo_2fa = str(random.randint(100000, 999999))
+            
+            # Guardamos datos temporalmente en sesión, incluyendo la clave ya encriptada
+            session['reset_2fa_code'] = codigo_2fa
+            session['reset_email'] = email
+            session['reset_new_password_hash'] = generate_password_hash(nueva_password, method='pbkdf2:sha256')
+
+            # Enviamos el correo
+            from flask_mail import Message
+            from extensions import mail
+            try:
+                msg = Message('Restablecer contraseña - Monster Eats',
+                              sender='no-reply@monstereats.com',
+                              recipients=[usuario.email])
+                msg.body = f'Hola {usuario.persona.nombre},\n\nTu código para restablecer tu contraseña es: {codigo_2fa}\n\nSi no solicitaste este cambio, ignora este mensaje.'
+                mail.send(msg)
+                logging.info(f'Código de recuperación enviado a {email}')
+            except Exception as e:
+                logging.error(f'Error enviando correo de recuperación a {email}: {e}')
+                flash('Ocurrió un error al enviar el código. Inténtalo de nuevo.', 'error')
+                return redirect(url_for('auth.restablecer_password'))
+
+            return redirect(url_for('auth.verify_reset_2fa'))
+
+        return render_template('auth/restablecer_contrasenia.html', form=reset_form)
+    except Exception as error:
+        logging.error(f'Error en restablecer_password: {str(error)}')
+        flash('Ocurrió un error inesperado.', 'error')
+        return redirect(url_for('auth.login'))
+
+
+@auth.route("/verify-reset-2fa", methods=["GET", "POST"])
+def verify_reset_2fa():
+    # Evitar accesos directos
+    if 'reset_email' not in session:
+        return redirect(url_for('auth.login'))
+
+    email_usuario = session.get('reset_email')
+
+    if request.method == "POST":
+        codigo_ingresado = request.form.get("codigo")
+        codigo_esperado = session.get("reset_2fa_code")
+
+        if codigo_ingresado and codigo_ingresado.strip() == codigo_esperado:
+            # Código correcto: Actualizamos la contraseña
+            usuario = Usuario.query.filter_by(email=email_usuario).first()
+            if usuario:
+                usuario.password = session.get('reset_new_password_hash')
+                db.session.commit()
+
+                audit.log_action(
+                    module_name="logs_auth",
+                    action="Contraseña restablecida exitosamente",
+                    details={"email": email_usuario},
+                    level="INFO"
+                )
+
+                # Limpiamos sesión
+                session.pop('reset_2fa_code', None)
+                session.pop('reset_email', None)
+                session.pop('reset_new_password_hash', None)
+
+                flash("¡Tu contraseña ha sido actualizada con éxito! Ya puedes iniciar sesión.", "success")
+                return redirect(url_for('auth.login'))
+        else:
+            audit.log_action(
+                module_name="logs_auth",
+                action="Fallo 2FA en recuperación de contraseña",
+                details={"email": email_usuario},
+                level="WARNING"
+            )
+            flash("El código no es válido. Vuelve a intentarlo.", "error")
+            return redirect(url_for('auth.verify_reset_2fa'))
+
+    return render_template("auth/verify_reset_2fa.html", email=email_usuario)

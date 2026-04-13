@@ -20,6 +20,17 @@ class LoginForm(Form):
         validators.DataRequired(message='El captcha es requerido')
     ])
 
+class RestablecerPassForm(Form):
+    email = EmailField('Correo', [
+        validators.DataRequired(message='El correo es requerido'),
+        validators.Email(message='Formato de correo no válido')
+    ])
+
+    nueva_password = PasswordField('Nueva contraseña', [
+        validators.DataRequired(message='El password es requerido'),
+        validators.Length(min=8, message='El password debe tener al menos 8 carácteres')
+    ])
+
 class RegisterForm(Form):
     nombre = StringField('Nombre', [
         validators.DataRequired(message='El nombre es requerido')

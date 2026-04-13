@@ -112,6 +112,12 @@
                     <p class="anim-item text-red-300 text-sm mb-2 ml-2">{{ error }}</p>
                     {% endfor %}
 
+                    <div class="anim-item text-center text-sm text-white/80 mt-4 mb-2">
+                        <p>
+                        ¿Olvidaste tu contraseña? <a href="{{ url_for('auth.restablecer_password') }}" class="text-orange-500 hover:text-orange-400 font-semibold transition-colors underline decoration-transparent hover:decoration-orange-400">Recupérala aquí</a>
+                        </p>
+                    </div>
+
                     <div class="anim-item text-center text-sm text-white/80 mt-2 mb-6">
                         <p>
                         Aun no tienes cuenta, <a href="{{ url_for('auth.register') }}" class="text-orange-500 hover:text-orange-400 font-semibold transition-colors underline decoration-transparent hover:decoration-orange-400">registrate</a>
