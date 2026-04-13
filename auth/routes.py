@@ -461,7 +461,15 @@ def verify_2fa():
                 session.pop('2fa_user_email', None)
                 session.pop('remember_me', None)
 
-                return redirect(url_for('index'))
+                # Priorizamos mandar al ERP si tienen cualquier rol de empleado
+                if (current_user.has_role('gerente') or current_user.has_role('Gerente') or
+                    current_user.has_role('Cajero') or current_user.has_role('cajero') or
+                    current_user.has_role('Cocina') or current_user.has_role('cocina')):
+                    return redirect(url_for('index'))
+                elif current_user.has_role('cliente') or current_user.has_role('Cliente'):
+                    return redirect(url_for('inicio'))
+                else:
+                    return redirect(url_for('index'))
         else:
             # El código no es válido
             audit.log_action(

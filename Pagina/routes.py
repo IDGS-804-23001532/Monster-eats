@@ -2,6 +2,7 @@ from flask import render_template, request, abort, session, redirect, url_for, f
 from sqlalchemy.exc import OperationalError, DBAPIError
 from Pagina import pagina_bp
 from models import db, Producto, CategoriaProducto, Combo, Receta, Insumo, UnidadMedida, MetodoPago
+from flask_security import login_required, current_user
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -125,6 +126,7 @@ def _save_carrito(carrito):
 
 
 @pagina_bp.route('/carrito/agregar', methods=['POST'])
+@login_required
 def carrito_agregar():
     """Agrega un producto o combo al carrito desde la página de descripción."""
     id_producto = request.form.get('id_producto', type=int)
@@ -185,6 +187,7 @@ def carrito_agregar():
 
 
 @pagina_bp.route('/carrito/action', methods=['POST'])
+@login_required
 def carrito_action():
     """Maneja las acciones del carrito: +1, -1, eliminar, vaciar, confirmar."""
     accion   = request.form.get('accion')
@@ -280,6 +283,7 @@ def carrito_action():
 
 
 @pagina_bp.route('/carrito', methods=['GET'])
+@login_required
 def carrito_ver():
     """Muestra la página del carrito."""
     carrito = _get_carrito()
