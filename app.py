@@ -41,8 +41,6 @@ from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
 from jinja2 import TemplateError
-from models import Producto, CategoriaProducto, Combo
-
 
 app = Flask(__name__)
 
