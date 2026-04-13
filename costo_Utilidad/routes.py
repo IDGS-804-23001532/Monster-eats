@@ -6,12 +6,13 @@ from audit_logger import audit
 import csv
 from io import StringIO
 from flask import Response
+from sqlalchemy import func
 
 costo_utilidad = Blueprint('costo_utilidad', __name__, url_prefix='/costo-utilidad')
 
 @costo_utilidad.route('/')
 @login_required
-@roles_accepted('Gerente') # REGLA: Bloqueo estricto por decorador
+@roles_accepted('gerente') # REGLA: Bloqueo estricto por decorador
 def principal():
     try:
         # Creará y guardará en la colección "logs_finanzas"
@@ -92,7 +93,7 @@ def principal():
 
 @costo_utilidad.route('/exportar-csv')
 @login_required
-@roles_accepted('Gerente', 'gerente')
+@roles_accepted('gerente', 'gerente')
 def exportar_csv():
     # 1. Obtenemos los datos limpios de tu vista
     query = text("SELECT nombre, tipo, precio_venta, costo_produccion, utilidad, margen_ganancia FROM vw_costo_utilidad ORDER BY margen_ganancia ASC")

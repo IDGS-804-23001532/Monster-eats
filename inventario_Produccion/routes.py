@@ -3,6 +3,9 @@ from models import db, Producto, InventarioProducto, MovimientoInventarioProduct
 from flask_security import login_required, roles_accepted, current_user
 from forms import AjusteStockForm  
 from audit_logger import audit  
+import csv
+from io import StringIO
+from flask import Response
 
 inventario_produccion = Blueprint('inventario_produccion', __name__, url_prefix='/inventario-produccion')
 
@@ -37,27 +40,21 @@ def principal():
                 return redirect(url_for('inventario_produccion.principal'))
 
             # 3. Clasificar el tipo de movimiento para el historial SQL
-            if cantidad_ajuste < 0:
-                # Si el usuario escribe "merma", "caducado" o "dañado" en el motivo, lo clasificamos específicamente
-                if any(palabra in motivo.lower() for palabra in ['merma', 'caducado', 'dañado', 'basura', 'accidente']):
-                    tipo_mov = 'SALIDA_MERMA'
-                else:
-                    tipo_mov = 'AJUSTE_NEGATIVO'
-            else:
-                tipo_mov = 'AJUSTE_POSITIVO'
+            # Según el Enum de tu base de datos, todo ajuste desde aquí es "AJUSTE_MANUAL"
+            tipo_mov = 'AJUSTE_MANUAL'
 
             # 4. Actualizamos el stock final
             inventario.stock_actual = stock_nuevo
 
-            # 5. Registramos el movimiento en la tabla SQL (Crucial para reportes financieros)
+            # 5. Registramos el movimiento en la tabla SQL
             movimiento = MovimientoInventarioProducto(
                 id_producto=id_prod,
                 tipo_movimiento=tipo_mov,
-                cantidad=abs(cantidad_ajuste), # Guardamos el valor absoluto (siempre positivo)
+                cantidad=abs(cantidad_ajuste), # Valor absoluto (siempre positivo)
                 stock_anterior=stock_anterior,
                 stock_nuevo=stock_nuevo,
-                origen='ajuste_manual',
-                descripcion=motivo,
+                motivo=motivo, # CORRECCIÓN: Se llama 'motivo', no 'descripcion'
+                referencia_tabla='ajuste_inventario', # Usamos esto en vez del campo 'origen'
                 id_usuario=current_user.id_usuario
             )
             db.session.add(movimiento)
@@ -90,11 +87,21 @@ def principal():
         flash('Error en los datos ingresados. Revisa el formulario.', 'error')
 
     # ---------------------------------------------------------
-    # LÓGICA GET: Mostrar el tablero
+    # LÓGICA GET: Mostrar el tablero (CON BUSCADOR)
     # ---------------------------------------------------------
-    # Filtramos productos activos. 
-    # Nota: Según tu DB, los combos están en su propia tabla, así que 'Producto' ya trae puros productos individuales.
-    productos_lote = Producto.query.filter_by(activo=True).all()
+    
+    # 1. Atrapamos el término de búsqueda de la URL (?q=...)
+    search_query = request.args.get('q', '').strip()
+    
+    # 2. Iniciamos la consulta base (Solo activos)
+    query = Producto.query.filter_by(activo=True)
+    
+    # 3. Si el usuario escribió algo en el buscador, encadenamos el filtro
+    if search_query:
+        query = query.filter(Producto.nombre.ilike(f"%{search_query}%"))
+        
+    # 4. Ejecutamos la consulta final filtrada
+    productos_lote = query.all()
     
     productos_stock = []
     for prod in productos_lote:
@@ -110,3 +117,56 @@ def principal():
         productos_stock=productos_stock, 
         form=form
     )
+
+@inventario_produccion.route('/exportar-csv')
+@login_required
+@roles_accepted('administrador', 'gerente', 'cocina', 'cocinero')
+def exportar_csv():
+    # 1. Atrapamos la palabra de búsqueda para que el Excel coincida con la pantalla
+    search_query = request.args.get('q', '').strip()
+    
+    query = Producto.query.filter_by(activo=True)
+    if search_query:
+        query = query.filter(Producto.nombre.ilike(f"%{search_query}%"))
+        
+    productos_lote = query.all()
+    
+    def generate():
+        data = StringIO()
+        # 2. Agregamos el BOM (Byte Order Mark) de UTF-8. 
+        # Esto obliga a Microsoft Excel a leer correctamente los acentos (á, é, í) y la ñ.
+        data.write('\ufeff')
+        
+        writer = csv.writer(data)
+        
+        # Cabeceras del Excel
+        writer.writerow(('ID', 'Producto Terminado', 'Stock en Cocina', 'Precio Venta ($)'))
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+        for prod in productos_lote:
+            inv = InventarioProducto.query.filter_by(id_producto=prod.id_producto).first()
+            stock_actual = inv.stock_actual if inv else 0
+            
+            writer.writerow((
+                prod.id_producto,
+                prod.nombre,
+                stock_actual,
+                f"{prod.precio_venta:.2f}"
+            ))
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+    # 3. Aseguramos que el mimetype también especifique utf-8
+    response = Response(generate(), mimetype='text/csv; charset=utf-8')
+    
+    # Nombre dinámico del archivo dependiendo de si hay búsqueda o no
+    if search_query:
+        filename = f"Inventario_Filtrado_{search_query}.csv"
+    else:
+        filename = "Inventario_Cocina_MonsterEats.csv"
+        
+    response.headers.set("Content-Disposition", "attachment", filename=filename)
+    return response

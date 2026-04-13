@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from models import db, Producto, Combo, DetalleCombo
 from flask_security import login_required, roles_accepted
 from forms import ComboForm
@@ -9,11 +11,24 @@ combos = Blueprint('combos', __name__, url_prefix='/combos')
 @login_required
 @roles_accepted('administrador', 'gerente')
 def principal():
-    lista_combos = Combo.query.filter_by(activo=True).all()
+    # 1. Atrapamos el término de búsqueda de la URL (?q=...)
+    search_query = request.args.get('q', '').strip()
+    
+    # 2. Iniciamos la consulta base (Solo activos)
+    query = Combo.query.filter_by(activo=True)
+    
+    # 3. Si el usuario escribió algo en el buscador, encadenamos el filtro
+    if search_query:
+        query = query.filter(Combo.nombre.ilike(f"%{search_query}%"))
+        
+    # 4. Ejecutamos la consulta final filtrada
+    lista_combos = query.all()
+    
     productos = Producto.query.filter_by(activo=True).all()
     
-    # Enviamos dos formularios limpios independientes
+    # Enviamos los formularios limpios independientes a la vista
     return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=ComboForm(), form_edit=ComboForm(), edit_error_id=None)
+
 
 @combos.route('/crear', methods=['POST'])
 @login_required
@@ -42,10 +57,23 @@ def crear():
                 flash('Un combo debe contener al menos 2 productos válidos.', 'error')
                 return render_template('combos/principal.html', combos=lista_combos, productos=productos, form=form, form_edit=ComboForm(), edit_error_id=None)
 
+            # ----- LÓGICA PARA GUARDAR IMAGEN -----
+            imagen_file = request.files.get('imagen')
+            nombre_imagen = 'default_combo.png' # Valor por defecto si no suben nada
+
+            if imagen_file and imagen_file.filename != '':
+                # Limpiamos el nombre del archivo y lo guardamos en /static/img/
+                filename = secure_filename(imagen_file.filename)
+                filepath = os.path.join(current_app.root_path, 'static', 'img', filename)
+                imagen_file.save(filepath)
+                nombre_imagen = filename
+            # --------------------------------------
+
             nuevo_combo = Combo(
                 nombre=form.nombre.data, 
                 descripcion=form.descripcion.data, 
-                precio_venta=form.precio_venta.data
+                precio_venta=form.precio_venta.data,
+                imagen=nombre_imagen # Guardamos el nombre del archivo en BD
             )
             db.session.add(nuevo_combo)
             db.session.flush() 
@@ -78,7 +106,7 @@ def crear():
 @login_required
 @roles_accepted('administrador', 'gerente')
 def editar(id_combo):
-    form_edit = ComboForm(request.form) # <--- Usamos form_edit
+    form_edit = ComboForm(request.form) # Usamos form_edit
     lista_combos = Combo.query.filter_by(activo=True).all()
     productos = Producto.query.filter_by(activo=True).all()
 
@@ -110,6 +138,18 @@ def editar(id_combo):
             combo_existente.precio_venta = form_edit.precio_venta.data
             combo_existente.descripcion = form_edit.descripcion.data
             
+            # ----- LÓGICA PARA ACTUALIZAR IMAGEN -----
+            imagen_file = request.files.get('imagen')
+            
+            # Si subió archivo nuevo, reemplazamos la foto actual
+            if imagen_file and imagen_file.filename != '':
+                filename = secure_filename(imagen_file.filename)
+                filepath = os.path.join(current_app.root_path, 'static', 'img', filename)
+                imagen_file.save(filepath)
+                combo_existente.imagen = filename
+            # -----------------------------------------
+            
+            # Borramos el detalle anterior y guardamos el nuevo
             DetalleCombo.query.filter_by(id_combo=id_combo).delete()
             for det in detalles_a_guardar:
                 db.session.add(det)

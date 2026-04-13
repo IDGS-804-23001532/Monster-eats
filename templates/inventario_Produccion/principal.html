@@ -8,6 +8,30 @@
             class="px-6 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl shadow-md shadow-orange-500/30 transition-colors flex items-center gap-2">
             <i class="fa-solid fa-boxes-stacked"></i> Productos Terminados
         </a>
+
+        <div class="flex flex-col sm:flex-row justify-between items-center w-full gap-4">
+
+            <form action="{{ url_for('inventario_produccion.principal') }}" method="GET"
+                class="flex w-full max-w-lg gap-2">
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="q" value="{{ request.args.get('q', '') }}"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors"
+                        placeholder="Buscar producto...">
+                </div>
+                <button type="submit"
+                    class="px-4 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20">
+                    Buscar
+                </button>
+            </form>
+
+            <a href="{{ url_for('inventario_produccion.exportar_csv') }}"
+                class="px-5 py-2.5 text-sm font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-500/20 flex items-center gap-2 w-full sm:w-auto justify-center whitespace-nowrap">
+                <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+            </a>
+        </div>
     </div>
 
     <div class="relative overflow-x-auto shadow-sm sm:rounded-2xl border border-gray-100 dark:border-gray-700">

@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm, Form
 from wtforms import Form, SelectField, DecimalField, HiddenField, EmailField, PasswordField, StringField, DateField, TelField, IntegerField, FloatField, TextAreaField, SubmitField
 from wtforms import validators
 from wtforms.validators import DataRequired, NumberRange, Email, Length, Regexp, ValidationError, Optional, NumberRange
+from flask_wtf.file import FileField, FileAllowed
 
 class LoginForm(Form):
     email = EmailField('Correo', [
@@ -103,15 +104,27 @@ class ProveedorForm(Form):
 
 
 class CrearComboForm(FlaskForm):
-    nombre_combo = StringField('Nombre del Combo', [
+    nombre = StringField('Nombre del Combo', validators=[
         validators.DataRequired(message='El nombre es obligatorio'),
         validators.Length(min=3, max=100, message='El nombre debe tener entre 3 y 100 caracteres')
     ])
-    precio_combo = FloatField('Precio ($)', [
+    
+    descripcion = StringField('Descripción', validators=[
+        validators.Optional(),
+        validators.Length(max=255, message='La descripción no puede exceder los 255 caracteres')
+    ])
+    
+    precio_venta = DecimalField('Precio de Venta ($)', validators=[
         validators.DataRequired(message='El precio es obligatorio'),
-        validators.NumberRange(min=1, message='El precio debe ser mayor a 0')
+        validators.NumberRange(min=0.01, message='El precio debe ser mayor a 0')
     ])
 
+    # NUEVO: Campo de imagen con validador de extensiones permitidas
+    imagen = FileField('Imagen del Combo', validators=[
+        validators.Optional(),
+        FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Solo se permiten imágenes (JPG, PNG, WEBP).')
+    ])
+    
 class VincularComboForm(FlaskForm):
     id_padre = SelectField('Combo Base', coerce=int, validators=[
         validators.DataRequired(message='Debes seleccionar un combo base')
