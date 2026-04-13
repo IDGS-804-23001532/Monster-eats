@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{% if es_combo %}{{ combo.nombre }}{% else %}{{ producto.nombre }}{% endif %} – Monster Eats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}" />
+    <script>
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") document.documentElement.classList.add("dark");
+      else if (saved === "light") document.documentElement.classList.remove("dark");
+      else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.classList.add("dark");
+    </script>
+  </head>
+
+  <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+
+    <!-- LOADER -->
+    <div id="pageLoader" class="fixed inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-[9999] transition-opacity duration-300">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-700 border-t-orange-500"></div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+      <div class="max-w-screen-xl mx-auto flex items-center justify-between px-6 py-3">
+        <div class="flex items-center gap-3">
+          <!-- Volver -->
+          {% if es_combo %}
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Combos') }}"
+          {% else %}
+            <a href="{{ url_for('pagina.menu_categoria', categoria=categoria.nombre) if categoria else '#' }}"
+          {% endif %}
+            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Volver">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </a>
+          <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="Monster Eats" class="h-12 w-auto" />
+        </div>
+        <!-- Theme toggle -->
+        <button onclick="toggleTheme()" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07-.71.71M6.34 17.66l-.71.71m12.02 0-.71-.71M6.34 6.34l-.71-.71M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+          </svg>
+          <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-screen-lg mx-auto px-6 py-12">
+
+      {% if not es_combo %}
+      {# ══════════════════════════════════════════
+         VISTA : PRODUCTO INDIVIDUAL
+         ══════════════════════════════════════════ #}
+      <div class="flex flex-col md:flex-row gap-12 items-start">
+
+        <!-- Imagen + Botón -->
+        <div class="w-full md:w-2/5 flex flex-col items-center gap-6">
+          <div class="w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden flex items-center justify-center">
+            {% if producto.imagen %}
+            <img src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}"
+                 alt="{{ producto.nombre }}" class="w-full h-full object-cover" />
+            {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"/>
+            </svg>
+            {% endif %}
+          </div>
+          <button onclick="abrirCarrito()"
+            class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md">
+            Añadir al pedido
+          </button>
+        </div>
+
+        <!-- Info del producto -->
+        <div class="w-full md:w-3/5">
+          <h1 class="text-4xl font-extrabold tracking-tight leading-tight">{{ producto.nombre }}</h1>
+          <p class="text-2xl font-bold text-orange-500 mt-2">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
+          {% if categoria %}
+          <span class="inline-block mt-3 px-3 py-1 text-xs font-semibold bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full">
+            {{ categoria.nombre }}
+          </span>
+          {% endif %}
+
+          <hr class="my-6 border-gray-100 dark:border-gray-800" />
+
+          <!-- Ingredientes (solo si hay) -->
+          <h2 class="text-lg font-bold mb-4">Ingredientes</h2>
+
+          {% if ingredientes %}
+          <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+            {% for ing in ingredientes %}
+            <div class="flex items-center justify-between px-5 py-3
+              {{ 'bg-gray-50 dark:bg-gray-800/50' if loop.even else 'bg-white dark:bg-gray-900' }}
+              {{ '' if loop.last else 'border-b border-gray-100 dark:border-gray-800' }}">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ ing.nombre }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                {{ "%.2g"|format(ing.cantidad) }} <span class="text-xs">{{ ing.unidad }}</span>
+              </span>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-sm text-gray-400 dark:text-gray-500">No hay ingredientes registrados para este producto.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% else %}
+      {# ══════════════════════════════════════════
+         VISTA : COMBO
+         ══════════════════════════════════════════ #}
+      <div class="flex flex-col md:flex-row gap-12 items-start">
+
+        <!-- Imagen + Botón -->
+        <div class="w-full md:w-2/5 flex flex-col items-center gap-6">
+          <div class="w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden flex items-center justify-center">
+            {% if combo.imagen %}
+            <img src="{{ url_for('static', filename='img/combos/' + combo.imagen) }}"
+                 alt="{{ combo.nombre }}" class="w-full h-full object-cover" />
+            {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"/>
+            </svg>
+            {% endif %}
+          </div>
+          <button onclick="abrirCarrito()"
+            class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md">
+            Añadir al pedido
+          </button>
+        </div>
+
+        <!-- Info del combo -->
+        <div class="w-full md:w-3/5">
+          <h1 class="text-4xl font-extrabold tracking-tight leading-tight">{{ combo.nombre }}</h1>
+          <p class="text-2xl font-bold text-orange-500 mt-2">${{ "%.2f"|format(combo.precio_venta|float) }}</p>
+          <span class="inline-block mt-3 px-3 py-1 text-xs font-semibold bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full">Combo</span>
+          {% if combo.descripcion %}
+          <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ combo.descripcion }}</p>
+          {% endif %}
+
+          <hr class="my-6 border-gray-100 dark:border-gray-800" />
+
+          <!-- Productos del combo con sus ingredientes -->
+          <h2 class="text-lg font-bold mb-4">Productos incluidos</h2>
+
+          {% if detalles %}
+            {% for det in detalles %}
+            <div class="mb-4 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+
+              <!-- Cabecera del producto -->
+              <button onclick="toggleAcordeon('det-{{ loop.index }}')"
+                class="w-full flex items-center justify-between px-5 py-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div class="flex items-center gap-3">
+                  <!-- Miniatura -->
+                  <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+                    {% if det.producto.imagen %}
+                    <img src="{{ url_for('static', filename='img/productos/' + det.producto.imagen) }}"
+                         alt="{{ det.producto.nombre }}" class="w-full h-full object-cover" />
+                    {% endif %}
+                  </div>
+                  <div class="text-left">
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ det.producto.nombre }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">
+                      {{ det.cantidad }}x · ${{ "%.2f"|format(det.producto.precio_venta|float) }}
+                    </p>
+                  </div>
+                </div>
+                <svg id="arrow-det-{{ loop.index }}" xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5 text-gray-400 transition-transform duration-200 rotate-180"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+
+              <!-- Ingredientes del producto del combo -->
+              <div id="panel-det-{{ loop.index }}">
+                {% if det.ingredientes %}
+                  {% for ing in det.ingredientes %}
+                  <div class="flex items-center justify-between px-5 py-2.5
+                    {{ 'bg-gray-50 dark:bg-gray-800/30' if loop.even else 'bg-white dark:bg-gray-900' }}
+                    {{ '' if loop.last else 'border-b border-gray-100 dark:border-gray-800' }}">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ ing.nombre }}</span>
+                    <span class="text-sm text-gray-400 font-mono">
+                      {{ "%.2g"|format(ing.cantidad) }} <span class="text-xs">{{ ing.unidad }}</span>
+                    </span>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                <div class="px-5 py-3 text-sm text-gray-400 dark:text-gray-500">
+                  Sin ingredientes registrados.
+                </div>
+                {% endif %}
+              </div>
+
+            </div>
+            {% endfor %}
+          {% else %}
+          <p class="text-sm text-gray-400 dark:text-gray-500">Este combo no tiene productos registrados.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="border-t border-gray-100 dark:border-gray-800 py-6 mt-12">
+      <div class="max-w-screen-xl mx-auto px-6 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+        <span class="font-bold text-gray-700 dark:text-gray-300">Monster Eats</span>
+        <span>© 2025 Monster Eats ERP. Todos los derechos reservados.</span>
+      </div>
+    </footer>
+
+    <script>
+      /* ── Theme ── */
+      function updateThemeIcons() {
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("iconSun").classList.toggle("hidden", isDark);
+        document.getElementById("iconMoon").classList.toggle("hidden", !isDark);
+      }
+      function toggleTheme() {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+        updateThemeIcons();
+      }
+      updateThemeIcons();
+
+      /* ── Loader ── */
+      const _loader = document.getElementById("pageLoader");
+      function _h() { _loader.style.opacity = "0"; _loader.style.pointerEvents = "none"; }
+      window.addEventListener("load", _h);
+      window.addEventListener("pageshow", _h);
+
+      /* ── Acordeones ── */
+      function toggleAcordeon(id) {
+        const panel = document.getElementById("panel-" + id);
+        const arrow = document.getElementById("arrow-" + id);
+        const open  = panel.style.display !== "none" && panel.style.display !== "";
+        panel.style.display = open ? "none" : "";
+        arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+      }
+
+      /* ── Carrito (placeholder) ── */
+      function abrirCarrito() {
+        alert("¡Producto añadido al pedido!");
+      }
+    </script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from models import db
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted
@@ -11,12 +11,14 @@ costo_utilidad = Blueprint('costo_utilidad', __name__, url_prefix='/costo-utilid
 @roles_accepted('Gerente', 'gerente') # REGLA: Bloqueo por decorador (Gerente y gerente)
 def principal():
     try:
-                # Creará y guardará en la colección "logs_finanzas"
+        # Creará y guardará en la colección "logs_finanzas"
         audit.log_action(
             module_name="logs_finanzas",
             action="Visualización Reporte Financiero", 
+            details={"info": "Acceso a tabla de Costos y Utilidades"}, # Agregado para prevenir errores en MongoDB
             level="WARNING"
         )
+        
         # 1. Obtener la tabla principal de Costo y Utilidad
         query_principal = text("SELECT * FROM vw_costo_utilidad ORDER BY margen_ganancia ASC")
         resultados = db.session.execute(query_principal).mappings().fetchall()
@@ -32,12 +34,13 @@ def principal():
             rentabilidad_general = 0
 
         # 3. KPI: Producto más rentable (Cruza Ventas Pagadas x Utilidad Neta)
+        # CORRECCIÓN: Buscamos en "Pagado" o "Completada", y filtramos solo a tipo 'Producto' para no confundir IDs de combos.
         query_rentable = text("""
             SELECT cu.nombre, (cu.utilidad * SUM(dv.cantidad)) AS utilidad_global
             FROM vw_costo_utilidad cu
             JOIN detalle_ventas dv ON cu.id_producto = dv.id_producto
             JOIN ventas v ON dv.id_venta = v.id_venta
-            WHERE v.estado_venta = 'Pagado'
+            WHERE v.estado_venta IN ('Pagado', 'Completada') AND cu.tipo = 'Producto'
             GROUP BY cu.id_producto, cu.nombre, cu.utilidad
             ORDER BY utilidad_global DESC
             LIMIT 1
@@ -48,12 +51,13 @@ def principal():
         desglose_recetas = {}
         for item in resultados:
             if item['tipo'] == 'Combo':
+                # CORRECCIÓN: Adaptado a la nueva estructura "detalle_combos"
                 query_combo = text("""
-                    SELECT p.nombre, (c.cantidad * cp.costo_produccion) AS costo 
-                    FROM combos c
-                    JOIN productos p ON c.id_producto_hijo = p.id_producto
+                    SELECT p.nombre, (dc.cantidad * cp.costo_produccion) AS costo 
+                    FROM detalle_combos dc
+                    JOIN productos p ON dc.id_producto = p.id_producto
                     JOIN vw_costo_productos cp ON p.id_producto = cp.id_producto
-                    WHERE c.id_producto_padre = :id_padre
+                    WHERE dc.id_combo = :id_padre
                 """)
                 ingredientes = db.session.execute(query_combo, {'id_padre': item['id_producto']}).mappings().fetchall()
             else:
@@ -65,7 +69,10 @@ def principal():
                 """)
                 ingredientes = db.session.execute(query_receta, {'id_prod': item['id_producto']}).mappings().fetchall()
             
-            desglose_recetas[item['id_producto']] = ingredientes
+            # Guardamos el desglose usando una clave combinada (Ej: "Producto_1" o "Combo_1") 
+            # para evitar que el Producto #1 y el Combo #1 se sobreescriban entre sí.
+            llave_unica = f"{item['tipo']}_{item['id_producto']}"
+            desglose_recetas[llave_unica] = ingredientes
 
         return render_template('costo_Utilidad/principal.html', 
                                resultados=resultados,
@@ -79,3 +86,4 @@ def principal():
         print(f"Error en SQL: {e}")
         flash('Error al generar reporte financiero. Revisa las Vistas SQL.', 'error')
         return redirect(url_for('dashboard.index'))
+
