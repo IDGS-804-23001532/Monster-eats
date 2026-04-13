@@ -1,4 +1,3 @@
-# recetas/routes.py
 import os
 from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
@@ -16,7 +15,7 @@ def index():
     try:
         query = text("CALL SP_Recetas_ObtenerTodos(:search)")
         recetas = db.session.execute(query, {'search': search}).fetchall()
-        db.session.commit()  # Limpiar resultados del CALL
+        db.session.commit()
         
         return render_template('recetas/index.html', recetas=recetas, search=search)
     
@@ -28,7 +27,6 @@ def index():
 @recetas_bp.route('/crear', methods=['GET', 'POST'])
 def crear():
     form = forms.ProductoForm()
-    # Llenamos el select de categorías dinámicamente
     categorias = CategoriaProducto.query.all()
     form.id_categoria.choices = [(c.id_categoria, c.nombre) for c in categorias]
 
@@ -36,21 +34,17 @@ def crear():
         try:
             nombre_imagen = 'default_product.png'
             
-            # Manejo de la imagen
             if form.imagen.data:
                 file = form.imagen.data
                 filename = secure_filename(f"{form.nombre.data}_{file.filename}")
-                # Ruta: static/img/productos/
                 upload_path = os.path.join(current_app.root_path, 'static', 'img', 'productos')
                 
-                # Crear carpeta si no existe
                 if not os.path.exists(upload_path):
                     os.makedirs(upload_path)
                 
                 file.save(os.path.join(upload_path, filename))
                 nombre_imagen = filename
 
-            # Crear el objeto Producto
             nuevo_producto = Producto(
                 nombre=form.nombre.data,
                 precio_venta=form.precio_venta.data,
@@ -63,7 +57,6 @@ def crear():
             db.session.commit()
 
             flash('Producto creado. Ahora añade los ingredientes de la receta.', 'success')
-            # Redireccionamos al detalle que ya tienes para que agregue insumos
             return redirect(url_for('recetas.detalle', id=nuevo_producto.id_producto))
 
         except Exception as e:
@@ -76,7 +69,6 @@ def crear():
 @recetas_bp.route('/detalle/<int:id>')
 def detalle(id):
     try:
-        # 1. Obtener información del producto
         query_producto = text("""
             SELECT 
                 p.id_producto,
@@ -100,7 +92,6 @@ def detalle(id):
             flash('Producto no encontrado', 'danger')
             return redirect(url_for('recetas.index'))
         
-        # Convertir a diccionario para fácil acceso
         producto = {
             'id_producto': producto_result[0],
             'producto': producto_result[1],
@@ -111,7 +102,6 @@ def detalle(id):
             'imagen': producto_result[6]
         }
         
-        # 2. Obtener insumos de la receta
         query_insumos = text("""
             SELECT 
                 r.id_insumo,
@@ -131,7 +121,6 @@ def detalle(id):
         insumos_result = db.session.execute(query_insumos, {'id': id}).fetchall()
         db.session.commit()
         
-        # Convertir insumos a lista de diccionarios
         insumos = []
         for row in insumos_result:
             insumos.append({
@@ -144,13 +133,13 @@ def detalle(id):
                 'costo_parcial': float(row[6])
             })
         
-        # 3. Obtener insumos disponibles para agregar
         query_disponibles = text("""
             SELECT 
                 i.id_insumo,
                 i.nombre,
                 um.abreviatura,
-                i.costo_unitario
+                i.costo_unitario,
+                um.nombre AS nombre_unidad
             FROM insumos i
             JOIN unidades_medida um ON i.id_unidad_medida = um.id_unidad_medida
             WHERE i.activo = 1
@@ -163,17 +152,16 @@ def detalle(id):
         disponibles_result = db.session.execute(query_disponibles, {'id': id}).fetchall()
         db.session.commit()
         
-        # Convertir a diccionario para la plantilla
         insumos_disponibles = []
         for row in disponibles_result:
             insumos_disponibles.append({
                 'id_insumo': row[0],
                 'nombre': row[1],
                 'abreviatura': row[2],
-                'costo_unitario': float(row[3])
+                'costo_unitario': float(row[3]),
+                'nombre_unidad': row[4]
             })
         
-        # Crear formulario
         form = forms.RecetaInsumoForm()
         form.id_producto.data = id
         form.id_insumo.choices = [(row[0], f"{row[1]} ({row[2]}) - ${float(row[3]):.2f}") 
@@ -202,7 +190,6 @@ def agregar_insumo():
         return redirect(url_for('recetas.detalle', id=id_producto))
     
     try:
-        # SQL directo para insertar o actualizar
         query = text("""
             INSERT INTO recetas (id_producto, id_insumo, cantidad_requerida)
             VALUES (:id_producto, :id_insumo, :cantidad)
@@ -258,7 +245,6 @@ def limpiar(id_producto):
         flash(f'Error al limpiar receta: {str(e)}', 'danger')
     
     return redirect(url_for('recetas.detalle', id=id_producto))
-
 
 @recetas_bp.route('/insumos_disponibles')
 def insumos_disponibles():

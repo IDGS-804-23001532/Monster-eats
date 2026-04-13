@@ -64,7 +64,8 @@
                     {% else %}
                     <div class="bg-slate-700/30 rounded-2xl p-4 text-center border border-slate-600/30">
                         <i class="fas fa-lock mr-2 text-slate-500"></i>
-                        <span class="text-slate-400 text-sm font-medium">Modo solo lectura. Solo el Gerente puede modificar recetas.</span>
+                        <span class="text-slate-400 text-sm font-medium">Modo solo lectura. Solo el Gerente puede
+                            modificar recetas.</span>
                     </div>
                     {% endif %}
                 </div>
@@ -219,11 +220,12 @@
                 <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Seleccionar
                     Insumo</label>
                 <div class="relative">
-                    <select name="id_insumo" required
+                    <select name="id_insumo" id="select_insumo" required onchange="actualizarUnidad()"
                         class="w-full px-5 py-4 rounded-2xl border-none bg-slate-900 text-white focus:ring-2 focus:ring-orange-500 outline-none appearance-none cursor-pointer">
                         <option value="">Selecciona un ingrediente...</option>
                         {% for insumo in insumos_disponibles %}
-                        <option value="{{ insumo.id_insumo }}">
+                        <option value="{{ insumo.id_insumo }}" data-unidad="{{ insumo.nombre_unidad }}"
+                            data-abreviatura="{{ insumo.abreviatura }}">
                             {{ insumo.nombre }} ({{ insumo.abreviatura }}) - ${{ "%.2f"|format(insumo.costo_unitario) }}
                         </option>
                         {% endfor %}
@@ -234,18 +236,22 @@
             </div>
 
             <div>
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Cantidad
-                    Requerida</label>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">
+                    Cantidad Requerida <span id="unidad_label" class="text-orange-500">(unidad)</span>
+                </label>
                 <div class="relative">
-                    <input type="number" name="cantidad_requerida" step="0.0001" min="0.0001" required
+                    <input type="number" name="cantidad_requerida" id="cantidad_requerida" step="0.0001" min="0.0001"
+                        required
                         class="w-full px-5 py-4 rounded-2xl border-none bg-slate-900 text-white focus:ring-2 focus:ring-orange-500 outline-none font-mono"
                         placeholder="0.0000">
                     <div
                         class="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-600 uppercase">
-                        Valor numérico</div>
+                        Valor numérico
+                    </div>
                 </div>
                 <p class="text-[10px] text-slate-500 mt-3 ml-1 uppercase font-bold tracking-tight">
-                    <i class="fas fa-info-circle text-orange-500 mr-1"></i> Usa la unidad base registrada (kg, l, pz)
+                    <i class="fas fa-info-circle text-orange-500 mr-1"></i>
+                    Ingresa la cantidad en <strong id="unidad_info">la unidad base del insumo</strong> (kg, l, pz)
                 </p>
             </div>
 
@@ -264,6 +270,16 @@
 </div>
 
 <script>
+    function actualizarUnidad() {
+        const select = document.getElementById('select_insumo');
+        const selectedOption = select.options[select.selectedIndex];
+        const unidad = selectedOption.getAttribute('data-unidad') || 'unidad';
+        const abreviatura = selectedOption.getAttribute('data-abreviatura') || '';
+
+        document.getElementById('unidad_label').innerHTML = `(${unidad})`;
+        document.getElementById('unidad_info').innerHTML = `la unidad base del insumo (${abreviatura})`;
+    }
+
     function abrirModalAgregar() {
         const modal = document.getElementById('modalAgregar');
         const container = document.getElementById('modalContainer');
@@ -273,6 +289,7 @@
             container.classList.remove('scale-95', 'opacity-0');
             container.classList.add('scale-100', 'opacity-100');
         }, 10);
+        actualizarUnidad();
     }
 
     function cerrarModal() {
