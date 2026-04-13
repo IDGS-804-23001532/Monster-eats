@@ -41,6 +41,8 @@ from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
 from jinja2 import TemplateError
+from models import Producto, CategoriaProducto, Combo
+
 
 app = Flask(__name__)
 
@@ -97,9 +99,9 @@ app.register_blueprint(pagina_bp)
 
 
 @app.route("/")
-#@login_required
+@login_required
 def index():
-    return render_template('inicio.html')
+    return render_template('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
