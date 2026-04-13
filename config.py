@@ -17,4 +17,3 @@ class DevelopmentConfig(Config):
     MAIL_USE_TLS = True
     MAIL_USERNAME = 'monstereatsmail@gmail.com'
     MAIL_PASSWORD = 'xtuyovvivveypura'
-
