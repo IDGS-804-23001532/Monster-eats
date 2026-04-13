@@ -40,7 +40,7 @@
             <form action="{{url_for('auth.login')}}" method="POST" novalidate>
                 {{ form.csrf_token }}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class= " login-box rounded-[28px] bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl px-7 py-8 text-white">
+                <div class= "login-box rounded-[28px] bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl px-7 py-8 text-white">
                     <div class="anim-item flex items-center justify-center gap-3 mb-6">
                         <div class="w-14 h-14 flex items-center justify-center shrink-0">
                             <img src="{{url_for('static',filename='img/monster_logo.png')}}" alt="Logo"
@@ -89,6 +89,26 @@
                     </div>
 
                     {% for error in form.password.errors %}
+                    <p class="anim-item text-red-300 text-sm mb-2 ml-2">{{ error }}</p>
+                    {% endfor %}
+
+                    <div class="anim-item relative mb-4 mt-2">
+                        <label class="block text-white font-semibold mb-2 ml-2 text-sm">
+                            Seguridad: {{ captcha_question }}
+                        </label>
+                        
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <svg class="w-5 h-5 text-white/50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v16H4z M9 9h6 M9 13h6 M9 17h6" />
+                                </svg>
+                            </div>
+
+                            {{ form.captcha( class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-0", placeholder="Escribe el resultado...", autocomplete="off" ) }}
+                        </div>
+                    </div>
+
+                    {% for error in form.captcha.errors %}
                     <p class="anim-item text-red-300 text-sm mb-2 ml-2">{{ error }}</p>
                     {% endfor %}
 

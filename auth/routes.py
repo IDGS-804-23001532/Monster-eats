@@ -1,4 +1,4 @@
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import limiter
 import forms
@@ -9,7 +9,7 @@ from models import Usuario, Persona, db
 from flask_security import login_required, current_user
 from flask_security.utils import login_user, logout_user
 from datetime import datetime, timedelta
-import uuid
+import uuid, random
 
 import logging
 
@@ -19,6 +19,17 @@ def login():
         create_form = forms.LoginForm(request.form)
 
         if request.method == "POST" and create_form.validate():
+            captcha_esperado = session.get('captcha_answer')
+            captcha_usuario = create_form.captcha.data
+
+            # Limpiamos la sesion para que no puedan reutilizarlo
+            session.pop('captcha_answer', None)
+
+            if captcha_esperado is None or captcha_usuario != captcha_esperado:
+                flash('Respuesta captcha incorrecta. Intentalo de nuevo')
+                return redirect(url_for('auth.login'))
+
+
             email = Sanitizador.limpiar_email(create_form.email.data)
             password = create_form.password.data.strip()
             remember = True if request.form.get('remember') else False
@@ -95,17 +106,33 @@ def login():
                 # Reseteamos los intentos fallidos
                 usuario.intentos_fallidos = 0
                 db.session.commit()
-                logging.info(f'Inicio de sesion exisoto de {email}')
 
-                audit.log_action(
-                    module_name="logs_auth",
-                    action="Inicio de sesión exitoso",
-                    details={"email": email},
-                    level="INFO"
-                )
+                # Generamos un codigo de 2FA
+                codigo_2fa = str(random.randint(100000, 999999))
 
-                login_user(usuario, remember = remember)
-                return redirect(url_for('index'))
+                # Guardamos datos temporalmente
+                session['2fa_code'] = codigo_2fa
+                session['2fa_user_email'] = usuario.email
+                session['remember_me'] = remember
+
+                # Enviamos el correo
+                from flask_mail import Message
+                from extensions import mail
+
+                try:
+                    msg = Message('Tu código de acceso - Monster Eats', 
+                                  sender= 'no-reply@monstereats.com',
+                                  recipients=[usuario.email])
+                    
+                    msg.body = f'Hola {usuario.persona.nombre}, \n\nTu código de verificación para entrar es: {codigo_2fa}\n\nSi no intentaste iniciar sesión, ignora este mensaje.'
+                    mail.send(msg)
+                    logging.info(f'Código 2FA enviado a {email}')
+                except Exception as e:
+                    logging.error(f'Error enviando correo 2FA a {email}: {e}')
+                    flash('Ocurrio un error al enviar el código a tu correo, por favor intentelo después')
+                    return redirect(url_for('auth.login'))
+                
+                return redirect(url_for('auth.verify_2fa'))
             else:
                 logging.warning(f'Intento de inicio de sesión sin datos sin coincidir {email}')
 
@@ -118,6 +145,19 @@ def login():
 
                 flash('El correo y/o contraseña son incorrectos', 'error')
                 return redirect(url_for('auth.login'))
+            
+        # Generacion del captcha 
+        num1 = random.randint(1, 10)
+        num2 = random.randint(1, 10)
+        operacion = random.choice(['+', '*'])
+
+        # Guardamos el resultado
+        session['captcha_answer'] = (num1 + num2) if operacion == '+' else (num1 * num2)
+
+        # Creamos el texto de la pregunta para mandarlo a la vista
+        captcha_question = f'¿Cuanto es {num1} {operacion} {num2}?'
+
+        return render_template('auth/login.html', form = create_form, captcha_question = captcha_question)
     except Exception as error:
         logging.warning(f'Error al inicio de sesion del usuario {email}: {str(error)}')
         audit.log_action(module_name="logs_auth", action="Error crítico en login", details={"error": str(error)}, level="ERROR")
@@ -210,8 +250,8 @@ def crear_cajero_demo():
     from app import user_datastore
 
     try:
-        email = "cajero.demo@monstereats.com"
-        password_plana = "Cajero123*"
+        email = "alexgonzalezgaytan@gmail.com"
+        password_plana = "Diego123#"
 
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if usuario_existente:
@@ -225,10 +265,10 @@ def crear_cajero_demo():
         db.session.commit()
 
         nueva_persona = Persona(
-            nombre="Cajero",
-            apellido_pa="Demo",
-            apellido_ma="Sistema",
-            telefono="2220001111"
+            nombre="Diego Alejandro",
+            apellido_pa="Gonzalez",
+            apellido_ma="Gaytan",
+            telefono="4771200987"
         )
         db.session.add(nueva_persona)
         db.session.flush()
@@ -389,3 +429,48 @@ def logout():
     )
 
     return redirect(url_for('auth.login'))
+
+@auth.route("/verify-2fa", methods=["GET", "POST"])
+def verify_2fa():
+    # Si intentan entrar a esta ruta sin haber pasado por el login, los regresamos
+    if '2fa_user_email' not in session:
+        return redirect(url_for('auth.login'))
+
+    email_usuario = session.get('2fa_user_email')
+
+    if request.method == "POST":
+        codigo_ingresado = request.form.get("codigo")
+        codigo_esperado = session.get("2fa_code")
+
+        if codigo_ingresado and codigo_ingresado.strip() == codigo_esperado:
+            # ¡Código correcto! Ahora sí iniciamos la sesión oficial
+            usuario = Usuario.query.filter_by(email=email_usuario).first()
+            if usuario:
+                remember = session.get('remember_me', False)
+                login_user(usuario, remember=remember)
+
+                audit.log_action(
+                    module_name="logs_auth",
+                    action="Inicio de sesión exitoso (2FA)",
+                    details={"email": email_usuario},
+                    level="INFO"
+                )
+
+                # Limpiamos la basura temporal de la sesión
+                session.pop('2fa_code', None)
+                session.pop('2fa_user_email', None)
+                session.pop('remember_me', None)
+
+                return redirect(url_for('index'))
+        else:
+            # El código no es válido
+            audit.log_action(
+                module_name="logs_auth",
+                action="Fallo de verificación 2FA",
+                details={"email": email_usuario},
+                level="WARNING"
+            )
+            flash("El código no es válido o ha expirado. Vuelve a intentarlo.", "error")
+            return redirect(url_for('auth.verify_2fa'))
+
+    return render_template("auth/verify_2fa.html", email=email_usuario)

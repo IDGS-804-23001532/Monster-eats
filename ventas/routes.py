@@ -148,6 +148,7 @@ def ventas():
             db.session.rollback()
             print(e)
             mensaje_usuario = 'Ocurrio un error al procesar la operación'
+            print(f'Error ventas {e}')
 
             try:
                 codigo_mysql = e.orig.args[0]
