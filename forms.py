@@ -16,6 +16,10 @@ class LoginForm(Form):
         validators.Length(min=8, message='El password debe tener al menos 8 carácteres')
     ])
 
+    captcha = IntegerField('Captcha: ', [
+        validators.DataRequired(message='El captcha es requerido')
+    ])
+
 class RegisterForm(Form):
     nombre = StringField('Nombre', [
         validators.DataRequired(message='El nombre es requerido')
