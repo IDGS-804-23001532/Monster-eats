@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
+    <title>Verificación 2FA - Monster Eats</title>
+</head>
+
+{% import "macros/_macros.html" as macros %}
+
+<body>
+    <div class="w-full min-h-screen flex items-center justify-center relative bg-cover bg-no-repeat overflow-hidden bg-[position:center_10%] md:bg-[position:center_25%]" 
+     style="background-image: url('{{ url_for('static', filename='img/background.png') }}');">
+
+    <div class="absolute inset-0 bg-black/60 z-0"></div>
+    
+    <div class="absolute inset-0 z-0 scale-[1.05] pointer-events-none bg-inherit bg-cover bg-[position:inherit]" style="background-image: inherit;"></div>
+
+        <div class="w-[400px] relative z-10">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-4 space-y-2 flash_container">
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                    <div class="rounded-xl bg-green-500/20 border border-green-400/30 text-green-100 px-4 py-3 text-center">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="rounded-xl bg-red-500/20 border border-red-400/30 text-red-100 px-4 py-3 text-center">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+            <form action="{{url_for('auth.verify_2fa')}}" method="POST" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class= "login-box rounded-[28px] bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl px-7 py-8 text-white">
+                    
+                    <div class="anim-item flex items-center justify-center gap-3 mb-6">
+                        <div class="w-14 h-14 flex items-center justify-center shrink-0">
+                            <img src="{{url_for('static',filename='img/monster_logo.png')}}" alt="Logo"
+                                class="w-full h-full object-contain block">
+                        </div>
+
+                        <div class="font-bold text-3xl leading-7">
+                            <span class="block">Monster</span>
+                            <span class="block">eats</span>
+                        </div>
+                    </div>
+
+                    <h2 class="anim-item text-3xl font-extrabold leading-tight mb-2 text-center">
+                        Verificación<br />
+                        Seguridad
+                    </h2>
+                    
+                    <p class="anim-item text-sm text-white/80 text-center mb-6">
+                        Ingresa el código de 6 dígitos que enviamos a <br>
+                        <span class="font-semibold text-white">{{ email }}</span>
+                    </p>
+
+                    <div class="anim-item relative mb-8">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <svg class="w-5 h-5 text-white/50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v3m-3-6V7a3 3 0 1 1 6 0v4m-8 0h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z"/>
+                            </svg>
+                        </div>
+
+                        <input class="w-full rounded-full border border-white/40 bg-white/5 py-3 pl-12 pr-4 text-white placeholder:text-white/50 outline-none shadow-none focus:ring-0 tracking-[0.5em] text-center font-bold text-lg" 
+                               id="codigo" 
+                               name="codigo" 
+                               type="text" 
+                               placeholder="••••••" 
+                               maxlength="6"
+                               required 
+                               autocomplete="off">
+                    </div>
+
+                    <button type="submit"
+                        class="anim-item w-full rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 transition mb-4">
+                        Verificar e Ingresar
+                    </button>
+                    
+                    <div class="anim-item text-center text-sm text-white/80">
+                        <a href="{{ url_for('auth.login') }}" class="text-orange-500 hover:text-orange-400 font-semibold transition-colors underline decoration-transparent hover:decoration-orange-400">
+                            &larr; Volver al inicio de sesión
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" 
+    integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer"></script>
+
+    <script src="{{ url_for('static', filename='js/animations.js')}}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            MonsterAnimations.animateLogin();
+            MonsterAnimations.animateFlashMessages();
+        });
+    </script>
+</body>
+
+</html>
