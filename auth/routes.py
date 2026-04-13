@@ -303,18 +303,18 @@ def gerente_full():
         from models import Usuario, Persona, Rol, db
         from app import user_datastore
 
-        email = "gerente@monstereats.com"
-        password_plana = "Gerente123*"
+        email = "christoferriveravalderrama@gmail.com"
+        password_plana = "Lagatita25"
 
         # 1. Buscamos o creamos el usuario
         usuario = Usuario.query.filter_by(email=email).first()
         
         if not usuario:
             nueva_persona = Persona(
-                nombre="SUPER",
-                apellido_pa="GERENTE",
-                apellido_ma="SISTEMA",
-                telefono="3220001111"
+                nombre="Christopher",
+                apellido_pa="Rivera",
+                apellido_ma="Valderrama",
+                telefono="4771800650"
             )
             db.session.add(nueva_persona)
             db.session.flush()

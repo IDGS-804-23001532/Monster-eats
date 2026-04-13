@@ -64,3 +64,6 @@ class AuditLogger:
 
 # Instancia global
 audit = AuditLogger()
+
+
+#Respaldo de la base de datos de mysql a mongodb, para auditoría de seguridad y análisis forense en caso de incidentes.

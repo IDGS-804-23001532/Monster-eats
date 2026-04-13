@@ -15,7 +15,7 @@ except ImportError:
     sys.modules['pkg_resources'] = MockPkgResources()
 
 from flask import Flask, render_template, redirect, url_for, flash
-from extensions import limiter, mail
+from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
 from flask_migrate import Migrate
@@ -61,7 +61,6 @@ app.config['SECURITY_REGISTER_URL'] = '/register_libreria'
 
 db.init_app(app)
 migrate = Migrate(app, db)
-mail.init_app(app)
 
 user_datastore = SQLAlchemyUserDatastore(db, Usuario, Rol)
 seguridad_app = Security(app, user_datastore)
@@ -102,7 +101,7 @@ app.register_blueprint(pagina_bp)
 @app.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    return render_template('inicio.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
