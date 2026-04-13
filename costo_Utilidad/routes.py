@@ -3,12 +3,16 @@ from models import db
 from sqlalchemy import text
 from flask_security import login_required, roles_accepted
 from audit_logger import audit
+import csv
+from io import StringIO
+from flask import Response
+from sqlalchemy import func
 
 costo_utilidad = Blueprint('costo_utilidad', __name__, url_prefix='/costo-utilidad')
 
 @costo_utilidad.route('/')
 @login_required
-@roles_accepted('Gerente', 'gerente') # REGLA: Bloqueo por decorador (Gerente y gerente)
+@roles_accepted('gerente') # REGLA: Bloqueo estricto por decorador
 def principal():
     try:
         # Creará y guardará en la colección "logs_finanzas"
@@ -87,3 +91,40 @@ def principal():
         flash('Error al generar reporte financiero. Revisa las Vistas SQL.', 'error')
         return redirect(url_for('dashboard.index'))
 
+@costo_utilidad.route('/exportar-csv')
+@login_required
+@roles_accepted('gerente', 'gerente')
+def exportar_csv():
+    # 1. Obtenemos los datos limpios de tu vista
+    query = text("SELECT nombre, tipo, precio_venta, costo_produccion, utilidad, margen_ganancia FROM vw_costo_utilidad ORDER BY margen_ganancia ASC")
+    resultados = db.session.execute(query).mappings().fetchall()
+
+    # 2. Preparamos el archivo CSV en memoria
+    def generate():
+        data = StringIO()
+        writer = csv.writer(data)
+        
+        # Escribir la cabecera (Títulos de las columnas)
+        writer.writerow(('Producto / Combo', 'Tipo', 'Precio Venta ($)', 'Costo Producción ($)', 'Utilidad Neta ($)', 'Margen (%)'))
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+        # Escribir los datos fila por fila
+        for item in resultados:
+            writer.writerow((
+                item['nombre'],
+                item['tipo'],
+                f"{item['precio_venta']:.2f}",
+                f"{item['costo_produccion']:.2f}",
+                f"{item['utilidad']:.2f}",
+                f"{item['margen_ganancia']:.1f}%"
+            ))
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+    # 3. Forzar al navegador a descargar el archivo
+    response = Response(generate(), mimetype='text/csv')
+    response.headers.set("Content-Disposition", "attachment", filename="Reporte_Rentabilidad_MonsterEats.csv")
+    return response

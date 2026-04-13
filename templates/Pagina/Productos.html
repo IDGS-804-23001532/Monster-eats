@@ -4,9 +4,15 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Monster Eats – {{ categoria_nombre }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='dist/output.css') }}"
+    />
     <script>
-      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      if (
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      )
         document.documentElement.classList.add("dark");
     </script>
   </head>
@@ -15,13 +21,21 @@
     class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans"
   >
     <!-- Loader -->
-    <div id="pageLoader" class="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col items-center justify-center gap-3 z-[9999] transition-opacity duration-300">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-700 border-t-orange-500"></div>
-      <p class="text-sm font-semibold text-gray-400 dark:text-gray-500 tracking-wide">Cargando...</p>
+    <div
+      id="pageLoader"
+      class="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col items-center justify-center gap-3 z-[9999] transition-opacity duration-300"
+    >
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-700 border-t-orange-500"
+      ></div>
+      <p
+        class="text-sm font-semibold text-gray-400 dark:text-gray-500 tracking-wide"
+      >
+        Cargando...
+      </p>
     </div>
 
     {% include 'Pagina/_header.html' %}
-
 
     <main class="max-w-screen-xl mx-auto px-4 pb-20">
       <!-- ===== CATEGORÍAS ===== -->
@@ -157,7 +171,7 @@
           >
             {% if producto.imagen %} {% if producto is mapping %}
             <img
-              src="{{ url_for('static', filename='img/combos/' + producto.imagen) }}"
+              src="{{ url_for('static', filename='img/' + producto.imagen) }}"
               alt="{{ producto.nombre }}"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -203,9 +217,7 @@
       {% endif %}
     </main>
 
-
     {% include 'Pagina/_footer.html' %}
-
 
     <script src="{{ url_for('static', filename='js/pagina_loader.js') }}"></script>
   </body>
