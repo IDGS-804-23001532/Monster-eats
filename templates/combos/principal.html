@@ -2,6 +2,26 @@
 
 {% block content %}
 <div class="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h2 class="text-xl font-black text-gray-800 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-list text-orange-500"></i> Catálogo de Combos
+        </h2>
+
+        <form action="{{ url_for('combos.principal') }}" method="GET" class="flex w-full sm:max-w-md gap-2">
+            <div class="relative w-full">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400"></i>
+                </div>
+                <input type="text" name="q" value="{{ request.args.get('q', '') }}"
+                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block w-full pl-10 p-2.5 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors"
+                    placeholder="Buscar por nombre de combo...">
+            </div>
+            <button type="submit"
+                class="px-4 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20">
+                Buscar
+            </button>
+        </form>
+    </div>
 
     <div
         class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-200 dark:border-gray-700 pb-5">
@@ -22,34 +42,58 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {% for combo in combos %}
         <div
-            class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group flex flex-col">
+            class="border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden group flex flex-col
+            {% if combo.activo %} bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 
+            {% else %} opacity-75 bg-orange-50/40 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800/30 {% endif %}">
 
-            <div
-                class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500 opacity-70 group-hover:opacity-100 transition-opacity">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-70 group-hover:opacity-100 transition-opacity
+                {% if combo.activo %} bg-blue-500 {% else %} bg-orange-400 {% endif %}">
             </div>
 
             <div class="flex justify-between items-start mb-4 pl-2">
-                <div>
-                    <h3 class="text-xl font-black text-gray-900 dark:text-white leading-tight">{{ combo.nombre }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ combo.descripcion or 'Sin descripción'
-                        }}</p>
+                <div class="flex items-center gap-3">
+                    <img src="{{ url_for('static', filename='img/' ~ (combo.imagen if combo.imagen else 'default_combo.png')) }}"
+                        alt="{{ combo.nombre }}" class="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-600 shadow-sm transition-all 
+                        {% if not combo.activo %} grayscale opacity-80 {% endif %}">
+                    <div>
+                        <h3
+                            class="text-xl font-black text-gray-900 dark:text-white leading-tight flex items-center gap-2">
+                            {{ combo.nombre }}
+                            {% if not combo.activo %}
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400">
+                                Inactivo
+                            </span>
+                            {% endif %}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ combo.descripcion or 'Sin
+                            descripción' }}</p>
+                    </div>
                 </div>
                 <span
-                    class="bg-green-50 text-green-700 text-sm font-black px-4 py-1.5 rounded-lg border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 shadow-sm">
+                    class="text-sm font-black px-4 py-1.5 rounded-lg border shadow-sm
+                    {% if combo.activo %} bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800
+                    {% else %} bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 {% endif %}">
                     ${{ "%.2f"|format(combo.precio_venta) }}
                 </span>
             </div>
 
             <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4 pl-2 flex-grow">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Incluye:</h4>
+                <h4
+                    class="text-xs font-bold uppercase tracking-wider mb-3 {% if combo.activo %} text-gray-400 {% else %} text-orange-400 {% endif %}">
+                    Incluye:</h4>
                 <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                     {% for detalle in combo.detalles %}
                     <li class="flex items-center gap-3">
                         <span
-                            class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded dark:bg-blue-900/50 dark:text-blue-400 text-xs">
+                            class="font-bold px-2 py-0.5 rounded text-xs
+                            {% if combo.activo %} bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400
+                            {% else %} bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400 {% endif %}">
                             {{ detalle.cantidad }}x
                         </span>
-                        <span class="font-medium">{{ detalle.producto.nombre }}</span>
+                        <span
+                            class="font-medium {% if not combo.activo %} text-gray-500 dark:text-gray-400 {% endif %}">{{
+                            detalle.producto.nombre }}</span>
                     </li>
                     {% else %}
                     <li class="text-red-500 italic text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Combo
@@ -58,20 +102,40 @@
                 </ul>
             </div>
 
-            <div class="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-end pl-2">
+            <div
+                class="mt-5 pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-end items-center gap-2 pl-2">
+
+                <form action="{{ url_for('combos.toggle_estado', id_combo=combo.id_combo) }}" method="POST"
+                    class="inline m-0 p-0">
+                    {{ form.csrf_token }}
+                    <button type="submit"
+                        class="text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1
+                        {% if combo.activo %} text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 
+                        {% else %} text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 {% endif %}">
+                        {% if combo.activo %}
+                        <i class="fa-solid fa-power-off"></i> Dar de baja
+                        {% else %}
+                        <i class="fa-solid fa-arrow-rotate-left"></i> Reactivar
+                        {% endif %}
+                    </button>
+                </form>
+
                 <button type="button" data-modal-target="modalEditarCombo-{{ combo.id_combo }}"
                     data-modal-toggle="modalEditarCombo-{{ combo.id_combo }}"
-                    class="text-sm font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:hover:bg-orange-900/40 px-4 py-2 rounded-lg transition-colors">
-                    <i class="fa-solid fa-pen mr-1"></i> Editar Combo
+                    class="text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1
+                    {% if combo.activo %} text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 
+                    {% else %} text-orange-600 hover:text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/40 dark:hover:bg-orange-900/60 {% endif %}">
+                    <i class="fa-solid fa-pen"></i> Editar
                 </button>
+
             </div>
         </div>
         {% else %}
         <div
             class="col-span-full py-16 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-            <div class="text-gray-400 mb-3"><i class="fa-solid fa-boxes-stacked text-5xl"></i></div>
-            <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">Aún no hay combos</h3>
-            <p class="text-gray-500 text-sm">Comienza creando tu primer paquete promocional.</p>
+            <div class="text-gray-400 mb-3"><i class="fa-solid fa-layer-group text-5xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">No se encontraron combos</h3>
+            <p class="text-gray-500 text-sm">Prueba con otra búsqueda o crea uno nuevo.</p>
         </div>
         {% endfor %}
     </div>
@@ -88,7 +152,6 @@
                 <h3 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="fa-solid fa-layer-group text-blue-600"></i> Nuevo Combo
                 </h3>
-
                 <button type="button" data-modal-hide="modalCrearCombo"
                     onclick="const f=document.getElementById('formCrearCombo'); f.reset(); f.querySelectorAll('input[type=text], input[name=precio_venta]').forEach(i=>i.value=''); f.querySelectorAll('select').forEach(s=>s.selectedIndex=0); f.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false); f.querySelectorAll('input[name=\'cantidad[]\']').forEach(i=>i.value=1);"
                     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-colors">
@@ -96,7 +159,8 @@
                 </button>
             </div>
 
-            <form id="formCrearCombo" action="{{ url_for('combos.crear') }}" method="POST" class="p-6" novalidate>
+            <form id="formCrearCombo" action="{{ url_for('combos.crear') }}" method="POST" enctype="multipart/form-data"
+                class="p-6" novalidate>
                 {{ form.csrf_token }}
 
                 <div class="grid grid-cols-2 gap-5 mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
@@ -141,6 +205,27 @@
                         {% if not edit_error_id %}{% for error in form.descripcion.errors %}<p
                             class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
                                 class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
+                    </div>
+
+                    <div class="col-span-2">
+                        <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">Imagen del Combo
+                            (Opcional)</label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="imagen_crear"
+                                class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-blue-50 dark:hover:bg-gray-800 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-all group">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                    <i
+                                        class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 group-hover:text-blue-500 transition-colors mb-2"></i>
+                                    <p class="mb-1 text-sm text-gray-500 dark:text-gray-400" id="texto-imagen-crear">
+                                        <span class="font-bold text-gray-700 dark:text-gray-300">Haz clic para
+                                            subir</span> o arrastra tu imagen aquí
+                                    </p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">Soporta PNG, JPG o WEBP</p>
+                                </div>
+                                <input id="imagen_crear" type="file" name="imagen" accept="image/*" class="hidden"
+                                    onchange="document.getElementById('texto-imagen-crear').innerHTML = '<span class=\'font-black text-blue-600 dark:text-blue-400\'><i class=\'fa-solid fa-check-circle mr-1\'></i> ' + this.files[0].name + '</span>';" />
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -233,7 +318,7 @@
         <div class="relative bg-white rounded-2xl shadow-2xl dark:bg-gray-800 overflow-hidden">
 
             <form action="{{ url_for('combos.editar', id_combo=combo.id_combo) }}" method="POST"
-                class="flex flex-col h-full" novalidate>
+                enctype="multipart/form-data" class="flex flex-col h-full" novalidate>
 
                 <div
                     class="flex items-center justify-between p-5 border-b bg-orange-50 dark:bg-orange-900/20 dark:border-gray-700">
@@ -253,59 +338,71 @@
                     <div class="grid grid-cols-2 gap-5 mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
                         <div class="col-span-2 md:col-span-1">
                             <label
-                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.nombre.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
-                                Nombre del Combo
-                            </label>
+                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.nombre.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Nombre
+                                del Combo</label>
                             {{ form_edit.nombre(value=(form_edit.nombre.data if is_edit_error else combo.nombre),
                             class="text-sm rounded-xl block w-full p-3 transition-colors " ~ ('bg-red-50 border-red-500
                             text-red-900 focus:border-red-500 focus:ring-red-500 dark:bg-red-100 dark:border-red-400' if
                             is_edit_error and form_edit.nombre.errors else 'bg-gray-50 border-gray-300 text-gray-900
                             focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-900 dark:border-gray-600
                             dark:text-white')) }}
-                            {% if is_edit_error %}
-                            {% for error in form_edit.nombre.errors %}
-                            <p class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
-                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
-                            {% endfor %}
-                            {% endif %}
+                            {% if is_edit_error %}{% for error in form_edit.nombre.errors %}<p
+                                class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
                         </div>
 
                         <div class="col-span-2 md:col-span-1">
                             <label
-                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.precio_venta.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
-                                Precio de Venta ($)
-                            </label>
+                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.precio_venta.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Precio
+                                de Venta ($)</label>
                             {{ form_edit.precio_venta(value=(form_edit.precio_venta.data if is_edit_error else
                             "%.2f"|format(combo.precio_venta)), type="number", step="0.01", class="text-sm rounded-xl
                             block w-full p-3 transition-colors " ~ ('bg-red-50 border-red-500 text-red-900
                             focus:border-red-500 dark:bg-red-100 dark:border-red-400' if is_edit_error and
                             form_edit.precio_venta.errors else 'bg-gray-50 border-gray-300 text-gray-900
                             focus:border-orange-500 dark:bg-gray-900 dark:border-gray-600 dark:text-white')) }}
-                            {% if is_edit_error %}
-                            {% for error in form_edit.precio_venta.errors %}
-                            <p class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
-                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
-                            {% endfor %}
-                            {% endif %}
+                            {% if is_edit_error %}{% for error in form_edit.precio_venta.errors %}<p
+                                class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
                         </div>
 
                         <div class="col-span-2">
                             <label
-                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.descripcion.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">
-                                Descripción Breve
-                            </label>
+                                class="block mb-2 text-sm font-bold {% if is_edit_error and form_edit.descripcion.errors %}text-red-600 dark:text-red-500{% else %}text-gray-700 dark:text-gray-300{% endif %}">Descripción
+                                Breve</label>
                             {{ form_edit.descripcion(value=(form_edit.descripcion.data if is_edit_error else
                             combo.descripcion or ''), class="text-sm rounded-xl block w-full p-3 transition-colors " ~
                             ('bg-red-50 border-red-500 text-red-900 dark:bg-red-100 dark:border-red-400' if
                             is_edit_error and form_edit.descripcion.errors else 'bg-gray-50 border-gray-300
                             text-gray-900 focus:border-orange-500 dark:bg-gray-900 dark:border-gray-600
                             dark:text-white')) }}
-                            {% if is_edit_error %}
-                            {% for error in form_edit.descripcion.errors %}
-                            <p class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
-                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
-                            {% endfor %}
-                            {% endif %}
+                            {% if is_edit_error %}{% for error in form_edit.descripcion.errors %}<p
+                                class="mt-1.5 text-xs font-bold text-red-600 dark:text-red-400"><i
+                                    class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}{% endif %}
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">Actualizar
+                                Imagen del Combo (Opcional)</label>
+                            <div class="flex items-center justify-center w-full">
+                                <label for="imagen_{{ combo.id_combo }}"
+                                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-orange-50 dark:hover:bg-gray-800 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500 transition-all group">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                        <i
+                                            class="fa-solid fa-image text-3xl text-gray-400 group-hover:text-orange-500 transition-colors mb-2"></i>
+                                        <p class="mb-1 text-sm text-gray-500 dark:text-gray-400"
+                                            id="texto-imagen-{{ combo.id_combo }}">
+                                            <span class="font-bold text-gray-700 dark:text-gray-300">Haz clic para
+                                                cambiar</span> la imagen actual
+                                        </p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">Sube una nueva foto solo si
+                                            quieres reemplazarla</p>
+                                    </div>
+                                    <input id="imagen_{{ combo.id_combo }}" type="file" name="imagen" accept="image/*"
+                                        class="hidden"
+                                        onchange="document.getElementById('texto-imagen-{{ combo.id_combo }}').innerHTML = '<span class=\'font-black text-orange-600 dark:text-orange-400\'><i class=\'fa-solid fa-check-circle mr-1\'></i> ' + this.files[0].name + '</span>';" />
+                                </label>
+                            </div>
                         </div>
                     </div>
 

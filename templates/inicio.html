@@ -92,7 +92,7 @@
           <a
             href="/login"
             class="bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold text-lg hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]"
-            >Personal / ERP</a
+            >Inicia sesión</a
           >
         </div>
       </div>
@@ -116,7 +116,7 @@
           <a
             href="/login"
             class="text-gray-900 dark:text-white font-medium hover:text-[#FF6B00]"
-            >Personal / ERP</a
+            >Inicia sesión</a
           >
         </div>
       </div>
@@ -330,7 +330,7 @@
               {% if combo_destacado.imagen %}
               <img
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                src="{{ url_for('static', filename='img/combos/' + combo_destacado.imagen) }}"
+                src="{{ url_for('static', filename='img/' + combo_destacado.imagen) }}"
                 alt="{{ combo_destacado.nombre }}"
               />
               {% endif %}
@@ -645,7 +645,7 @@
               </li>
               <li>
                 <a class="hover:text-[#FF6B00] transition-colors" href="/login"
-                  >Acceso ERP Corporativo</a
+                  >Inicia sesión</a
                 >
               </li>
             </ul>

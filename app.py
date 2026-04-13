@@ -98,6 +98,20 @@ app.register_blueprint(pagina_bp)
 
 
 @app.route("/")
+def inicio():
+    from models import Producto, Combo, CategoriaProducto
+    
+    cat_hambur = CategoriaProducto.query.filter(CategoriaProducto.nombre.ilike('Hamburguesas')).first()
+    producto_hambur = Producto.query.filter_by(id_categoria=cat_hambur.id_categoria, activo=True).first() if cat_hambur else None
+    
+    cat_papas = CategoriaProducto.query.filter(CategoriaProducto.nombre.ilike('Papas')).first()
+    producto_papa = Producto.query.filter_by(id_categoria=cat_papas.id_categoria, activo=True).first() if cat_papas else None
+    
+    combo_destacado = Combo.query.filter_by(activo=True).first()
+    
+    return render_template('inicio.html', producto_hambur=producto_hambur, producto_papa=producto_papa, combo_destacado=combo_destacado)
+
+@app.route("/bienvenida")
 @login_required
 def index():
     return render_template('index.html')
