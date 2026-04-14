@@ -519,8 +519,8 @@ camposNuevos %} {% block content %}
               <th class="px-4 py-2">Insumo</th>
               <th class="px-4 py-2">Cantidad</th>
               <th class="px-4 py-2">Unidad</th>
-              <th class="px-4 py-2">Precio</th>
-              <th class="px-4 py-2">Subtotal</th>
+              <th class="px-4 py-2">Precio Unit.</th>
+              <th class="px-4 py-2">Total Pagado</th>
             </tr>
           </thead>
           <tbody>
@@ -530,7 +530,7 @@ camposNuevos %} {% block content %}
               <td class="px-4 py-2">{{ det.cantidad_comprada }}</td>
               <td class="px-4 py-2">{{ det.unidad_medida.abreviatura }}</td>
               <td class="px-4 py-2">
-                ${{ "%.2f" | format(det.costo_unitario) }}
+                ${{ "%.2f" | format(det.costo_subtotal) }}
               </td>
               <td class="px-4 py-2 font-semibold">
                 ${{ "%.2f" | format(det.costo_subtotal) }}
@@ -763,8 +763,8 @@ camposNuevos %} {% block content %}
                 <th class="px-3 py-2">Insumo</th>
                 <th class="px-3 py-2">Cantidad</th>
                 <th class="px-3 py-2">Unidad</th>
-                <th class="px-3 py-2">Precio</th>
-                <th class="px-3 py-2">Subtotal</th>
+                <th class="px-3 py-2">Precio Unit.</th>
+                <th class="px-3 py-2">Total Pagado</th>
               </tr>
             </thead>
             <tbody>
@@ -792,7 +792,7 @@ camposNuevos %} {% block content %}
                 <td class="px-3 py-2">{{ row.cantidad_comprada }}</td>
                 <td class="px-3 py-2">{{ row.unidad }}</td>
                 <td class="px-3 py-2">
-                  ${{ "%.2f" | format(row.costo_unitario) }}
+                  ${{ "%.2f" | format(row.costo_subtotal) }}
                 </td>
                 <td class="px-3 py-2 font-semibold">
                   ${{ "%.2f" | format(row.costo_subtotal) }}
@@ -908,11 +908,11 @@ camposNuevos %} {% block content %}
         <div class="grid grid-cols-4 gap-2">
           <div>
             <label class="block mb-1 text-xs text-gray-400">Cantidad</label>
-            <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
+            <input type="number" name="cantidad[]" min="0.01" step="any" placeholder="0" class="input-cantidad block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
           </div>
           <div>
             <label class="block mb-1 text-xs text-gray-400">Precio</label>
-            <input type="number" name="precio[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required oninput="this.value = Math.abs(this.value)" />
+            <input type="number" name="precio[]" min="0" step="any" placeholder="$0" class="input-costo block w-full bg-[#394E6D] text-white text-xs rounded-lg px-2 py-2 focus:ring-[#FF6B00] focus:border-[#FF6B00]" required />
           </div>
           <div>
             <label class="block mb-1 text-xs text-gray-400">Caducidad</label>
@@ -1129,14 +1129,9 @@ camposNuevos %} {% block content %}
 
       let precioUnitario;
 
-      // Special case: if the insumo's base unit is grams (id 2) and user selected grams,
-      // treat the entered "precio" as the TOTAL for the line (user entered e.g. price for 250g)
-      if (baseUnitId === 2 && selUnitId === 2) {
-        precioUnitario = (cantidad > 0) ? (costo / cantidad) : 0;
-      } else {
-        // otherwise precio input is considered unit price
-        precioUnitario = costo;
-      }
+      // El usuario indicó que el campo "Precio" en el formulario siempre debe
+      // representar el TOTAL pagado por esa línea (sin importar si son piezas, kg, etc.)
+      precioUnitario = (cantidad > 0) ? (costo / cantidad) : 0;
 
       const subtotal = cantidad * precioUnitario;
 
@@ -1194,23 +1189,7 @@ camposNuevos %} {% block content %}
           }
           origUnidadField.value = selUnitId || '';
 
-          if (insumoId && baseUnitId && selUnitId && selUnitId !== baseUnitId) {
-            // get factor (base units per selected unit)
-            const conv = conversionsData.find(c => c.id_insumo === insumoId && c.id_unidad_compra === selUnitId);
-            const key = `${selUnitId}:${baseUnitId}`;
-            let factor = conv ? parseFloat(conv.cantidad_equivalente_base) : (INFERRED[key] ? parseFloat(INFERRED[key]) : null);
-            if (factor && factor > 0) {
-              const convertedQty = origCantidad * factor;
-              inputCantidad.value = Number(convertedQty.toFixed(4));
-              // set price to base price (per base unit)
-              inputCosto.value = Number(basePrice.toFixed(4));
-              // set unidad select value to base unit so backend receives base unit id
-              EscojeUnidad.value = baseUnitId;
-              // mark converted visually
-              const note = div.querySelector('.equiv-note');
-              if (note) note.textContent += ' (enviado convertido a base)';
-            }
-          }
+          // (Frontend conversion removed. Backend now handles it.)
         } catch (err) {
           // ignore per-line errors
         }

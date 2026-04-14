@@ -41,11 +41,13 @@ from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
 from jinja2 import TemplateError
+from models import db
 
 app = Flask(__name__)
 
 limiter.init_app(app)
 csrf = CSRFProtect()
+migrate = Migrate(app, db)
 app.config.from_object(DevelopmentConfig)
 
 # Salt 
