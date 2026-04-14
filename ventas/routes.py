@@ -41,49 +41,54 @@ def ventas():
 
     if request.method == 'POST':
         accion = request.form.get('accion')
-        id_producto = request.form.get('id_producto', type=int)
+        
+        # --- CAMBIOS APLICADOS AQUÍ ---
+        # Ahora recibimos id_item y tipo_item desde los inputs hidden del HTML
+        id_item = request.form.get('id_item', type=int)
+        tipo_item = request.form.get('tipo_item', type=str)
 
         try:
-            if accion == 'agregar' and id_producto:
+            if accion == 'agregar' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_agregar(:id_usuario, :id_producto, :cantidad)"),
+                    db.text("CALL sp_carrito_agregar(:id_usuario, :id_item, :tipo_item, :cantidad)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto,
+                        'id_item': id_item,
+                        'tipo_item': tipo_item,
                         'cantidad': 1
                     }
                 )
                 db.session.commit()
                 return redirect(url_for('venta.ventas'))
 
-            print(accion)
-
-            if accion == 'quitar_unidad' and id_producto:
+            if accion == 'quitar_unidad' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_quitar_unidad(:id_usuario, :id_producto)"),
+                    db.text("CALL sp_carrito_quitar_unidad(:id_usuario, :id_item, :tipo_item)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto
+                        'id_item': id_item,
+                        'tipo_item': tipo_item
                     }
                 )
                 db.session.commit()
                 return redirect(url_for('venta.ventas'))
 
-            if accion == 'eliminar_producto' and id_producto:
+            if accion == 'eliminar_producto' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_eliminar_producto(:id_usuario, :id_producto)"),
+                    db.text("CALL sp_carrito_eliminar_producto(:id_usuario, :id_item, :tipo_item)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto
+                        'id_item': id_item,
+                        'tipo_item': tipo_item
                     }
                 )
                 db.session.commit()
                 
-                # Opcional: Registrar cuando se elimina un producto entero del carrito (suele ser útil por seguridad)
+                # Opcional: Registrar cuando se elimina un producto/combo entero del carrito
                 audit.log_action(
                     module_name="logs_ventas",
-                    action="Producto eliminado del carrito",
-                    details={"email_cajero": email_usuario, "id_producto": id_producto},
+                    action=f"Artículo eliminado del carrito ({tipo_item})",
+                    details={"email_cajero": email_usuario, "id_item": id_item, "tipo_item": tipo_item},
                     level="INFO"
                 )
                 return redirect(url_for('venta.ventas'))
@@ -107,8 +112,6 @@ def ventas():
                             'monto_recibido': create_form.monto_recibido.data
                         }
                     )
-
-                    print(result)
 
                     # Obtenemos el id de la venta
                     row = result.fetchone()
@@ -183,8 +186,6 @@ def ventas():
         """)
     ).mappings().all()
 
-  #  print(productos_venta)
-
     carrito = db.session.execute(
         db.text("""
             SELECT *
@@ -194,8 +195,6 @@ def ventas():
         """),
         {'id_usuario': id_usuario}
     ).mappings().all()
-
-    print(carrito)
 
     resumen = db.session.execute(
         db.text("""
@@ -218,7 +217,7 @@ def ventas():
     # Extraemos el id de la sesion del ticket de la venta y al final queremos que se borre
     # Automaticamente
     ticket_a_imprimir = session.pop('ticket_a_imprimir', None)
-    return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen, ticket_a_imprimir = ticket_a_imprimir)
+    return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen, ticket_a_imprimir=ticket_a_imprimir)
 
 @venta.route('/ticket/<int:id_venta>')
 @login_required
