@@ -1,6 +1,7 @@
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask_security import login_required, current_user
 from models import db, Producto, Insumo, UnidadMedida, CategoriaProducto
 from sqlalchemy import text
 import logging
@@ -49,6 +50,7 @@ def crear():
                 nombre=form.nombre.data,
                 precio_venta=form.precio_venta.data,
                 id_categoria=form.id_categoria.data,
+                descripcion=form.descripcion.data,  # ← NUEVO
                 imagen=nombre_imagen,
                 activo=True
             )
@@ -73,6 +75,7 @@ def detalle(id):
             SELECT 
                 p.id_producto,
                 p.nombre AS producto,
+                p.descripcion,
                 p.precio_venta,
                 c.nombre AS categoria,
                 p.activo,
@@ -83,7 +86,7 @@ def detalle(id):
             LEFT JOIN recetas r ON p.id_producto = r.id_producto
             LEFT JOIN insumos i ON r.id_insumo = i.id_insumo
             WHERE p.id_producto = :id
-            GROUP BY p.id_producto, p.nombre, p.precio_venta, c.nombre, p.activo, p.imagen
+            GROUP BY p.id_producto, p.nombre, p.descripcion, p.precio_venta, c.nombre, p.activo, p.imagen
         """)
         producto_result = db.session.execute(query_producto, {'id': id}).fetchone()
         db.session.commit()
@@ -95,11 +98,12 @@ def detalle(id):
         producto = {
             'id_producto': producto_result[0],
             'producto': producto_result[1],
-            'precio_venta': float(producto_result[2]),
-            'categoria': producto_result[3],
-            'activo': producto_result[4],
-            'costo_total': float(producto_result[5]),
-            'imagen': producto_result[6]
+            'descripcion': producto_result[2] or '',
+            'precio_venta': float(producto_result[3]),
+            'categoria': producto_result[4],
+            'activo': producto_result[5],
+            'costo_total': float(producto_result[6]),
+            'imagen': producto_result[7]
         }
         
         query_insumos = text("""
@@ -167,17 +171,49 @@ def detalle(id):
         form.id_insumo.choices = [(row[0], f"{row[1]} ({row[2]}) - ${float(row[3]):.2f}") 
                                    for row in disponibles_result]
         
+        # Formulario para editar descripción (solo Gerente)
+        descripcion_form = forms.ProductoDescripcionForm()
+        descripcion_form.descripcion.data = producto['descripcion']
+        
         return render_template('recetas/detalle.html', 
                              producto=producto, 
                              insumos=insumos,
                              insumos_disponibles=insumos_disponibles,
-                             form=form)
+                             form=form,
+                             descripcion_form=descripcion_form)
     
     except Exception as e:
         db.session.rollback()
         print(f"Error en detalle: {str(e)}")
         flash('Error al cargar el detalle de la receta', 'danger')
-        return redirect(url_for('recetas.index'))    
+        return redirect(url_for('recetas.index'))
+
+# NUEVA RUTA - Editar descripción (solo Gerente)
+@recetas_bp.route('/editar_descripcion/<int:id>', methods=['POST'])
+@login_required
+def editar_descripcion(id):
+    if not current_user.has_role('gerente'):
+        flash('No tienes permiso para editar la descripción', 'danger')
+        return redirect(url_for('recetas.detalle', id=id))
+    
+    form = forms.ProductoDescripcionForm()
+    
+    if form.validate_on_submit():
+        try:
+            producto = Producto.query.get_or_404(id)
+            producto.descripcion = form.descripcion.data
+            db.session.commit()
+            
+            flash('Descripción actualizada correctamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error al actualizar descripción: {str(e)}")
+            flash('Error al actualizar la descripción', 'danger')
+    else:
+        flash('Datos inválidos', 'danger')
+    
+    return redirect(url_for('recetas.detalle', id=id))
 
 @recetas_bp.route('/agregar_insumo', methods=['POST'])
 def agregar_insumo():

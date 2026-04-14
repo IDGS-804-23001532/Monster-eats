@@ -52,6 +52,18 @@
                 </div>
             </div>
 
+            <!-- NUEVO CAMPO: Descripción -->
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-slate-300 ml-2">Descripción del Producto</label>
+                <div class="relative group">
+                    <div class="absolute top-4 left-0 pl-4 flex items-start pointer-events-none">
+                        <i class="fas fa-align-left text-slate-500 group-focus-within:text-orange-500 transition-colors"></i>
+                    </div>
+                    {{ form.descripcion(class="w-full pl-12 pr-4 py-3 rounded-2xl border border-transparent bg-slate-900/60 text-white placeholder-slate-500 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all outline-none backdrop-blur-md", rows="4", placeholder="Describe los ingredientes, presentación, origen, etc.") }}
+                </div>
+                <p class="text-xs text-slate-500 ml-2">Esta descripción se mostrará en la página del producto para los clientes.</p>
+            </div>
+
             <div class="space-y-2">
                 <label class="text-sm font-bold text-slate-300 ml-2">Fotografía del Producto</label>
                 <div class="relative w-full rounded-2xl border-2 border-dashed border-slate-700/50 bg-slate-900/40 p-6 hover:border-orange-500/50 hover:bg-slate-900/60 transition-all duration-300 group text-center cursor-pointer flex flex-col items-center justify-center">
