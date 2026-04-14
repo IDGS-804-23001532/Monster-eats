@@ -56,6 +56,8 @@ def ventas():
                 db.session.commit()
                 return redirect(url_for('venta.ventas'))
 
+            print(accion)
+
             if accion == 'quitar_unidad' and id_producto:
                 db.session.execute(
                     db.text("CALL sp_carrito_quitar_unidad(:id_usuario, :id_producto)"),
@@ -105,6 +107,8 @@ def ventas():
                             'monto_recibido': create_form.monto_recibido.data
                         }
                     )
+
+                    print(result)
 
                     # Obtenemos el id de la venta
                     row = result.fetchone()
@@ -179,6 +183,8 @@ def ventas():
         """)
     ).mappings().all()
 
+  #  print(productos_venta)
+
     carrito = db.session.execute(
         db.text("""
             SELECT *
@@ -188,6 +194,8 @@ def ventas():
         """),
         {'id_usuario': id_usuario}
     ).mappings().all()
+
+    print(carrito)
 
     resumen = db.session.execute(
         db.text("""
