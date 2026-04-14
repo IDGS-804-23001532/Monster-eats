@@ -13,7 +13,7 @@ from audit_logger import audit
 
 @proveedor.route("/proveedores", methods=['GET', 'POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def proveedores():
     create_form = forms.ProveedorForm(request.form)
@@ -110,7 +110,7 @@ def proveedores():
 
 @proveedor.route("/proveedores/actualizar/<int:id>", methods=['POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def actualizar_proveedor(id):
     create_form = forms.ProveedorForm(request.form)
@@ -195,7 +195,7 @@ def actualizar_proveedor(id):
 
 @proveedor.route("/proveedores/eliminar/<int:id>", methods=['POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def eliminar_proveedor(id):
     create_form = forms.CategoriaProveedorForm(request.form)
@@ -233,7 +233,7 @@ def eliminar_proveedor(id):
 
 @proveedor.route("/categorias", methods=['GET', 'POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def categorias():
     create_form = forms.CategoriaProveedorForm(request.form)
@@ -284,7 +284,7 @@ def categorias():
 
 @proveedor.route("/categorias/actualizar/<int:id>", methods=['GET', 'POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def actualizar_categoria(id):
     create_form = forms.CategoriaProveedorForm(request.form)
@@ -333,7 +333,7 @@ def actualizar_categoria(id):
 
 @proveedor.route("/categorias/eliminar/<int:id>", methods=['POST'])
 @login_required
-@roles_required('Gerente')
+@roles_required('gerente')
 @limiter.limit('8 per minute') # 8 request por minuto
 def eliminar_categoria(id):
     create_form = forms.CategoriaProveedorForm(request.form)

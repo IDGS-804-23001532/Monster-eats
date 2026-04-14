@@ -428,6 +428,7 @@ class ProduccionFinalizarForm(FlaskForm):
 class ProductoForm(FlaskForm):
     nombre = StringField('Nombre del Producto', validators=[DataRequired()])
     precio_venta = DecimalField('Precio de Venta', validators=[DataRequired(), NumberRange(min=0)])
+    descripcion = TextAreaField('Descripción', validators=[Optional()])
     id_categoria = SelectField('Categoría', coerce=int, validators=[DataRequired()])
     imagen = FileField('Imagen del Producto', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], '¡Solo se permiten imágenes (jpg, png)!')

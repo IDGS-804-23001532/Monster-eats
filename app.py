@@ -127,10 +127,10 @@ def page_not_found(e):
 def interval_server_error(e):
     return render_template('500.html'), 500
 
-@app.errorhandler(TemplateError)
+ @app.errorhandler(TemplateError)
 def handle_template_error(e):
     # Intercepta errores de diseño para enviar a la ventana 500
-    return render_template('500.html'), 500
+    return render_template('500.html'), 500 
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
