@@ -409,6 +409,12 @@ class RecetaInsumoForm(FlaskForm):
         validators=[DataRequired(), NumberRange(min=0.01, message="La cantidad debe ser mayor a 0")],
         places=4)
 
+
+# Solo para editar descripción
+class ProductoDescripcionForm(FlaskForm):
+    descripcion = TextAreaField('Descripción', validators=[Optional()])
+    submit = SubmitField('Guardar Descripción')
+
 class ProduccionOrdenForm(FlaskForm):
     id_producto = SelectField('Producto', coerce=int, validators=[DataRequired()])
     cantidad_programada = IntegerField('Cantidad a producir', 
