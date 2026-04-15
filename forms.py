@@ -409,6 +409,12 @@ class RecetaInsumoForm(FlaskForm):
         validators=[DataRequired(), NumberRange(min=0.01, message="La cantidad debe ser mayor a 0")],
         places=4)
 
+
+# Solo para editar descripción
+class ProductoDescripcionForm(FlaskForm):
+    descripcion = TextAreaField('Descripción', validators=[Optional()])
+    submit = SubmitField('Guardar Descripción')
+
 class ProduccionOrdenForm(FlaskForm):
     id_producto = SelectField('Producto', coerce=int, validators=[DataRequired()])
     cantidad_programada = IntegerField('Cantidad a producir', 
@@ -422,6 +428,7 @@ class ProduccionFinalizarForm(FlaskForm):
 class ProductoForm(FlaskForm):
     nombre = StringField('Nombre del Producto', validators=[DataRequired()])
     precio_venta = DecimalField('Precio de Venta', validators=[DataRequired(), NumberRange(min=0)])
+    descripcion = TextAreaField('Descripción', validators=[Optional()])
     id_categoria = SelectField('Categoría', coerce=int, validators=[DataRequired()])
     imagen = FileField('Imagen del Producto', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], '¡Solo se permiten imágenes (jpg, png)!')

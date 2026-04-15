@@ -15,7 +15,7 @@ from audit_logger import audit
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('Cajero', 'Gerente', 'gerente')
-@limiter.limit('20 per minute') # 8 request por minuto
+@limiter.limit('20 per minute') # 20 request por minuto
 def ventas():
     create_form = forms.VentasForm(request.form)
 
@@ -41,76 +41,107 @@ def ventas():
 
     if request.method == 'POST':
         accion = request.form.get('accion')
-        id_producto = request.form.get('id_producto', type=int)
+        
+        # Atrapamos los nuevos inputs del HTML (id_item y tipo_item)
+        id_item = request.form.get('id_item', type=int)
+        tipo_item = request.form.get('tipo_item', type=str)
 
         try:
-            if accion == 'agregar' and id_producto:
+            # ====================================================
+            # ACCIONES DEL CARRITO (Agregar, Quitar, Eliminar)
+            # ====================================================
+            if accion == 'agregar' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_agregar(:id_usuario, :id_producto, :cantidad)"),
+                    db.text("CALL sp_carrito_agregar(:id_usuario, :id_item, :tipo_item, :cantidad)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto,
+                        'id_item': id_item,
+                        'tipo_item': tipo_item,
                         'cantidad': 1
                     }
                 )
                 db.session.commit()
                 return redirect(url_for('venta.ventas'))
 
-            if accion == 'quitar_unidad' and id_producto:
+            if accion == 'quitar_unidad' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_quitar_unidad(:id_usuario, :id_producto)"),
+                    db.text("CALL sp_carrito_quitar_unidad(:id_usuario, :id_item, :tipo_item)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto
+                        'id_item': id_item,
+                        'tipo_item': tipo_item
                     }
                 )
                 db.session.commit()
                 return redirect(url_for('venta.ventas'))
 
-            if accion == 'eliminar_producto' and id_producto:
+            if accion == 'eliminar_producto' and id_item and tipo_item:
                 db.session.execute(
-                    db.text("CALL sp_carrito_eliminar_producto(:id_usuario, :id_producto)"),
+                    db.text("CALL sp_carrito_eliminar_producto(:id_usuario, :id_item, :tipo_item)"),
                     {
                         'id_usuario': id_usuario,
-                        'id_producto': id_producto
+                        'id_item': id_item,
+                        'tipo_item': tipo_item
                     }
                 )
                 db.session.commit()
                 
-                # Opcional: Registrar cuando se elimina un producto entero del carrito (suele ser útil por seguridad)
                 audit.log_action(
                     module_name="logs_ventas",
-                    action="Producto eliminado del carrito",
-                    details={"email_cajero": email_usuario, "id_producto": id_producto},
+                    action=f"Artículo eliminado del carrito ({tipo_item})",
+                    details={"email_cajero": email_usuario, "id_item": id_item, "tipo_item": tipo_item},
                     level="INFO"
                 )
                 return redirect(url_for('venta.ventas'))
 
+            # ====================================================
+            # ACCIÓN COMPLETAR VENTA
+            # ====================================================
             if accion == 'completar':
                 if create_form.validate():
+                    
+                    id_metodo = create_form.metodo_pago.data
+                    num_cuenta = create_form.numero_cuenta.data if create_form.numero_cuenta.data else None
+                    monto_recibido = create_form.monto_recibido.data if create_form.monto_recibido.data else 0.00
+                    
+                    # 1. Obtenemos la conexión directa a la BD
+                    connection = db.engine.raw_connection()
+                    cursor = connection.cursor()
+                    
+                    try:
+                        # 2. Llamamos al SP
+                        cursor.callproc('sp_venta_completar', (id_usuario, id_metodo, num_cuenta, monto_recibido))
+                        
+                        id_venta = None
+                        
+                        # 3. Recorremos TODOS los resultados para atrapar el último (El ID de la Venta)
+                        if hasattr(cursor, 'stored_results'):
+                            # Para mysql-connector-python
+                            for result_set in cursor.stored_results():
+                                row = result_set.fetchone()
+                                if row is not None:
+                                    id_venta = row[0]
+                        else:
+                            # Para pymysql / mysqlclient
+                            row = cursor.fetchone()
+                            if row is not None:
+                                id_venta = row[0]
+                                
+                            while cursor.nextset():
+                                row = cursor.fetchone()
+                                if row is not None:
+                                    id_venta = row[0]
+                        
+                        connection.commit()
+                        
+                    except Exception as e:
+                        connection.rollback()
+                        raise e # Lo lanzamos para que el except de abajo lo atrape y formatee
+                    finally:
+                        cursor.close()
+                        connection.close()
 
-                    result = db.session.execute(
-                        db.text("""
-                            CALL sp_venta_completar(
-                                :id_usuario,
-                                :id_metodo_pago,
-                                :num_cuenta,
-                                :monto_recibido
-                            )
-                        """),
-                        {
-                            'id_usuario': id_usuario,
-                            'id_metodo_pago': create_form.metodo_pago.data,
-                            'num_cuenta': create_form.numero_cuenta.data,
-                            'monto_recibido': create_form.monto_recibido.data
-                        }
-                    )
-
-                    # Obtenemos el id de la venta
-                    row = result.fetchone()
-                    id_venta = row[0] if row else None
-                    db.session.commit()
-
+                    # 4. Buscamos el nombre del método de pago para los logs
                     metodo_nombre = next(
                         (
                             mp.nombre.lower()
@@ -128,7 +159,7 @@ def ventas():
                             "email_cajero": email_usuario, 
                             "id_venta": id_venta,
                             "metodo_pago": metodo_nombre,
-                            "monto_recibido": create_form.monto_recibido.data
+                            "monto_recibido": monto_recibido
                         },
                         level="INFO"
                     )
@@ -138,26 +169,30 @@ def ventas():
                     else:
                         flash('Cobro con tarjeta procesado correctamente.', 'success')
 
-                    # Guardamos el id temporalmente
+                    # Guardamos el id correcto para imprimir el ticket
                     session['ticket_a_imprimir'] = id_venta
 
-                    # Redirigimos a la pagina de ventas
                     return redirect(url_for('venta.ventas'))
 
-        except (OperationalError, DBAPIError) as e:
+        except (OperationalError, DBAPIError, Exception) as e:
+            # db.session.rollback() no es necesario aquí para la conexión raw, pero sí para el resto de session
             db.session.rollback()
             print(e)
             mensaje_usuario = 'Ocurrio un error al procesar la operación'
-            print(f'Error ventas {e}')
+            print(f'Error ventas: {e}')
 
             try:
+                # Intenta extraer el mensaje original de MySQL si existe
                 codigo_mysql = e.orig.args[0]
                 mensaje_mysql = e.orig.args[1]
 
-                if codigo_mysql == 1644:
+                if codigo_mysql == 1644: # Error personalizado de SIGNAL SQLSTATE '45000'
                     mensaje_usuario = mensaje_mysql
             except Exception:
-                pass
+                # Si es un error desde raw_connection, la estructura de 'e' puede ser ligeramente distinta
+                if len(e.args) >= 2 and isinstance(e.args[0], int):
+                    if e.args[0] == 1644:
+                        mensaje_usuario = e.args[1]
 
             # --- REGISTRO DE AUDITORÍA: ERROR EN VENTA ---
             audit.log_action(
@@ -170,6 +205,9 @@ def ventas():
             flash(mensaje_usuario, 'error')
             return redirect(url_for('venta.ventas'))    
 
+    # ====================================================
+    # CARGA DE VISTAS (GET)
+    # ====================================================
     productos_venta = db.session.execute(
         db.text("""
             SELECT *
@@ -207,11 +245,20 @@ def ventas():
             'total_piezas': 0
         }
     
-    # Extraemos el id de la sesion del ticket de la venta y al final queremos que se borre
-    # Automaticamente
+    # Extraemos el id de la sesion del ticket de la venta y al final queremos que se borre automáticamente
     ticket_a_imprimir = session.pop('ticket_a_imprimir', None)
-    return render_template('ventas/ventas.html', form=create_form, id_tarjeta=id_tarjeta, id_efectivo=id_efectivo, productos=productos_venta, carrito=carrito, resumen=resumen, ticket_a_imprimir = ticket_a_imprimir)
-
+    
+    return render_template(
+        'ventas/ventas.html', 
+        form=create_form, 
+        id_tarjeta=id_tarjeta, 
+        id_efectivo=id_efectivo, 
+        productos=productos_venta, 
+        carrito=carrito, 
+        resumen=resumen, 
+        ticket_a_imprimir=ticket_a_imprimir
+    )
+    
 @venta.route('/ticket/<int:id_venta>')
 @login_required
 @roles_accepted('Cajero', 'cajero', 'Gerente', 'gerente')

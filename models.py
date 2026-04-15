@@ -258,6 +258,7 @@ class Producto(db.Model):
     id_categoria = db.Column(db.Integer, db.ForeignKey('categorias.id_categoria'), nullable=False)
     nombre = db.Column(db.String(100), nullable=False, unique=True, index=True)
     imagen = db.Column(db.String(255), nullable=True, default='default_product.png')
+    descripcion = db.Column(db.Text, nullable=True)
     precio_venta = db.Column(db.Numeric(10, 2), nullable=False)
     activo = db.Column(db.Boolean, nullable=False, default=True, index=True)
 
@@ -336,7 +337,7 @@ class Combo(db.Model):
     nombre = db.Column(db.String(100), nullable=False, unique=True)
     descripcion = db.Column(db.String(255))
     precio_venta = db.Column(db.Numeric(10, 2), nullable=False)
-    imagen = db.Column(db.String(255), default='default_combo.png')
+    imagen = db.Column(db.String(255), default='Combo.png')
     activo = db.Column(db.Boolean, default=True)
     
     # Relación mágica: Al llamar combo.detalles, te traerá todos sus productos

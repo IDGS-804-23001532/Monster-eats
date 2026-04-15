@@ -153,7 +153,7 @@ def carrito_agregar():
             'nombre':    combo.nombre,
             'precio':    float(combo.precio_venta),
             'imagen':    combo.imagen,
-            'carpeta':   'combos',
+            'carpeta':   '',
             'cantidad':  cantidad,
         })
     elif id_producto:

@@ -180,40 +180,33 @@ def nueva_compra():
                         conversions = ConversionUnidadInsumo.query.filter_by(activo=True).all()
                         return render_template('compras/index.html', compras=compras_list, search_query='', proveedores=proveedores, form=form, insumos=insumos_list, unidades_medida=unidades_medida, conversions=conversions, show_modal='nuevaCompraModal')
 
-                    #  El precio se ajusta proporcionalmente al factor de conversión para reflejar el costo real por unidad base.
+                    # El precio ingresado siempre es el costo total
                     cantidad_base = float(cant) * factor
-                    precio_por_base = float(precio) / factor if factor != 0 else 0.0
-
+                    precio_total = float(precio)
+                    precio_por_base = precio_total / cantidad_base if cantidad_base != 0 else 0.0
+                    
                     detalles.append({
                         'id_insumo': int(insumos_ids[i]),
                         'cantidad': cantidad_base,
                         'id_unidad': int(insumo_obj.id_unidad_medida),
                         'costo': round(precio_por_base, 4),
                         'caducidad': caducidad_val,
-                        'conversion_inferida': inferred
+                        'conversion_inferida': inferred,
+                        'precio_total': precio_total
                     })
                 else:
                     # Si la unidad de compra es la misma que la unidad base, no se necesita conversión
-                    unidad_base_id = insumo_obj.id_unidad_medida
-                    if unidad_base_id == 2:
-                        precio_total = float(precio)
-                        precio_unitario = (precio_total / float(cant)) if float(cant) != 0 else 0.0
-                        detalles.append({
-                            'id_insumo': int(insumos_ids[i]),
-                            'cantidad': cant,
-                            'id_unidad': int(unidades[i]),
-                            'costo': round(precio_unitario, 4),
-                            'caducidad': caducidad_val,
-                            'precio_total': precio_total
-                        })
-                    else:
-                        detalles.append({
-                            'id_insumo': int(insumos_ids[i]),
-                            'cantidad': cant,
-                            'id_unidad': int(unidades[i]),
-                            'costo': precio,
-                            'caducidad': caducidad_val
-                        })
+                    # Por requerimiento, el precio ingresado en el form es SIEMPRE el total pagado
+                    precio_total = float(precio)
+                    precio_unitario = (precio_total / float(cant)) if float(cant) != 0 else 0.0
+                    detalles.append({
+                        'id_insumo': int(insumos_ids[i]),
+                        'cantidad': cant,
+                        'id_unidad': int(unidades[i]),
+                        'costo': round(precio_unitario, 4),
+                        'caducidad': caducidad_val,
+                        'precio_total': precio_total
+                    })
         
         if not detalles:
             compras_list = Compra.query.order_by(Compra.fecha_compra.desc()).all()

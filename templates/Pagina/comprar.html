@@ -4,53 +4,72 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Tu pedido – Monster Eats</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='dist/output.css') }}"
+    />
     <script>
-      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      if (
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      )
         document.documentElement.classList.add("dark");
     </script>
   </head>
 
-  <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
-
-    {% set back_url = url_for('pagina.menu_categoria', categoria='Hamburguesas') %}
-    {% include 'Pagina/_header.html' %}
+  <body
+    class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300"
+  >
+    {% set back_url = url_for('pagina.menu_categoria', categoria='Hamburguesas')
+    %} {% include 'Pagina/_header.html' %}
 
     <main class="max-w-screen-lg mx-auto px-6 py-12">
-
       <h1 class="text-3xl font-extrabold tracking-tight mb-2">Tu pedido</h1>
-      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">Revisa los productos antes de confirmar.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">
+        Revisa los productos antes de confirmar.
+      </p>
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-          <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium
-            {% if category == 'success' %}bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800
-            {% elif category == 'error' %}bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800
-            {% else %}bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800{% endif %}">
-            {{ message }}
-          </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      {% if carrito|length > 0 %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="mb-4 px-4 py-3 rounded-xl text-sm font-medium {% if category == 'success' %}bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 {% elif category == 'error' %}bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 {% else %}bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800{% endif %}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %} {% if carrito|length > 0 %}
       <div class="flex flex-col lg:flex-row gap-8">
-
         <!-- Lista de items -->
         <div class="flex-1 space-y-4">
           {% for item in carrito %}
-          <div class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
-
+          <div
+            class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4"
+          >
             <!-- Imagen -->
-            <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+            <div
+              class="w-20 h-20 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800 flex-shrink-0"
+            >
               {% if item.imagen %}
-              <img src="{{ url_for('static', filename='img/' + item.carpeta + '/' + item.imagen) }}"
-                   alt="{{ item.nombre }}" class="w-full h-full object-cover" />
+              <img
+                src="{{ url_for('static', filename='img/' + (item.carpeta + '/' if item.carpeta else '') + item.imagen) }}"
+                alt="{{ item.nombre }}"
+                class="w-full h-full object-cover"
+              />
               {% else %}
-              <div class="w-full h-full flex items-center justify-center text-gray-400">
-                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"/>
+              <div
+                class="w-full h-full flex items-center justify-center text-gray-400"
+              >
+                <svg
+                  class="w-8 h-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"
+                  />
                 </svg>
               </div>
               {% endif %}
@@ -58,33 +77,59 @@
 
             <!-- Info -->
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-sm text-gray-900 dark:text-white truncate">{{ item.nombre }}</h3>
+              <h3
+                class="font-bold text-sm text-gray-900 dark:text-white truncate"
+              >
+                {{ item.nombre }}
+              </h3>
               <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 {% if item.es_combo %}Combo{% else %}Producto{% endif %}
               </p>
-              <p class="text-orange-500 font-bold text-sm mt-1">${{ "%.2f"|format(item.precio) }}</p>
+              <p class="text-orange-500 font-bold text-sm mt-1">
+                ${{ "%.2f"|format(item.precio) }}
+              </p>
             </div>
 
             <!-- Controles cantidad -->
             <div class="flex items-center gap-2">
-              <form method="POST" action="{{ url_for('pagina.carrito_action') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <form
+                method="POST"
+                action="{{ url_for('pagina.carrito_action') }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <input type="hidden" name="accion" value="quitar_unidad" />
                 <input type="hidden" name="item_key" value="{{ item.key }}" />
-                <button type="submit"
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-bold text-sm">
+                <button
+                  type="submit"
+                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-bold text-sm"
+                >
                   −
                 </button>
               </form>
 
-              <span class="w-8 text-center font-bold text-sm">{{ item.cantidad }}</span>
+              <span class="w-8 text-center font-bold text-sm"
+                >{{ item.cantidad }}</span
+              >
 
-              <form method="POST" action="{{ url_for('pagina.carrito_action') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <form
+                method="POST"
+                action="{{ url_for('pagina.carrito_action') }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <input type="hidden" name="accion" value="agregar" />
                 <input type="hidden" name="item_key" value="{{ item.key }}" />
-                <button type="submit"
-                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors font-bold text-sm">
+                <button
+                  type="submit"
+                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors font-bold text-sm"
+                >
                   +
                 </button>
               </form>
@@ -92,12 +137,24 @@
 
             <!-- Subtotal + eliminar -->
             <div class="flex flex-col items-end gap-1">
-              <span class="font-bold text-sm text-gray-900 dark:text-white">${{ "%.2f"|format(item.subtotal) }}</span>
-              <form method="POST" action="{{ url_for('pagina.carrito_action') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <span class="font-bold text-sm text-gray-900 dark:text-white"
+                >${{ "%.2f"|format(item.subtotal) }}</span
+              >
+              <form
+                method="POST"
+                action="{{ url_for('pagina.carrito_action') }}"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
                 <input type="hidden" name="accion" value="eliminar" />
                 <input type="hidden" name="item_key" value="{{ item.key }}" />
-                <button type="submit" class="text-xs text-red-500 hover:text-red-400 font-medium transition-colors">
+                <button
+                  type="submit"
+                  class="text-xs text-red-500 hover:text-red-400 font-medium transition-colors"
+                >
                   Eliminar
                 </button>
               </form>
@@ -108,75 +165,129 @@
 
         <!-- Resumen -->
         <div class="lg:w-80 flex-shrink-0">
-          <div class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 sticky top-24">
+          <div
+            class="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 sticky top-24"
+          >
             <h3 class="font-extrabold text-lg mb-6">Resumen del pedido</h3>
 
             <div class="space-y-3 mb-6">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-500 dark:text-gray-400">Productos ({{ total_items }})</span>
+                <span class="text-gray-500 dark:text-gray-400"
+                  >Productos ({{ total_items }})</span
+                >
                 <span class="font-semibold">${{ "%.2f"|format(total) }}</span>
               </div>
             </div>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
+            <div
+              class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6"
+            >
               <div class="flex justify-between">
                 <span class="font-extrabold text-lg">Total</span>
-                <span class="font-extrabold text-lg text-orange-500">${{ "%.2f"|format(total) }}</span>
+                <span class="font-extrabold text-lg text-orange-500"
+                  >${{ "%.2f"|format(total) }}</span
+                >
               </div>
             </div>
 
-            <form method="POST" action="{{ url_for('pagina.carrito_action') }}" class="space-y-4">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <form
+              method="POST"
+              action="{{ url_for('pagina.carrito_action') }}"
+              class="space-y-4"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <input type="hidden" name="accion" value="confirmar" />
 
               <div>
-                <label for="numero_cuenta" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                <label
+                  for="numero_cuenta"
+                  class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
+                >
                   Número de tarjeta
                 </label>
-                <input type="text" name="numero_cuenta" id="numero_cuenta" required
-                  minlength="16" maxlength="20" pattern="[0-9]*" inputmode="numeric"
+                <input
+                  type="text"
+                  name="numero_cuenta"
+                  id="numero_cuenta"
+                  required
+                  minlength="16"
+                  maxlength="20"
+                  pattern="[0-9]*"
+                  inputmode="numeric"
                   placeholder="0000 0000 0000 0000"
-                  class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition" />
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">16 a 20 dígitos, solo números.</p>
+                  class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition"
+                />
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  16 a 20 dígitos, solo números.
+                </p>
               </div>
 
-              <button type="submit"
-                class="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-3 rounded-full transition-all duration-200 shadow-md">
+              <button
+                type="submit"
+                class="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-3 rounded-full transition-all duration-200 shadow-md"
+              >
                 Pagar ${{ "%.2f"|format(total) }}
               </button>
             </form>
 
-            <form method="POST" action="{{ url_for('pagina.carrito_action') }}" class="mt-3">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <form
+              method="POST"
+              action="{{ url_for('pagina.carrito_action') }}"
+              class="mt-3"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
               <input type="hidden" name="accion" value="vaciar" />
-              <button type="submit"
-                class="w-full bg-transparent border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:text-red-500 font-medium py-2.5 rounded-full transition-all duration-200 text-sm">
+              <button
+                type="submit"
+                class="w-full bg-transparent border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-400 hover:text-red-500 font-medium py-2.5 rounded-full transition-all duration-200 text-sm"
+              >
                 Vaciar carrito
               </button>
             </form>
           </div>
         </div>
-
       </div>
 
       {% else %}
       <!-- Carrito vacío -->
       <div class="text-center py-20">
-        <svg class="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+        <svg
+          class="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+          />
         </svg>
-        <h2 class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2">Tu carrito está vacío</h2>
-        <p class="text-gray-400 dark:text-gray-500 text-sm mb-6">Agrega productos desde el menú para empezar tu pedido.</p>
-        <a href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}"
-           class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-200">
+        <h2 class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2">
+          Tu carrito está vacío
+        </h2>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mb-6">
+          Agrega productos desde el menú para empezar tu pedido.
+        </p>
+        <a
+          href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}"
+          class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-200"
+        >
           Ver menú
         </a>
       </div>
       {% endif %}
-
     </main>
 
     {% include 'Pagina/_footer.html' %}
-
   </body>
 </html>

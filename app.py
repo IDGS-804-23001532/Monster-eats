@@ -41,11 +41,13 @@ from flask_security import Security, SQLAlchemyUserDatastore, login_required
 from flask_security.decorators import roles_required
 from datetime import timedelta
 from jinja2 import TemplateError
+from models import db
 
 app = Flask(__name__)
 
 limiter.init_app(app)
 csrf = CSRFProtect()
+migrate = Migrate(app, db)
 app.config.from_object(DevelopmentConfig)
 
 # Salt 
@@ -125,10 +127,10 @@ def page_not_found(e):
 def interval_server_error(e):
     return render_template('500.html'), 500
 
-@app.errorhandler(TemplateError)
+ @app.errorhandler(TemplateError)
 def handle_template_error(e):
     # Intercepta errores de diseño para enviar a la ventana 500
-    return render_template('500.html'), 500
+    return render_template('500.html'), 500 
 
 @app.errorhandler(429)
 def ratelimit_handler(e):

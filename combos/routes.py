@@ -71,7 +71,7 @@ def crear():
 
             # ----- LÓGICA PARA GUARDAR IMAGEN -----
             imagen_file = request.files.get('imagen')
-            nombre_imagen = 'default_combo.png' # Valor por defecto si no suben nada
+            nombre_imagen = 'Combo.png' # Valor por defecto si no suben nada
 
             if imagen_file and imagen_file.filename != '':
                 # Limpiamos el nombre del archivo y lo guardamos en /static/img/
@@ -156,7 +156,7 @@ def editar(id_combo):
                 {"id": id_combo}
             ).fetchone()
             
-            nombre_imagen = combo_existente[0] if combo_existente and combo_existente[0] else 'default_combo.png'
+            nombre_imagen = combo_existente[0] if combo_existente and combo_existente[0] else 'Combo.png'
             
             # ----- LÓGICA PARA ACTUALIZAR IMAGEN -----
             imagen_file = request.files.get('imagen')
