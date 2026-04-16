@@ -30,11 +30,19 @@ def principal():
 @login_required
 @roles_accepted('administrador', 'gerente', 'cocina', 'cocinero')
 def marcar_listo():
-    # recibimos el ID y el tipo de origen desde el formulario
+    print("\n" + "="*60)
+    print("🍳 KDS: INICIANDO PROCESO DE DESPACHO")
+    print("="*60)
+
+    # Recibimos los datos del frontend
     id_origen = request.form.get('id_origen')
     origen = request.form.get('origen')
+
+    print(f" 1. Recibiendo petición del navegador:")
+    print(f"   - Tipo: {origen} | ID: {id_origen} | Usuario: {current_user.email}")
+
     try:
-        # Llamamos al nuevo Stored Procedure Mágico Unificado
+        print("\n  2. Mandando la orden a MySQL (Ejecutando el SP)...")
         db.session.execute(
             text("CALL SP_KDS_Despachar(:id_origen, :origen, :id_usuario)"),
             {
@@ -43,9 +51,11 @@ def marcar_listo():
                 'id_usuario': current_user.id_usuario
             }
         )
+
         db.session.commit()
+        print("\n 3. COMMIT EXITOSO: El inventario se ha actualizado permanentemente.")
         
-        # Guardamos en bitácora
+        # Guardamos en bitácora local de NoSQL
         audit.log_action(
             module_name="logs_kds", 
             action=f"Ticket {origen} Despachado", 
@@ -54,10 +64,19 @@ def marcar_listo():
         )
         
         flash(f'¡{origen} marcada como LISTA y materia prima descontada!', 'success')
+        print(" Proceso terminado. Recargando página...\n")
         
     except Exception as e:
         db.session.rollback()
-        print(f"Error en KDS al despachar: {e}")
-        flash('Hubo un error al despachar la orden. Verifica que tengas suficiente stock de insumos.', 'error')
+        print("\n" + "!"*50)
+        print(" ERROR CRÍTICO AL DESPACHAR")
+        print("!"*50)
+        
+        # Si MySQL falla (ej. por falta de inventario o validaciones), imprimimos su error nativo
+        error_msg = str(e)
+        print(f" Motivo del rechazo desde BD: {error_msg}")
+        print("="*60 + "\n")
+        
+        flash('Hubo un error al despachar la orden. Verifica que el inventario sea suficiente.', 'error')
         
     return redirect(url_for('tablero_kds.principal'))

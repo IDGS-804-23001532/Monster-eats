@@ -1,4 +1,4 @@
-from flask import render_template, request, abort, session, redirect, url_for, flash
+from flask import render_template, request, abort, session, redirect, url_for, flash, jsonify
 from sqlalchemy.exc import OperationalError, DBAPIError
 from Pagina import pagina_bp
 from models import db, Producto, CategoriaProducto, Combo, Receta, Insumo, UnidadMedida, MetodoPago
@@ -125,13 +125,93 @@ def _save_carrito(carrito):
     session['carrito'] = carrito
 
 
+@pagina_bp.route('/carrito/validar_agregar', methods=['POST'])
+def carrito_validar_agregar():
+    """Valida si el usuario está logueado antes de agregar.
+    Si está logueado delega en `carrito_agregar()`. Si no, muestra una card
+    que pide iniciar sesión (sin usar el carrito como destino).
+    """
+    # Si está autenticado, reusar la lógica existente (llama a la función)
+    if current_user.is_authenticated:
+        return carrito_agregar()
+
+    # No autenticado: renderizar una card indicando que debe iniciar sesión.
+    # Determinar si el formulario incluye id_producto o id_combo y renderizar
+    # la página de descripción con la card inline (sin navegar al panel ERP).
+    id_producto = request.form.get('id_producto', type=int)
+    id_combo = request.form.get('id_combo', type=int)
+
+    # Si tenemos id_producto -> renderizar detalle de producto con card
+    if id_producto:
+        producto = Producto.query.filter_by(id_producto=id_producto, activo=True).first_or_404()
+        categoria = CategoriaProducto.query.get(producto.id_categoria)
+        ingredientes = _get_ingredientes(id_producto)
+        return render_template(
+            'Pagina/descripcion.html',
+            producto=producto,
+            categoria=categoria,
+            ingredientes=ingredientes,
+            es_combo=False,
+            show_login_card=True,
+            next=url_for('pagina.producto_detalle', id_producto=id_producto)
+        )
+
+    # Si tenemos id_combo -> renderizar detalle de combo con card
+    if id_combo:
+        combo = Combo.query.filter_by(id_combo=id_combo, activo=True).first_or_404()
+        detalles = []
+        for det in combo.detalles:
+            detalles.append({
+                'producto':     det.producto,
+                'cantidad':     det.cantidad,
+                'ingredientes': _get_ingredientes(det.id_producto),
+            })
+        return render_template(
+            'Pagina/descripcion.html',
+            combo=combo,
+            detalles=detalles,
+            es_combo=True,
+            show_login_card=True,
+            next=url_for('pagina.combo_detalle', id_combo=id_combo)
+        )
+
+    # Fallback: si no hay ids, mostrar la card simple
+    target = request.referrer or url_for('pagina.menu_categoria', categoria='Hamburguesas')
+    return render_template('Pagina/login_card.html', next=target)
+
+
 @pagina_bp.route('/carrito/agregar', methods=['POST'])
-@login_required
 def carrito_agregar():
     """Agrega un producto o combo al carrito desde la página de descripción."""
     id_producto = request.form.get('id_producto', type=int)
     id_combo    = request.form.get('id_combo', type=int)
     cantidad    = request.form.get('cantidad', 1, type=int)
+
+    # Si no está autenticado, redirigir al detalle con ?show_login=1 (sin JS) o devolver JSON para AJAX
+    if not current_user.is_authenticated:
+        # Construir URL de destino: si existe referrer, usarlo (soporta listas),
+        # si no, usar la página de detalle correspondiente.
+        if request.referrer:
+            target = request.referrer
+        elif id_combo:
+            target = url_for('pagina.combo_detalle', id_combo=id_combo)
+        elif id_producto:
+            target = url_for('pagina.producto_detalle', id_producto=id_producto)
+        else:
+            target = url_for('pagina.menu_categoria', categoria='Hamburguesas')
+
+        # Mantener compatibilidad con peticiones AJAX (XHR)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'login_required': True, 'login_url': url_for('auth.login')})
+
+        # Añadir query param show_login=1
+        from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+        p = urlparse(target)
+        qs = dict(parse_qsl(p.query))
+        qs['show_login'] = '1'
+        new_q = urlencode(qs)
+        target = urlunparse((p.scheme, p.netloc, p.path, p.params, new_q, p.fragment))
+        return redirect(target)
 
     carrito = _get_carrito()
 
@@ -143,7 +223,10 @@ def carrito_agregar():
             if item['key'] == key:
                 item['cantidad'] += cantidad
                 _save_carrito(carrito)
-                flash(f'{combo.nombre} actualizado en tu pedido.', 'success')
+                msg = f'{combo.nombre} actualizado en tu pedido.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': True, 'message': msg, 'redirect': request.referrer or url_for('pagina.menu_categoria', categoria='Combos')})
+                flash(msg, 'success')
                 return redirect(request.referrer or url_for('pagina.menu_categoria', categoria='Combos'))
 
         carrito.append({
@@ -164,7 +247,10 @@ def carrito_agregar():
             if item['key'] == key:
                 item['cantidad'] += cantidad
                 _save_carrito(carrito)
-                flash(f'{producto.nombre} actualizado en tu pedido.', 'success')
+                msg = f'{producto.nombre} actualizado en tu pedido.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': True, 'message': msg, 'redirect': request.referrer or url_for('pagina.menu_categoria', categoria=cat.nombre if cat else 'Hamburguesas')})
+                flash(msg, 'success')
                 return redirect(request.referrer or url_for('pagina.menu_categoria', categoria=cat.nombre if cat else 'Hamburguesas'))
 
         carrito.append({
@@ -178,20 +264,28 @@ def carrito_agregar():
             'cantidad':  cantidad,
         })
     else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'Producto no encontrado.'}), 404
         flash('Producto no encontrado.', 'error')
         return redirect(request.referrer or '/')
 
     _save_carrito(carrito)
-    flash('Producto añadido a tu pedido.', 'success')
+    msg = 'Producto añadido a tu pedido.'
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': msg, 'redirect': request.referrer or '/'})
+    flash(msg, 'success')
     return redirect(request.referrer or '/')
 
 
 @pagina_bp.route('/carrito/action', methods=['POST'])
-@login_required
 def carrito_action():
     """Maneja las acciones del carrito: +1, -1, eliminar, vaciar, confirmar."""
     accion   = request.form.get('accion')
     item_key = request.form.get('item_key')
+    # Si no está autenticado, mostrar pantalla que pide iniciar sesión
+    if not current_user.is_authenticated:
+        return render_template('Pagina/login_required.html', next=request.path)
+
     carrito  = _get_carrito()
 
     if accion == 'agregar' and item_key:
@@ -283,9 +377,13 @@ def carrito_action():
 
 
 @pagina_bp.route('/carrito', methods=['GET'])
-@login_required
 def carrito_ver():
     """Muestra la página del carrito."""
+    # Si no está autenticado, mostrar la card de login inline en la vista del carrito
+    if not current_user.is_authenticated:
+        # Renderizar la misma plantilla de carrito pero pidiendo credenciales
+        return render_template('Pagina/comprar.html', carrito=[], total=0.0, total_items=0, show_login_card=True, next=request.path)
+
     carrito = _get_carrito()
 
     # Calcular subtotales

@@ -77,20 +77,36 @@
             </svg>
             {% endif %}
           </div>
-          <form method="POST" action="{{ url_for('pagina.carrito_agregar') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <input
-              type="hidden"
-              name="id_producto"
-              value="{{ producto.id_producto }}"
-            />
-            <button
-              type="submit"
-              class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md"
-            >
-              Añadir al pedido
-            </button>
-          </form>
+          <div class="add-to-cart-wrapper w-full">
+            {% if show_login_card %}
+            <div class="p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg">
+              <h3 class="text-lg font-bold mb-2">Debes iniciar sesión</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Para agregar este producto a tu pedido debes iniciar sesión.</p>
+              <div class="flex gap-2 justify-center">
+                <a href="{{ url_for('auth.login', next=next) }}" class="px-4 py-2 bg-orange-500 text-white rounded">Iniciar sesión</a>
+                <a href="{{ url_for('auth.register', next=next) }}" class="px-4 py-2 border rounded">Crear cuenta</a>
+              </div>
+              <div class="mt-3 text-center">
+                <a href="{{ next }}" class="text-sm text-gray-600 hover:underline">Volver</a>
+              </div>
+            </div>
+            {% else %}
+            <form method="POST" action="{{ url_for('pagina.carrito_validar_agregar') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <input
+                type="hidden"
+                name="id_producto"
+                value="{{ producto.id_producto }}"
+              />
+              <button
+                type="submit"
+                class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md"
+              >
+                Añadir al pedido
+              </button>
+            </form>
+            {% endif %}
+          </div>
         </div>
 
         <!-- Info del producto -->
@@ -173,16 +189,32 @@
             </svg>
             {% endif %}
           </div>
-          <form method="POST" action="{{ url_for('pagina.carrito_agregar') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <input type="hidden" name="id_combo" value="{{ combo.id_combo }}" />
-            <button
-              type="submit"
-              class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md"
-            >
-              Añadir al pedido
-            </button>
-          </form>
+          <div class="add-to-cart-wrapper w-full">
+            {% if show_login_card %}
+            <div class="p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg">
+              <h3 class="text-lg font-bold mb-2">Debes iniciar sesión</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Para agregar este combo a tu pedido debes iniciar sesión.</p>
+              <div class="flex gap-2 justify-center">
+                <a href="{{ url_for('auth.login', next=next) }}" class="px-4 py-2 bg-orange-500 text-white rounded">Iniciar sesión</a>
+                <a href="{{ url_for('auth.register', next=next) }}" class="px-4 py-2 border rounded">Crear cuenta</a>
+              </div>
+              <div class="mt-3 text-center">
+                <a href="{{ next }}" class="text-sm text-gray-600 hover:underline">Volver</a>
+              </div>
+            </div>
+            {% else %}
+            <form method="POST" action="{{ url_for('pagina.carrito_validar_agregar') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <input type="hidden" name="id_combo" value="{{ combo.id_combo }}" />
+              <button
+                type="submit"
+                class="w-full bg-orange-400 hover:bg-orange-500 active:scale-95 text-white font-bold py-3 px-8 rounded-full text-base transition-all duration-200 shadow-md"
+              >
+                Añadir al pedido
+              </button>
+            </form>
+            {% endif %}
+          </div>
         </div>
 
         <!-- Info del combo -->
@@ -288,5 +320,6 @@
     {% include 'Pagina/_footer.html' %}
 
     <script src="{{ url_for('static', filename='js/pagina_loader.js') }}"></script>
+    
   </body>
 </html>

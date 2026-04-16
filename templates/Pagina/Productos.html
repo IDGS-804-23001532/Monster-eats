@@ -93,32 +93,30 @@
           action="{{ url_for('pagina.menu_categoria', categoria=categoria_param) }}"
         >
           <div class="relative">
-            <!-- Lupa -->
-            <svg
-              class="w-6 h-6 text-gray-800 dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="2"
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-              />
-            </svg>
+  <!-- Lupa -->
+  <svg
+    class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-width="2"
+      d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+    />
+  </svg>
 
-            <input
-              name="q"
-              value="{{ q }}"
-              type="search"
-              placeholder="Buscar en {{ categoria_nombre }}…"
-              class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors w-72"
-            />
-          </div>
+  <!-- Input -->
+  <input
+    name="q"
+    value="{{ q }}"
+    type="search"
+    placeholder="Buscar en {{ categoria_nombre }}…"
+    class="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors w-72"
+  />
+</div>
         </form>
       </div>
 
@@ -161,57 +159,43 @@
         url_for('pagina.producto_detalle', id_producto=producto.id_producto) %}
         {% endif %}
 
-        <a
-          href="{{ detalle_url }}"
-          class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer block"
-        >
+        <div class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <!-- Imagen -->
-          <div
-            class="bg-gray-50 dark:bg-gray-800 aspect-square overflow-hidden flex items-center justify-center"
-          >
-            {% if producto.imagen %} {% if producto is mapping %}
-            <img
-              src="{{ url_for('static', filename='img/' + producto.imagen) }}"
-              alt="{{ producto.nombre }}"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            {% else %}
-            <img
-              src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}"
-              alt="{{ producto.nombre }}"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            {% endif %} {% else %}
-            <!-- Fallback icon (no image) -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-16 h-16 text-gray-300 dark:text-gray-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0"
-              />
-            </svg>
-            {% endif %}
-          </div>
+          <a href="{{ detalle_url }}" class="block">
+            <div class="bg-gray-50 dark:bg-gray-800 aspect-square overflow-hidden flex items-center justify-center">
+              {% if producto.imagen %}
+                {% if producto is mapping %}
+                  <img src="{{ url_for('static', filename='img/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {% else %}
+                  <img src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {% endif %}
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M3 15h18M5 6q7-3 14 0M5 18q7 3 14 0" />
+                </svg>
+              {% endif %}
+            </div>
+          </a>
 
-          <!-- Info -->
-          <div class="p-3">
-            <h3
-              class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2"
-            >
-              {{ producto.nombre }}
-            </h3>
-            <p class="text-orange-500 font-bold text-sm mt-1">
-              ${{ "%.2f"|format(producto.precio_venta|float) }}
-            </p>
+          <!-- Info + Añadir (sin JS) -->
+          <div class="p-3 flex flex-col gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">{{ producto.nombre }}</h3>
+              <p class="text-orange-500 font-bold text-sm mt-1">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
+            </div>
+            <div>
+              <form method="POST" action="{{ url_for('pagina.carrito_validar_agregar') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                {% if producto is mapping and producto.id_combo %}
+                  <input type="hidden" name="id_combo" value="{{ producto.id_combo }}" />
+                {% else %}
+                  <input type="hidden" name="id_producto" value="{{ producto.id_producto }}" />
+                {% endif %}
+                <button type="submit" class="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-full">Añadir</button>
+              </form>
+            </div>
           </div>
-        </a>
+        </div>
         {% endfor %}
       </div>
       {% endif %}

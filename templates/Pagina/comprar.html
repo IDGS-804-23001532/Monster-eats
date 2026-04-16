@@ -25,9 +25,23 @@
 
     <main class="max-w-screen-lg mx-auto px-6 py-12">
       <h1 class="text-3xl font-extrabold tracking-tight mb-2">Tu pedido</h1>
-      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">
-        Revisa los productos antes de confirmar.
-      </p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">Revisa los productos antes de confirmar.</p>
+
+      {% if show_login_card %}
+      <div class="max-w-md mx-auto">
+        <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-center">
+          <h2 class="text-xl font-bold mb-2">Inicia sesión para continuar</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Debes iniciar sesión para ver y completar tu pedido.</p>
+          <div class="flex gap-2 justify-center">
+            <a href="{{ url_for('auth.login', next=next) }}" class="px-4 py-2 bg-orange-500 text-white rounded">Iniciar sesión</a>
+            <a href="{{ url_for('auth.register', next=next) }}" class="px-4 py-2 border rounded">Crear cuenta</a>
+          </div>
+          <div class="mt-4">
+            <a href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}" class="text-sm text-gray-600 hover:underline">Seguir navegando</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
 
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
