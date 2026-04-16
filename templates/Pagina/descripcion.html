@@ -127,32 +127,16 @@
 
           <hr class="my-6 border-gray-100 dark:border-gray-800" />
 
-          <!-- Ingredientes (solo si hay) -->
-          <h2 class="text-lg font-bold mb-4">Ingredientes</h2>
+          <!-- Mostrar solo la descripción de la receta -->
+          <h2 class="text-lg font-bold mb-4">Descripción de la receta</h2>
 
-          {% if ingredientes %}
-          <div
-            class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden"
-          >
-            {% for ing in ingredientes %}
-            <div
-              class="flex items-center justify-between px-5 py-3
-              {{ 'bg-gray-50 dark:bg-gray-800/50' if loop.even else 'bg-white dark:bg-gray-900' }}
-              {{ '' if loop.last else 'border-b border-gray-100 dark:border-gray-800' }}"
-            >
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-200"
-                >{{ ing.nombre }}</span
-              >
-              <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">
-                {{ "%.2g"|format(ing.cantidad) }}
-                <span class="text-xs">{{ ing.unidad }}</span>
-              </span>
-            </div>
-            {% endfor %}
+          {% if producto.descripcion %}
+          <div class="prose max-w-none text-sm text-gray-700 dark:text-gray-200">
+            {{ producto.descripcion }}
           </div>
           {% else %}
           <p class="text-sm text-gray-400 dark:text-gray-500">
-            No hay ingredientes registrados para este producto.
+            No hay descripción disponible para esta receta.
           </p>
           {% endif %}
         </div>
