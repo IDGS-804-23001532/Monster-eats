@@ -6,6 +6,7 @@ from audit_logger import audit
 import csv
 from io import StringIO
 from flask import Response
+from flask import make_response
 
 inventario_produccion = Blueprint('inventario_produccion', __name__, url_prefix='/inventario-produccion')
 
@@ -122,7 +123,7 @@ def principal():
 @login_required
 @roles_accepted('administrador', 'gerente', 'cocina', 'cocinero')
 def exportar_csv():
-    # 1. Atrapamos la palabra de búsqueda para que el Excel coincida con la pantalla
+    # 1. Atrapamos la palabra de búsqueda
     search_query = request.args.get('q', '').strip()
     
     query = Producto.query.filter_by(activo=True)
@@ -131,42 +132,43 @@ def exportar_csv():
         
     productos_lote = query.all()
     
-    def generate():
-        data = StringIO()
-        # 2. Agregamos el BOM (Byte Order Mark) de UTF-8. 
-        # Esto obliga a Microsoft Excel a leer correctamente los acentos (á, é, í) y la ñ.
-        data.write('\ufeff')
-        
-        writer = csv.writer(data)
-        
-        # Cabeceras del Excel
-        writer.writerow(('ID', 'Producto Terminado', 'Stock en Cocina', 'Precio Venta ($)'))
-        yield data.getvalue()
-        data.seek(0)
-        data.truncate(0)
-
-        for prod in productos_lote:
-            inv = InventarioProducto.query.filter_by(id_producto=prod.id_producto).first()
-            stock_actual = inv.stock_actual if inv else 0
-            
-            writer.writerow((
-                prod.id_producto,
-                prod.nombre,
-                stock_actual,
-                f"{prod.precio_venta:.2f}"
-            ))
-            yield data.getvalue()
-            data.seek(0)
-            data.truncate(0)
-
-    # 3. Aseguramos que el mimetype también especifique utf-8
-    response = Response(generate(), mimetype='text/csv; charset=utf-8')
+    # 2. En lugar de Yield (streaming), creamos el archivo completo en memoria
+    si = StringIO()
     
-    # Nombre dinámico del archivo dependiendo de si hay búsqueda o no
+    # BOM para que Excel en español lea perfecto los acentos y la Ñ
+    si.write('\ufeff')
+    
+    # Configuramos el escritor
+    writer = csv.writer(si)
+    writer.writerow(['ID', 'Producto Terminado', 'Stock en Cocina', 'Precio Venta ($)'])
+    
+    # 3. Llenamos los datos previniendo errores de valores nulos
+    for prod in productos_lote:
+        inv = InventarioProducto.query.filter_by(id_producto=prod.id_producto).first()
+        stock_actual = inv.stock_actual if inv else 0
+        
+        # Validamos que el precio no sea nulo antes de formatearlo a 2 decimales
+        precio = float(prod.precio_venta) if prod.precio_venta is not None else 0.0
+        
+        writer.writerow([
+            prod.id_producto,
+            prod.nombre,
+            stock_actual,
+            f"{precio:.2f}"
+        ])
+
+    # 4. Construimos la respuesta de Flask con el archivo finalizado
+    response = make_response(si.getvalue())
+    
+    # 5. Nombre dinámico y SEGURO (Sin espacios)
     if search_query:
-        filename = f"Inventario_Filtrado_{search_query}.csv"
+        nombre_limpio = search_query.replace(" ", "_")
+        filename = f"Inventario_Filtrado_{nombre_limpio}.csv"
     else:
         filename = "Inventario_Cocina_MonsterEats.csv"
         
-    response.headers.set("Content-Disposition", "attachment", filename=filename)
+    # 6. Forzamos al navegador a descargarlo como archivo adjunto
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.headers["Content-Type"] = "text/csv; charset=utf-8"
+    
     return response

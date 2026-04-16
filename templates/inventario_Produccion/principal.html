@@ -27,7 +27,7 @@
                 </button>
             </form>
 
-            <a href="{{ url_for('inventario_produccion.exportar_csv') }}"
+            <a href="{{ url_for('inventario_produccion.exportar_csv', q=request.args.get('q', '')) }}"
                 class="px-5 py-2.5 text-sm font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-500/20 flex items-center gap-2 w-full sm:w-auto justify-center whitespace-nowrap">
                 <i class="fa-solid fa-file-excel"></i> Exportar a Excel
             </a>
