@@ -26,16 +26,6 @@
     .dark .editorial-shadow {
       box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
     }
-
-    /* Transición suave para el menú lateral */
-    #mobile-menu {
-      transition: transform 0.3s ease-in-out;
-    }
-
-    /* Utilidades para animación de acordeón */
-    .faq-content {
-      transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    }
   </style>
 
   <script>
@@ -60,21 +50,55 @@
 <body
   class="bg-gray-50 dark:bg-[#1F2937] font-[Inter] text-gray-900 dark:text-white overflow-x-hidden transition-colors duration-300">
 
-  <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0 backdrop-blur-sm">
+  <div id="aboutModal" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-full bg-black/60 backdrop-blur-sm transition-opacity">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <div
+        class="relative bg-white rounded-3xl shadow dark:bg-[#101828] border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div
+          class="flex justify-between items-center p-6 border-b dark:border-gray-800 bg-gray-50 dark:bg-[#1F2937]/50">
+          <h3
+            class="text-2xl font-black text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] flex items-center gap-3">
+            <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="Icon" class="h-8 w-auto">
+            Acerca de Monster Eats
+          </h3>
+          <button type="button" id="closeAboutModal"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-full text-sm p-2 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-6 space-y-5">
+          <p class="text-base leading-relaxed text-gray-600 dark:text-gray-300">
+            <strong class="text-gray-900 dark:text-white font-bold">Monster Eats</strong> es una empresa especializada
+            en la venta de comida rápida de alta calidad. Nuestra misión es muy clara: ofrecer alimentos excepcionales
+            brindando a nuestros clientes una experiencia deliciosa y plenamente satisfactoria.
+          </p>
+          <p class="text-base leading-relaxed text-gray-600 dark:text-gray-300">
+            Tenemos la visión de ser el establecimiento de comida rápida de mayor preferencia en nuestra región. Pero no
+            solo somos el eslogan <em>"Sabor monstruoso, hambre saciada"</em>; detrás del mostrador somos una empresa
+            tecnológica. Operamos bajo una solución digital integral diseñada para estandarizar nuestras recetas,
+            optimizar la transformación de materia prima y garantizar operaciones transparentes basadas en datos.
+          </p>
+          <p class="text-base leading-relaxed text-gray-600 dark:text-gray-300">
+            Nuestros valores son el pilar de cada hamburguesa que entregamos: <strong
+              class="text-gray-900 dark:text-white">Calidad, eficiencia, atención y trabajo en equipo.</strong>
+          </p>
+        </div>
+        <div class="flex justify-end p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#101828]">
+          <button id="acceptAboutModal" type="button"
+            class="text-white bg-gradient-to-r from-[#FF6B00] to-[#E65A00] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-orange-300 font-bold rounded-xl text-sm px-6 py-3 text-center shadow-[0_0_15px_rgba(255,107,0,0.3)] transition-all">
+            ¡Entendido!
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <nav class="w-full top-0 z-50 absolute bg-transparent">
+  <nav class="w-full top-0 z-40 absolute bg-transparent">
     <div class="flex items-center justify-between px-6 md:px-12 py-6 w-full max-w-screen-2xl mx-auto relative">
       <div class="flex items-center gap-4">
-        <button
-          class="text-white hover:text-[#FF6B00] transition-colors duration-200 active:scale-95 flex items-center justify-center p-1 relative z-50"
-          id="menu-toggle">
-          <svg class="w-10 h-10 inline-block drop-shadow-md text-white" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-
         <a href="/" class="cursor-pointer relative z-50">
           <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="Monster Eats Logo"
             class="h-12 md:h-14 w-auto drop-shadow-md hover:scale-105 transition-transform" />
@@ -86,60 +110,6 @@
           class="bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold text-lg hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]">
           Inicia sesión
         </a>
-      </div>
-    </div>
-
-    <div id="mobile-menu"
-      class="fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-white dark:bg-[#101828] border-r border-gray-200 dark:border-gray-700 shadow-2xl z-50 -translate-x-full overflow-y-auto">
-
-      <div
-        class="p-6 pb-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-[#1F2937]/50">
-        <span class="font-['Plus_Jakarta_Sans'] font-black text-xl text-gray-900 dark:text-white">Menú Principal</span>
-        <button id="close-menu"
-          class="p-2 text-gray-500 hover:text-[#FF6B00] transition-colors bg-white dark:bg-[#101828] rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-6 flex flex-col gap-2">
-        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 px-4">Explora</p>
-        <a href="#"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all">
-          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
-            </path>
-          </svg>
-          Ubicaciones
-        </a>
-        <a href="#"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all">
-          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7">
-            </path>
-          </svg>
-          Promociones
-        </a>
-
-        <div class="w-full h-px bg-gray-100 dark:bg-gray-800 my-4"></div>
-
-        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 px-4">Mi Cuenta</p>
-        <a href="/login"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all md:hidden">
-          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-          </svg>
-          Inicia sesión
-        </a>
-      </div>
-
-      <div class="absolute bottom-0 left-0 w-full p-6 text-center opacity-30 pointer-events-none">
-        <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="" class="w-20 mx-auto grayscale" />
       </div>
     </div>
   </nav>
@@ -160,12 +130,11 @@
         <div
           class="bg-gray-900/80 backdrop-blur-md p-2 rounded-full flex gap-2 mb-8 editorial-shadow border border-gray-700/50">
           <button
-            class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:scale-105 active:scale-95">
-            Monster Delivery
+            class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] cursor-default">
+            Pide en línea
           </button>
-          <button
-            class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-800 transition-all">
-            Recoger aquí
+          <button class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] cursor-default">
+            Recoge en sucursal
           </button>
         </div>
         <div class="w-full max-w-3xl flex flex-col md:flex-row gap-4">
@@ -173,13 +142,11 @@
             class="flex-1 bg-gray-900/90 backdrop-blur-md rounded-xl flex items-center px-6 py-4 editorial-shadow border border-gray-700 focus-within:ring-2 ring-[#FF6B00]">
             <svg class="w-6 h-6 inline-block text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input
               class="bg-transparent border-none outline-none w-full text-lg font-medium text-white focus:ring-0 placeholder-gray-500"
-              placeholder="Busca una dirección de entrega" type="text" />
+              placeholder="Busca tu hamburguesa favorita..." type="text" />
           </div>
           <button
             class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]">
@@ -363,87 +330,69 @@
       </div>
     </section>
 
-    <section class="max-w-screen-xl mx-auto px-4 py-16">
-      <div class="text-center mb-12">
+    <section
+      class="max-w-screen-2xl mx-auto px-4 py-20 border-t border-gray-200 dark:border-gray-800 transition-colors">
+      <div class="text-center mb-16">
+        <span
+          class="bg-[#FF6B00]/10 text-[#FF6B00] px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest mb-4 inline-block">Monster
+          Pickup</span>
         <h2
-          class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors">
-          ¿Necesitas alguna razón más?
+          class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors mt-4">
+          Pide en línea. Recoge en tienda.
         </h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-4 max-w-2xl mx-auto text-lg">
+          Para garantizar que tu comida llegue siempre caliente y perfecta a tus manos, todos nuestros pedidos se
+          preparan al momento para que pases por ellos. ¡Cero filas, cero esperas!
+        </p>
       </div>
 
-      <div class="max-w-4xl mx-auto space-y-2" id="faq-container">
-
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         <div
-          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
-          <button
-            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
-            <span
-              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">¿Qué
-              medios de pago acepta Monster Eats?</span>
-            <svg
-              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          class="bg-white dark:bg-[#101828] p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg text-center group hover:-translate-y-2 transition-transform duration-300">
+          <div
+            class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-[#FF6B00] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
             </svg>
-          </button>
-          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
-            <div
-              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
-              Aceptamos pagos en efectivo directamente en sucursal al recoger, así como tarjetas de crédito y débito
-              (Visa, MasterCard y American Express) tanto en línea como físicamente en mostrador. Próximamente
-              habilitaremos pagos mediante transferencias y PayPal.
-            </div>
           </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] mb-2">1. Haz tu pedido
+          </h3>
+          <p class="text-gray-500 dark:text-gray-400">Arma tu carrito con tus monstruosidades favoritas desde tu celular
+            o computadora.</p>
         </div>
 
         <div
-          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
-          <button
-            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
-            <span
-              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">¿Cómo
-              puedo cancelar mi pedido?</span>
-            <svg
-              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          class="bg-white dark:bg-[#101828] p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg text-center group hover:-translate-y-2 transition-transform duration-300">
+          <div
+            class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
+              </path>
             </svg>
-          </button>
-          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
-            <div
-              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
-              Puedes cancelar tu pedido desde tu panel de usuario ("Mis Pedidos") siempre y cuando el estado de tu orden
-              siga en "Pendiente". Una vez que cocina haya comenzado a prepararlo (Estado "En Proceso" o "Listo"), la
-              cancelación deberá solicitarse directamente por teléfono a la sucursal.
-            </div>
           </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] mb-2">2. Lo preparamos
+          </h3>
+          <p class="text-gray-500 dark:text-gray-400">Nuestros chefs cocinan tu orden al momento.</p>
         </div>
 
         <div
-          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
-          <button
-            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
-            <span
-              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">Seguimiento
-              del estado de mi pedido</span>
-            <svg
-              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          class="bg-white dark:bg-[#101828] p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg text-center group hover:-translate-y-2 transition-transform duration-300">
+          <div
+            class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-          </button>
-          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
-            <div
-              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
-              ¡Es muy sencillo! Inicia sesión en tu cuenta, dirígete a la sección de "Mis Pedidos" y ahí verás en tiempo
-              real si tu comida está "Pendiente" de revisión, "En Cocina" preparándose, o "Lista" para que pases a
-              recogerla calientita a nuestra sucursal.
-            </div>
           </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] mb-2">3. Recoge en
+            tienda</h3>
+          <p class="text-gray-500 dark:text-gray-400">Pasa al mostrador, menciona tu número de orden y disfruta. ¡Así de
+            rápido!</p>
         </div>
-
       </div>
     </section>
+
   </main>
 
   <footer
@@ -500,7 +449,8 @@
           </h5>
           <ul class="flex flex-col gap-3 text-sm">
             <li>
-              <a class="hover:text-[#FF6B00] transition-colors" href="#">Sobre nosotros</a>
+              <button id="openAboutModal" type="button"
+                class="hover:text-[#FF6B00] transition-colors text-left w-full">Sobre nosotros</button>
             </li>
             <li>
               <a class="hover:text-[#FF6B00] transition-colors" href="#">Sucursales</a>
@@ -538,75 +488,38 @@
 
   <script>
     // ==========================================
-    // LÓGICA PARA EL MENÚ MÓVIL 
+    // LÓGICA PARA EL MODAL "ACERCA DE NOSOTROS"
     // ==========================================
-    const menuToggle = document.getElementById("menu-toggle");
-    const closeMenu = document.getElementById("close-menu");
-    const mobileMenu = document.getElementById("mobile-menu");
-    const menuOverlay = document.getElementById("menu-overlay");
+    const aboutModal = document.getElementById('aboutModal');
+    const openAboutModalBtn = document.getElementById('openAboutModal');
+    const closeAboutModalBtn = document.getElementById('closeAboutModal');
+    const acceptAboutModalBtn = document.getElementById('acceptAboutModal');
 
-    function openSidebar() {
-      // Removemos clase que lo esconde y trasladamos a la vista
-      mobileMenu.classList.remove("-translate-x-full");
-      menuOverlay.classList.remove("hidden");
-
-      // Pequeño timeout para que se aplique la transición de opacidad
-      setTimeout(() => {
-        menuOverlay.classList.remove("opacity-0");
-      }, 10);
-
-      // Evita scroll en la página de fondo
-      document.body.style.overflow = "hidden";
+    function openModal() {
+      aboutModal.classList.remove('hidden');
+      aboutModal.classList.add('flex');
+      document.body.style.overflow = 'hidden'; // Bloquea el scroll del fondo
     }
 
-    function closeSidebar() {
-      // Lo empujamos fuera de la pantalla
-      mobileMenu.classList.add("-translate-x-full");
-      menuOverlay.classList.add("opacity-0");
-
-      // Esperamos que termine la transición para esconder el overlay
-      setTimeout(() => {
-        menuOverlay.classList.add("hidden");
-      }, 300);
-
-      // Restauramos el scroll
-      document.body.style.overflow = "auto";
+    function closeModal() {
+      aboutModal.classList.add('hidden');
+      aboutModal.classList.remove('flex');
+      document.body.style.overflow = 'auto'; // Restaura el scroll
     }
 
-    menuToggle.addEventListener("click", openSidebar);
-    closeMenu.addEventListener("click", closeSidebar);
-    menuOverlay.addEventListener("click", closeSidebar);
+    openAboutModalBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
 
-    // ==========================================
-    // LÓGICA PARA EL ACORDEÓN (FAQ)
-    // ==========================================
-    const faqButtons = document.querySelectorAll('.faq-btn');
+    closeAboutModalBtn.addEventListener('click', closeModal);
+    acceptAboutModalBtn.addEventListener('click', closeModal);
 
-    faqButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const content = button.nextElementSibling;
-        const icon = button.querySelector('.faq-icon');
-
-        // Comprobar si el que tocamos ya está abierto
-        const isOpen = content.classList.contains('max-h-96');
-
-        // Cerrar todos los demás primero (Opcional, si quieres que solo uno esté abierto a la vez)
-        document.querySelectorAll('.faq-content').forEach(el => {
-          el.classList.remove('max-h-96', 'opacity-100');
-          el.classList.add('max-h-0', 'opacity-0');
-        });
-        document.querySelectorAll('.faq-icon').forEach(el => {
-          el.classList.remove('-rotate-180');
-        });
-
-        // Si NO estaba abierto, lo abrimos
-        if (!isOpen) {
-          // Cambiamos clases de Tailwind para animar
-          content.classList.remove('max-h-0', 'opacity-0');
-          content.classList.add('max-h-96', 'opacity-100'); // max-h-96 es suficiente para textos medianos
-          icon.classList.add('-rotate-180'); // Gira la flechita
-        }
-      });
+    // Cerrar el modal al hacer clic en el fondo oscuro
+    aboutModal.addEventListener('click', (e) => {
+      if (e.target === aboutModal) {
+        closeModal();
+      }
     });
   </script>
 </body>

@@ -151,23 +151,46 @@
       <div
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
       >
-        {% for producto in productos %} {# -- URL del detalle según tipo -- #}
-        {% if producto is mapping %} {% if producto.id_combo %} {% set
-        detalle_url = url_for('pagina.combo_detalle',
-        id_combo=producto.id_combo) %} {% else %} {% set detalle_url = '#' %} {%
-        endif %} {% else %} {% set detalle_url =
-        url_for('pagina.producto_detalle', id_producto=producto.id_producto) %}
+        {% for producto in productos %}
+        {# -- URL del detalle según tipo -- #}
+        {% set detalle_url = None %}
+        {% if producto is mapping %}
+          {% if 'id_combo' in producto and producto.id_combo %}
+            {% set detalle_url = url_for('pagina.combo_detalle', id_combo=producto.id_combo) %}
+          {% elif 'id_producto' in producto and producto.id_producto %}
+            {% set detalle_url = url_for('pagina.producto_detalle', id_producto=producto.id_producto) %}
+          {% endif %}
+        {% else %}
+          {% set detalle_url = url_for('pagina.producto_detalle', id_producto=producto.id_producto) %}
         {% endif %}
 
-        <div class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        {# Determine availability: default to available unless route provided flag says otherwise #}
+        {% set is_available = true %}
+        {% if producto is mapping and 'disponible' in producto %}
+          {% set is_available = producto.disponible %}
+        {% elif not (producto is mapping) and (producto.stock is defined) %}
+          {% set is_available = (producto.stock|int > 0) %}
+        {% endif %}
+
+        <div class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 {% if not is_available %}opacity-60 pointer-events-none{% endif %}">
           <!-- Imagen -->
+          {% if detalle_url and is_available %}
           <a href="{{ detalle_url }}" class="block">
             <div class="bg-gray-50 dark:bg-gray-800 aspect-square overflow-hidden flex items-center justify-center">
+          {% else %}
+            <div class="block bg-gray-50 dark:bg-gray-800 aspect-square overflow-hidden flex items-center justify-center">
+          {% endif %}
               {% if producto.imagen %}
+                {% set img_classes = 'w-full h-full object-cover transition-transform duration-500' %}
+                {% set hover_class = ' group-hover:scale-105' if is_available else '' %}
                 {% if producto is mapping %}
-                  <img src="{{ url_for('static', filename='img/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {% if producto.es_combo %}
+                    <img src="{{ url_for('static', filename='img/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="{{ img_classes }}{{ hover_class }} {% if not is_available %}filter grayscale{% endif %}" />
+                  {% else %}
+                    <img src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="{{ img_classes }}{{ hover_class }} {% if not is_available %}filter grayscale{% endif %}" />
+                  {% endif %}
                 {% else %}
-                  <img src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}" alt="{{ producto.nombre }}" class="{{ img_classes }}{{ hover_class }} {% if not is_available %}filter grayscale{% endif %}" />
                 {% endif %}
               {% else %}
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
@@ -175,24 +198,24 @@
                 </svg>
               {% endif %}
             </div>
+          {% if detalle_url and is_available %}
           </a>
+          {% endif %}
 
-          <!-- Info + Añadir (sin JS) -->
+          <!-- Info (sin botones) -->
           <div class="p-3 flex flex-col gap-3">
             <div>
-              <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">{{ producto.nombre }}</h3>
+              {% if is_available and detalle_url %}
+                <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2"><a href="{{ detalle_url }}">{{ producto.nombre }}</a></h3>
+              {% else %}
+                <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">{{ producto.nombre }}</h3>
+              {% endif %}
               <p class="text-orange-500 font-bold text-sm mt-1">${{ "%.2f"|format(producto.precio_venta|float) }}</p>
             </div>
             <div>
-              <form method="POST" action="{{ url_for('pagina.carrito_validar_agregar') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                {% if producto is mapping and producto.id_combo %}
-                  <input type="hidden" name="id_combo" value="{{ producto.id_combo }}" />
-                {% else %}
-                  <input type="hidden" name="id_producto" value="{{ producto.id_producto }}" />
-                {% endif %}
-                <button type="submit" class="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-full">Añadir</button>
-              </form>
+              {% if not is_available %}
+                <div class="w-full py-3 text-center text-sm text-gray-600 dark:text-gray-400">Agotado</div>
+              {% endif %}
             </div>
           </div>
         </div>
