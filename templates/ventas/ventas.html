@@ -23,15 +23,32 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-5">
         {% for producto in productos %}
+        {% set stock_disp = producto.get('stock_disponible') if producto.get('stock_disponible') is not none else (producto.get('stock') or 0) %}
         <article class="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-200">
-          <div class="aspect-[4/3] bg-slate-700 overflow-hidden">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
-              alt="{{ producto.nombre }}"
-              class="w-full h-full object-contain p-6"
-            />
+          
+          <div class="aspect-[4/3] bg-slate-700 overflow-hidden flex items-center justify-center">
+            {% if producto.imagen %}
+              {% if producto.tipo_item == 'Combo' %}
+                <img
+                  src="{{ url_for('static', filename='img/' + producto.imagen) }}"
+                  alt="{{ producto.nombre }}"
+                  class="w-full h-full object-cover"
+                />
+              {% else %}
+                <img
+                  src="{{ url_for('static', filename='img/productos/' + producto.imagen) }}"
+                  alt="{{ producto.nombre }}"
+                  class="w-full h-full object-cover"
+                />
+              {% endif %}
+            {% else %}
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"
+                alt="{{ producto.nombre }}"
+                class="w-full h-full object-contain p-6 opacity-50"
+              />
+            {% endif %}
           </div>
-
           <div class="p-4">
             <div class="mb-2 flex flex-wrap gap-2">
               <span class="inline-flex items-center rounded-full bg-orange-500/15 px-3 py-1 text-xs font-medium text-orange-400 border border-orange-500/20">
@@ -49,8 +66,8 @@
 
             <div class="mt-4 flex flex-col gap-2">
               <div class="text-sm">
-                {% if producto.stock > 0 %}
-                <span class="text-emerald-400 font-medium">Stock: {{ producto.stock }} disponibles</span>
+                {% if stock_disp > 0 %}
+                <span class="text-emerald-400 font-medium">Stock: {{ stock_disp }} disponibles</span>
                 {% else %}
                 <span class="text-red-400 font-medium">Agotado</span>
                 {% endif %}
@@ -69,7 +86,7 @@
                   <input type="hidden" name="id_item" value="{{ producto.id_item }}" />
                   <input type="hidden" name="tipo_item" value="{{ producto.tipo_item }}" />
 
-                  {% if producto.stock > 0 %}
+                  {% if stock_disp > 0 %}
                   <button type="submit" class="inline-flex items-center justify-center rounded-2xl border border-orange-500 bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 hover:border-orange-600 transition">
                     Agregar
                   </button>

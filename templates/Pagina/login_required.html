@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<main class="max-w-screen-md mx-auto px-4 py-20 text-center">
+  <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 shadow-sm">
+    <h1 class="text-2xl font-extrabold mb-4">Inicia sesión para continuar</h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-6">Debes iniciar sesión para poder agregar productos al carrito y completar la compra.</p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="{{ url_for('auth.login') }}" class="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold">Iniciar sesión</a>
+      <a href="{{ url_for('auth.register') }}" class="px-6 py-3 border border-gray-200 dark:border-gray-700 rounded-lg">Crear cuenta</a>
+    </div>
+
+    {% if next %}
+    <p class="text-sm text-gray-500 mt-4">Acción solicitada: {{ next }}</p>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
