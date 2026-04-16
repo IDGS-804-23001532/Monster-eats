@@ -1,6 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, flash
+<<<<<<< Updated upstream
 from extensions import limiter
 from flask_wtf.csrf import CSRFProtect
+=======
+from flask import session
+from extensions import limiter, mail
+from flask_wtf.csrf import CSRFProtect, CSRFError
+>>>>>>> Stashed changes
 from config import DevelopmentConfig
 from flask_migrate import Migrate
 from auth import auth
@@ -94,8 +100,24 @@ def interval_server_error(e):
     return render_template('500.html'), 500
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
  
+
+>>>>>>> Stashed changes
+=======
+""" @app.errorhandler(TemplateError)
+def handle_template_error(e):
+    # Intercepta errores de diseño para enviar a la ventana 500
+    return render_template('500.html'), 500 
+ """
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    # Limpiamos cualquier dato residual de la sesión por seguridad
+    session.clear()
+    flash('Tu sesión expiró o no tienes permiso para realizar esta acción. Por favor, inicia sesión nuevamente.', 'error')
+    return redirect(url_for('auth.login'))
 
 >>>>>>> Stashed changes
 @app.errorhandler(429)
