@@ -1794,6 +1794,9 @@
   .max-w-md {
     max-width: var(--container-md);
   }
+  .max-w-none {
+    max-width: none;
+  }
   .max-w-screen-2xl {
     max-width: var(--breakpoint-2xl);
   }
