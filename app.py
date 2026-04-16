@@ -93,6 +93,11 @@ def page_not_found(e):
 def interval_server_error(e):
     return render_template('500.html'), 500
 
+<<<<<<< Updated upstream
+=======
+ 
+
+>>>>>>> Stashed changes
 @app.errorhandler(429)
 def ratelimit_handler(e):
     return render_template('429.html', error_description=e.description), 429
