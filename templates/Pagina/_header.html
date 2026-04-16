@@ -55,6 +55,9 @@
             d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
           />
         </svg>
+        {% if cart_count and cart_count > 0 %}
+        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">{{ cart_count }}</span>
+        {% endif %}
       </a>
     </div>
   </div>

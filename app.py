@@ -15,6 +15,7 @@ except ImportError:
     sys.modules['pkg_resources'] = MockPkgResources()
 
 from flask import Flask, render_template, redirect, url_for, flash
+from flask import session
 from extensions import limiter, mail
 from flask_wtf.csrf import CSRFProtect
 from config import DevelopmentConfig
@@ -97,6 +98,32 @@ app.register_blueprint(recetas, url_prefix='/recetas')
 app.register_blueprint(produccion, url_prefix='/produccion')
 app.register_blueprint(usuarios, url_prefix='/usuarios')
 app.register_blueprint(pagina_bp)
+
+
+@app.context_processor
+def inject_cart_count():
+    """Provee `cart_count` a todas las plantillas para mostrar badge en el header.
+    Para usuarios no autenticados usa la sesión; para autenticados intenta leer
+    el resumen desde la vista `vw_carrito_resumen` (si existe).
+    """
+    try:
+        from flask_security import current_user
+        count = 0
+        # Preferir carrito en sesión si existe
+        sess_cart = session.get('carrito')
+        if sess_cart is not None:
+            count = sum(item.get('cantidad', 1) for item in sess_cart)
+        elif current_user.is_authenticated:
+            # Intentar consultar la vista de resumen (respaldo para el módulo ventas)
+            try:
+                resumen = db.session.execute(db.text("SELECT total_piezas FROM vw_carrito_resumen WHERE id_usuario = :id_usuario LIMIT 1"), {'id_usuario': current_user.id_usuario}).mappings().first()
+                if resumen and resumen.get('total_piezas') is not None:
+                    count = int(resumen.get('total_piezas'))
+            except Exception:
+                count = 0
+        return dict(cart_count=count)
+    except Exception:
+        return dict(cart_count=0)
 
 
 @app.route("/")
