@@ -1,699 +1,614 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Monster Eats | Empieza con tu pedido</title>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Monster Eats | Empieza con tu pedido</title>
 
-    <script>
-      // Configurar Tailwind para respetar el modo oscuro por clase de acuerdo al sistema
-      tailwind.config = {
-        darkMode: "class",
-      };
-    </script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
 
-    <style>
-      .editorial-shadow {
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
-      }
-      .dark .editorial-shadow {
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
-      }
-    </style>
+  <script>
+    // Configurar Tailwind para respetar el modo oscuro por clase de acuerdo al sistema
+    tailwind.config = {
+      darkMode: "class",
+    };
+  </script>
 
-    <!-- Auto-detect System Dark Mode -->
-    <script>
-      if (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        document.documentElement.classList.add("dark");
-      }
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (event) => {
-          if (event.matches) {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
-          }
-        });
-    </script>
-  </head>
+  <style>
+    .editorial-shadow {
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+    }
 
-  <!-- Fondo general: Claro (blanco hueso/gris muy tenue) vs Oscuro (#1F2937) -->
-  <body
-    class="bg-gray-50 dark:bg-[#1F2937] font-[Inter] text-gray-900 dark:text-white overflow-x-hidden transition-colors duration-300"
-  >
-    <!-- Top Navigation Shell -->
-    <nav class="w-full top-0 z-50 absolute bg-transparent">
+    .dark .editorial-shadow {
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Transición suave para el menú lateral */
+    #mobile-menu {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    /* Utilidades para animación de acordeón */
+    .faq-content {
+      transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+  </style>
+
+  <script>
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (event) => {
+        if (event.matches) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      });
+  </script>
+</head>
+
+<body
+  class="bg-gray-50 dark:bg-[#1F2937] font-[Inter] text-gray-900 dark:text-white overflow-x-hidden transition-colors duration-300">
+
+  <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity opacity-0 backdrop-blur-sm">
+  </div>
+
+  <nav class="w-full top-0 z-50 absolute bg-transparent">
+    <div class="flex items-center justify-between px-6 md:px-12 py-6 w-full max-w-screen-2xl mx-auto relative">
+      <div class="flex items-center gap-4">
+        <button
+          class="text-white hover:text-[#FF6B00] transition-colors duration-200 active:scale-95 flex items-center justify-center p-1 relative z-50"
+          id="menu-toggle">
+          <svg class="w-10 h-10 inline-block drop-shadow-md text-white" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
+        <a href="/" class="cursor-pointer relative z-50">
+          <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="Monster Eats Logo"
+            class="h-12 md:h-14 w-auto drop-shadow-md hover:scale-105 transition-transform" />
+        </a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8 relative z-50">
+        <a href="/login"
+          class="bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold text-lg hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]">
+          Inicia sesión
+        </a>
+      </div>
+    </div>
+
+    <div id="mobile-menu"
+      class="fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-white dark:bg-[#101828] border-r border-gray-200 dark:border-gray-700 shadow-2xl z-50 -translate-x-full overflow-y-auto">
+
       <div
-        class="flex items-center justify-between px-6 md:px-12 py-6 w-full max-w-screen-2xl mx-auto"
-      >
-        <!-- ESTILO MCDONALDS: Menú pegado al Logo (Sin Texto) -->
-        <div class="flex items-center gap-4">
-          <button
-            class="text-white hover:text-[#FF6B00] transition-colors duration-200 active:scale-95 flex items-center justify-center p-1"
-            id="menu-toggle"
-          >
-            <!-- Icono devuelto a un tamaño estético y manejable -->
-            <svg
-              class="w-10 h-10 inline-block drop-shadow-md text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </button>
+        class="p-6 pb-8 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-[#1F2937]/50">
+        <span class="font-['Plus_Jakarta_Sans'] font-black text-xl text-gray-900 dark:text-white">Menú Principal</span>
+        <button id="close-menu"
+          class="p-2 text-gray-500 hover:text-[#FF6B00] transition-colors bg-white dark:bg-[#101828] rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
 
-          <a href="/" class="cursor-pointer">
-            <img
-              src="{{ url_for('static', filename='img/monster_logo.png') }}"
-              alt="Monster Eats Logo"
-              class="h-12 md:h-14 w-auto drop-shadow-md hover:scale-105 transition-transform"
-            />
+      <div class="p-6 flex flex-col gap-2">
+        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 px-4">Explora</p>
+        <a href="#"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all">
+          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+          </svg>
+          Ubicaciones
+        </a>
+        <a href="#"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all">
+          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7">
+            </path>
+          </svg>
+          Promociones
+        </a>
+
+        <div class="w-full h-px bg-gray-100 dark:bg-gray-800 my-4"></div>
+
+        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 px-4">Mi Cuenta</p>
+        <a href="/login"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-[#FF6B00] transition-all md:hidden">
+          <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+          </svg>
+          Inicia sesión
+        </a>
+      </div>
+
+      <div class="absolute bottom-0 left-0 w-full p-6 text-center opacity-30 pointer-events-none">
+        <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="" class="w-20 mx-auto grayscale" />
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="relative h-[650px] w-full overflow-hidden">
+      <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+        <source src="{{ url_for('static', filename='img/Creación.mp4') }}" type="video/mp4" />
+      </video>
+      <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/70 to-transparent"></div>
+
+      <div
+        class="relative h-full max-w-screen-2xl mx-auto px-8 flex flex-col justify-center items-start mt-8 md:pl-24 lg:pl-32">
+        <h1
+          class="text-white font-['Plus_Jakarta_Sans'] text-5xl md:text-7xl font-extrabold tracking-tight max-w-2xl mb-8 leading-tight drop-shadow-2xl">
+          Empieza con tu pedido
+        </h1>
+        <div
+          class="bg-gray-900/80 backdrop-blur-md p-2 rounded-full flex gap-2 mb-8 editorial-shadow border border-gray-700/50">
+          <button
+            class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:scale-105 active:scale-95">
+            Monster Delivery
+          </button>
+          <button
+            class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-800 transition-all">
+            Recoger aquí
+          </button>
+        </div>
+        <div class="w-full max-w-3xl flex flex-col md:flex-row gap-4">
+          <div
+            class="flex-1 bg-gray-900/90 backdrop-blur-md rounded-xl flex items-center px-6 py-4 editorial-shadow border border-gray-700 focus-within:ring-2 ring-[#FF6B00]">
+            <svg class="w-6 h-6 inline-block text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <input
+              class="bg-transparent border-none outline-none w-full text-lg font-medium text-white focus:ring-0 placeholder-gray-500"
+              placeholder="Busca una dirección de entrega" type="text" />
+          </div>
+          <button
+            class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]">
+            Comenzar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-10 bg-white dark:bg-[#101828] transition-colors duration-300">
+      <div class="max-w-screen-2xl mx-auto px-4">
+        <div class="flex flex-wrap md:flex-nowrap overflow-x-auto justify-center gap-2 pb-2 scrollbar-hide">
+          {% set cat_imgs = [ ('Hamburguesas', 'hamburguesa.png'), ('Papas',
+          'papas.png'), ('Desayunos', 'desayuno.png'), ('Bebidas',
+          'bebidas.png'), ('Postres', 'postre.png'), ('Hot Dogs',
+          'hotdogs.png'), ('Combos', 'combos.png') ] %} {% for cat_nombre,
+          cat_img in cat_imgs %}
+          <a href="{{ url_for('pagina.menu_categoria', categoria=cat_nombre) }}"
+            class="flex flex-col items-center gap-1 px-4 pb-3 pt-2 min-w-[80px] group relative">
+            <div class="w-16 h-16 overflow-hidden flex items-center justify-center">
+              <img src="{{ url_for('static', filename='img/categorias_pag/' + cat_img) }}" alt="{{ cat_nombre }}"
+                loading="eager"
+                class="w-full h-full object-contain transition-transform duration-200 group-hover:scale-110" />
+            </div>
+            <span
+              class="text-xs font-semibold text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+              {{ cat_nombre }}
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-screen-2xl mx-auto px-4 py-20">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2 flex flex-col gap-8 md:grid md:grid-cols-2">
+          {% if producto_hambur %}
+          <a href="{{ url_for('pagina.producto_detalle', id_producto=producto_hambur.id_producto) }}"
+            class="relative h-[500px] rounded-3xl overflow-hidden group md:col-span-2 border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block">
+            {% if producto_hambur.imagen %}
+            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="{{ url_for('static', filename='img/productos/' + producto_hambur.imagen) }}"
+              alt="{{ producto_hambur.nombre }}" />
+            {% endif %}
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-12">
+              <span
+                class="bg-[#FF6B00] text-white px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest">Favorito
+                de la casa</span>
+              <h3 class="text-white font-['Plus_Jakarta_Sans'] text-4xl font-extrabold mb-4 drop-shadow-lg">
+                {{ producto_hambur.nombre }}
+              </h3>
+              <p class="text-gray-200 dark:text-gray-300 mb-6 font-bold text-xl">
+                ${{ "%.2f"|format(producto_hambur.precio_venta|float) }}
+              </p>
+              <span
+                class="bg-white text-gray-900 dark:bg-[#1F2937] dark:text-white border border-gray-200 dark:border-[#FF6B00] px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] w-fit hover:bg-gray-100 dark:hover:bg-[#FF6B00] transition-colors">
+                Ordenar Ahora
+              </span>
+            </div>
+          </a>
+          {% endif %}
+
+          {% if producto_papa %}
+          <a href="{{ url_for('pagina.producto_detalle', id_producto=producto_papa.id_producto) }}"
+            class="relative h-[500px] rounded-3xl overflow-hidden group border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block">
+            {% if producto_papa.imagen %}
+            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="{{ url_for('static', filename='img/productos/' + producto_papa.imagen) }}"
+              alt="{{ producto_papa.nombre }}" />
+            {% endif %}
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10">
+              <span
+                class="bg-gray-800/80 dark:bg-[#101828]/80 backdrop-blur border border-gray-600 text-gray-100 dark:text-gray-300 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest">Más
+                vendido</span>
+              <h3 class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-2 drop-shadow-lg">
+                {{ producto_papa.nombre }}
+              </h3>
+              <p class="text-[#FF6B00] font-bold text-lg mb-4">
+                ${{ "%.2f"|format(producto_papa.precio_venta|float) }}
+              </p>
+              <span
+                class="bg-[#FF6B00] text-white px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] hover:brightness-110 transition-colors w-fit shadow-[0_0_15px_rgba(255,107,0,0.3)]">
+                Ver producto
+              </span>
+            </div>
+          </a>
+          {% endif %}
+
+          {% if combo_destacado %}
+          <a href="{{ url_for('pagina.combo_detalle', id_combo=combo_destacado.id_combo) }}"
+            class="relative h-[500px] rounded-3xl overflow-hidden group border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block">
+            {% if combo_destacado.imagen %}
+            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="{{ url_for('static', filename='img/' + combo_destacado.imagen) }}"
+              alt="{{ combo_destacado.nombre }}" />
+            {% endif %}
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10">
+              <span
+                class="bg-[#FF6B00]/20 backdrop-blur text-[#FF6B00] border border-[#FF6B00]/40 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest">Combo
+                Especial</span>
+              <h3 class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-2 drop-shadow-lg">
+                {{ combo_destacado.nombre }}
+              </h3>
+              <p class="text-[#FF6B00] font-bold text-lg mb-4">
+                ${{ "%.2f"|format(combo_destacado.precio_venta|float) }}
+              </p>
+              <span
+                class="bg-white text-gray-900 dark:bg-[#101828] dark:text-white border border-gray-200 dark:border-gray-600 px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] w-fit hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                Ver combo
+              </span>
+            </div>
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-8">
+          <div
+            class="bg-white dark:bg-[#101828] border border-gray-200 dark:border-gray-700 rounded-3xl p-8 flex flex-col justify-between h-[234px] relative overflow-hidden group shadow-lg transition-colors duration-300">
+            <div class="relative z-10">
+              <h4
+                class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] text-2xl font-black transition-colors">
+                Velocidad Monster
+              </h4>
+              <p class="text-gray-600 dark:text-gray-400 mt-2 transition-colors">
+                Pide desde la pagina para solo recoger en la sucursal.
+              </p>
+            </div>
+            <svg
+              class="w-32 h-32 absolute -bottom-4 -right-4 text-[#FF6B00]/10 group-hover:scale-110 group-hover:text-[#FF6B00]/20 transition-all"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M15.59 14.37a6 6 0 01-5.84 7.36c-5.91.54-7.5-3.5-7.5-3.5a18.27 18.27 0 014.24-5.4A18.27 18.27 0 0111 8.5c0 0-4.04-1.58-3.5-7.5a6 6 0 017.36-5.84l4.24 4.24c3.5 1 5.5 3 5.5 3l-4.24.47-5.77-5.77-1.41 1.41 5.77 5.77-.47 4.24s-2 2-3 5.5l-4.24-4.24z">
+              </path>
+            </svg>
+          </div>
+
+          <div
+            class="bg-gradient-to-br from-white to-gray-50 dark:from-[#1F2937] dark:to-[#101828] border border-[#FF6B00]/30 rounded-3xl p-8 flex flex-col justify-between h-[234px] relative overflow-hidden group shadow-[0_0_20px_rgba(255,107,0,0.05)] dark:shadow-[0_0_20px_rgba(255,107,0,0.1)] transition-colors duration-300">
+            <div class="relative z-10">
+              <h4
+                class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] text-2xl font-black group-hover:text-[#FF6B00] dark:group-hover:text-[#FF6B00] transition-colors">
+                Exclusivo App
+              </h4>
+              <p class="text-gray-600 dark:text-gray-400 mt-2 transition-colors">
+                Descarga la App de Monster Eats y gana combos gratis y
+                recompensas.
+              </p>
+            </div>
+            <div class="flex gap-2 items-center cursor-pointer">
+              <svg class="w-5 h-5 inline-block text-[#FF6B00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+              <span class="font-bold text-[#FF6B00]">Descargar</span>
+            </div>
+          </div>
+
+          <a href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}"
+            class="relative h-[500px] rounded-3xl overflow-hidden group shadow-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-300 block">
+            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="{{ url_for('static', filename='img/categorias_pag/hamburguesa.png') }}" alt="Ver Menú Completo" />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10">
+              <span
+                class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-300 border border-gray-300 dark:border-gray-600 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest">Menú
+                Completo</span>
+              <h3 class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-4 drop-shadow-lg">
+                Ver todas las categorías
+              </h3>
+              <span
+                class="bg-white text-gray-900 dark:bg-[#101828] dark:text-white border border-gray-200 dark:border-gray-600 px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-100 dark:hover:bg-[#FF6B00] dark:hover:border-[#FF6B00] transition-colors w-fit">
+                Explorar
+              </span>
+            </div>
           </a>
         </div>
+      </div>
+    </section>
 
-        <!-- LADO DERECHO: Botón Personal -->
-        <div class="hidden md:flex items-center gap-8">
-          <a
-            href="/login"
-            class="bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold text-lg hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,107,0,0.4)]"
-            >Inicia sesión</a
-          >
-        </div>
+    <section class="max-w-screen-xl mx-auto px-4 py-16">
+      <div class="text-center mb-12">
+        <h2
+          class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors">
+          ¿Necesitas alguna razón más?
+        </h2>
       </div>
 
-      <!-- Dropdown Menu -->
-      <div
-        class="hidden absolute top-full left-0 w-full bg-white dark:bg-[#101828] border-t border-gray-200 dark:border-gray-700 shadow-lg transition-colors duration-300"
-        id="mobile-menu"
-      >
-        <div class="max-w-screen-2xl mx-auto px-8 py-6 flex flex-col gap-4">
-          <a
-            href="#"
-            class="text-gray-900 dark:text-white font-medium hover:text-[#FF6B00]"
-            >Ubicaciones</a
-          >
-          <a
-            href="#"
-            class="text-gray-900 dark:text-white font-medium hover:text-[#FF6B00]"
-            >Promociones</a
-          >
-          <a
-            href="/login"
-            class="text-gray-900 dark:text-white font-medium hover:text-[#FF6B00]"
-            >Inicia sesión</a
-          >
+      <div class="max-w-4xl mx-auto space-y-2" id="faq-container">
+
+        <div
+          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
+          <button
+            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
+            <span
+              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">¿Qué
+              medios de pago acepta Monster Eats?</span>
+            <svg
+              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
+            <div
+              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
+              Aceptamos pagos en efectivo directamente en sucursal al recoger, así como tarjetas de crédito y débito
+              (Visa, MasterCard y American Express) tanto en línea como físicamente en mostrador. Próximamente
+              habilitaremos pagos mediante transferencias y PayPal.
+            </div>
+          </div>
         </div>
+
+        <div
+          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
+          <button
+            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
+            <span
+              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">¿Cómo
+              puedo cancelar mi pedido?</span>
+            <svg
+              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
+            <div
+              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
+              Puedes cancelar tu pedido desde tu panel de usuario ("Mis Pedidos") siempre y cuando el estado de tu orden
+              siga en "Pendiente". Una vez que cocina haya comenzado a prepararlo (Estado "En Proceso" o "Listo"), la
+              cancelación deberá solicitarse directamente por teléfono a la sucursal.
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="border-b border-gray-200 dark:border-gray-700 transition-colors rounded-xl overflow-hidden bg-white dark:bg-[#101828] mb-4">
+          <button
+            class="faq-btn w-full flex items-center justify-between p-6 text-left group hover:bg-gray-50 dark:hover:bg-[#1F2937] transition-all focus:outline-none focus-visible:ring-2 ring-[#FF6B00] inset-0">
+            <span
+              class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors">Seguimiento
+              del estado de mi pedido</span>
+            <svg
+              class="faq-icon w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-transform duration-300 transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="faq-content max-h-0 opacity-0 overflow-hidden">
+            <div
+              class="p-6 pt-0 text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800/50 mt-2 mx-6">
+              ¡Es muy sencillo! Inicia sesión en tu cuenta, dirígete a la sección de "Mis Pedidos" y ahí verás en tiempo
+              real si tu comida está "Pendiente" de revisión, "En Cocina" preparándose, o "Lista" para que pases a
+              recogerla calientita a nuestra sucursal.
+            </div>
+          </div>
+        </div>
+
       </div>
-    </nav>
+    </section>
+  </main>
 
-    <main>
-      <!-- Hero Section -->
-      <section class="relative h-[650px] w-full overflow-hidden">
-        <!-- El video siempre es oscuro, así que el texto encima (Hero) se queda en blanco forzado -->
-        <video
-          autoplay
-          loop
-          muted
-          playsinline
-          class="absolute inset-0 w-full h-full object-cover"
-        >
-          <source
-            src="{{ url_for('static', filename='img/Creación.mp4') }}"
-            type="video/mp4"
-          />
-        </video>
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/70 to-transparent"
-        ></div>
-
-        <div
-          class="relative h-full max-w-screen-2xl mx-auto px-8 flex flex-col justify-center items-start mt-8 md:pl-24 lg:pl-32"
-        >
-          <h1
-            class="text-white font-['Plus_Jakarta_Sans'] text-5xl md:text-7xl font-extrabold tracking-tight max-w-2xl mb-8 leading-tight drop-shadow-2xl"
-          >
-            Empieza con tu pedido
-          </h1>
-          <div
-            class="bg-gray-900/80 backdrop-blur-md p-2 rounded-full flex gap-2 mb-8 editorial-shadow border border-gray-700/50"
-          >
-            <button
-              class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] hover:scale-105 active:scale-95"
-            >
-              Monster Delivery
-            </button>
-            <button
-              class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-800 transition-all"
-            >
-              Recoger aquí
-            </button>
+  <footer
+    class="w-full bg-gray-100 dark:bg-[#020617] border-t border-gray-300 dark:border-gray-800 text-gray-600 dark:text-gray-400 py-16 transition-colors duration-300">
+    <div class="max-w-screen-2xl mx-auto px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <img src="{{ url_for('static', filename='img/monster_logo.png') }}" alt="Monster Eats Logo"
+              class="h-20 md:h-24 w-auto drop-shadow-md hover:scale-105 transition-transform" />
+            <span
+              class="text-xl font-black text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors">Monster
+              Eats</span>
           </div>
-          <div class="w-full max-w-3xl flex flex-col md:flex-row gap-4">
-            <div
-              class="flex-1 bg-gray-900/90 backdrop-blur-md rounded-xl flex items-center px-6 py-4 editorial-shadow border border-gray-700 focus-within:ring-2 ring-[#FF6B00]"
-            >
-              <svg
-                class="w-6 h-6 inline-block text-gray-400 mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                ></path>
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-              <input
-                class="bg-transparent border-none outline-none w-full text-lg font-medium text-white focus:ring-0 placeholder-gray-500"
-                placeholder="Busca una dirección de entrega"
-                type="text"
-              />
-            </div>
-            <button
-              class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]"
-            >
-              Comenzar
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Category Navigation -->
-      <section
-        class="py-10 bg-white dark:bg-[#101828] transition-colors duration-300"
-      >
-        <div class="max-w-screen-2xl mx-auto px-4">
-          <div
-            class="flex flex-wrap md:flex-nowrap overflow-x-auto justify-center gap-2 pb-2 scrollbar-hide"
-          >
-            {% set cat_imgs = [ ('Hamburguesas', 'hamburguesa.png'), ('Papas',
-            'papas.png'), ('Desayunos', 'desayuno.png'), ('Bebidas',
-            'bebidas.png'), ('Postres', 'postre.png'), ('Hot Dogs',
-            'hotdogs.png'), ('Combos', 'combos.png') ] %} {% for cat_nombre,
-            cat_img in cat_imgs %}
-            <a
-              href="{{ url_for('pagina.menu_categoria', categoria=cat_nombre) }}"
-              class="flex flex-col items-center gap-1 px-4 pb-3 pt-2 min-w-[80px] group relative"
-            >
-              <div
-                class="w-16 h-16 overflow-hidden flex items-center justify-center"
-              >
-                <img
-                  src="{{ url_for('static', filename='img/categorias_pag/' + cat_img) }}"
-                  alt="{{ cat_nombre }}"
-                  loading="eager"
-                  class="w-full h-full object-contain transition-transform duration-200 group-hover:scale-110"
-                />
-              </div>
-              <span
-                class="text-xs font-semibold text-center text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
-              >
-                {{ cat_nombre }}
-              </span>
-            </a>
-            {% endfor %}
-          </div>
-        </div>
-      </section>
-
-      <!-- Main Content (Editorial Bento Grid) -->
-      <section class="max-w-screen-2xl mx-auto px-4 py-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- ── Left Column ── -->
-          <div class="md:col-span-2 flex flex-col gap-8 md:grid md:grid-cols-2">
-            <!-- Feature 1: Hamburguesa (ancho completo) -->
-            {% if producto_hambur %}
-            <a
-              href="{{ url_for('pagina.producto_detalle', id_producto=producto_hambur.id_producto) }}"
-              class="relative h-[500px] rounded-3xl overflow-hidden group md:col-span-2 border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block"
-            >
-              {% if producto_hambur.imagen %}
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                src="{{ url_for('static', filename='img/productos/' + producto_hambur.imagen) }}"
-                alt="{{ producto_hambur.nombre }}"
-              />
-              {% endif %}
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-12"
-              >
-                <span
-                  class="bg-[#FF6B00] text-white px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest"
-                  >Favorito de la casa</span
-                >
-                <h3
-                  class="text-white font-['Plus_Jakarta_Sans'] text-4xl font-extrabold mb-4 drop-shadow-lg"
-                >
-                  {{ producto_hambur.nombre }}
-                </h3>
-                <p
-                  class="text-gray-200 dark:text-gray-300 mb-6 font-bold text-xl"
-                >
-                  ${{ "%.2f"|format(producto_hambur.precio_venta|float) }}
-                </p>
-                <span
-                  class="bg-white text-gray-900 dark:bg-[#1F2937] dark:text-white border border-gray-200 dark:border-[#FF6B00] px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] w-fit hover:bg-gray-100 dark:hover:bg-[#FF6B00] transition-colors"
-                >
-                  Ordenar Ahora
-                </span>
-              </div>
-            </a>
-            {% endif %}
-
-            <!-- Feature 2: Papas -->
-            {% if producto_papa %}
-            <a
-              href="{{ url_for('pagina.producto_detalle', id_producto=producto_papa.id_producto) }}"
-              class="relative h-[500px] rounded-3xl overflow-hidden group border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block"
-            >
-              {% if producto_papa.imagen %}
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                src="{{ url_for('static', filename='img/productos/' + producto_papa.imagen) }}"
-                alt="{{ producto_papa.nombre }}"
-              />
-              {% endif %}
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10"
-              >
-                <span
-                  class="bg-gray-800/80 dark:bg-[#101828]/80 backdrop-blur border border-gray-600 text-gray-100 dark:text-gray-300 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest"
-                  >Más vendido</span
-                >
-                <h3
-                  class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-2 drop-shadow-lg"
-                >
-                  {{ producto_papa.nombre }}
-                </h3>
-                <p class="text-[#FF6B00] font-bold text-lg mb-4">
-                  ${{ "%.2f"|format(producto_papa.precio_venta|float) }}
-                </p>
-                <span
-                  class="bg-[#FF6B00] text-white px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] hover:brightness-110 transition-colors w-fit shadow-[0_0_15px_rgba(255,107,0,0.3)]"
-                >
-                  Ver producto
-                </span>
-              </div>
-            </a>
-            {% endif %}
-
-            <!-- Feature 3: Combo -->
-            {% if combo_destacado %}
-            <a
-              href="{{ url_for('pagina.combo_detalle', id_combo=combo_destacado.id_combo) }}"
-              class="relative h-[500px] rounded-3xl overflow-hidden group border border-gray-200 dark:border-gray-700/50 shadow-2xl transition-colors duration-300 block"
-            >
-              {% if combo_destacado.imagen %}
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                src="{{ url_for('static', filename='img/' + combo_destacado.imagen) }}"
-                alt="{{ combo_destacado.nombre }}"
-              />
-              {% endif %}
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10"
-              >
-                <span
-                  class="bg-[#FF6B00]/20 backdrop-blur text-[#FF6B00] border border-[#FF6B00]/40 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest"
-                  >Combo Especial</span
-                >
-                <h3
-                  class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-2 drop-shadow-lg"
-                >
-                  {{ combo_destacado.nombre }}
-                </h3>
-                <p class="text-[#FF6B00] font-bold text-lg mb-4">
-                  ${{ "%.2f"|format(combo_destacado.precio_venta|float) }}
-                </p>
-                <span
-                  class="bg-white text-gray-900 dark:bg-[#101828] dark:text-white border border-gray-200 dark:border-gray-600 px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] w-fit hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  Ver combo
-                </span>
-              </div>
-            </a>
-            {% endif %}
-          </div>
-
-          <!-- ── Right Column ── -->
-          <div class="flex flex-col gap-8">
-            <div
-              class="bg-white dark:bg-[#101828] border border-gray-200 dark:border-gray-700 rounded-3xl p-8 flex flex-col justify-between h-[234px] relative overflow-hidden group shadow-lg transition-colors duration-300"
-            >
-              <div class="relative z-10">
-                <h4
-                  class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] text-2xl font-black transition-colors"
-                >
-                  Velocidad Monster
-                </h4>
-                <p
-                  class="text-gray-600 dark:text-gray-400 mt-2 transition-colors"
-                >
-                  Pide desde la pagina para solo recoger en la sucursal.
-                </p>
-              </div>
-              <svg
-                class="w-32 h-32 absolute -bottom-4 -right-4 text-[#FF6B00]/10 group-hover:scale-110 group-hover:text-[#FF6B00]/20 transition-all"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M15.59 14.37a6 6 0 01-5.84 7.36c-5.91.54-7.5-3.5-7.5-3.5a18.27 18.27 0 014.24-5.4A18.27 18.27 0 0111 8.5c0 0-4.04-1.58-3.5-7.5a6 6 0 017.36-5.84l4.24 4.24c3.5 1 5.5 3 5.5 3l-4.24.47-5.77-5.77-1.41 1.41 5.77 5.77-.47 4.24s-2 2-3 5.5l-4.24-4.24z"
-                ></path>
-              </svg>
-            </div>
-
-            <div
-              class="bg-gradient-to-br from-white to-gray-50 dark:from-[#1F2937] dark:to-[#101828] border border-[#FF6B00]/30 rounded-3xl p-8 flex flex-col justify-between h-[234px] relative overflow-hidden group shadow-[0_0_20px_rgba(255,107,0,0.05)] dark:shadow-[0_0_20px_rgba(255,107,0,0.1)] transition-colors duration-300"
-            >
-              <div class="relative z-10">
-                <h4
-                  class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] text-2xl font-black group-hover:text-[#FF6B00] dark:group-hover:text-[#FF6B00] transition-colors"
-                >
-                  Exclusivo App
-                </h4>
-                <p
-                  class="text-gray-600 dark:text-gray-400 mt-2 transition-colors"
-                >
-                  Descarga la App de Monster Eats y gana combos gratis y
-                  recompensas.
-                </p>
-              </div>
-              <div class="flex gap-2 items-center cursor-pointer">
-                <svg
-                  class="w-5 h-5 inline-block text-[#FF6B00]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                <span class="font-bold text-[#FF6B00]">Descargar</span>
-              </div>
-            </div>
-
-            <a
-              href="{{ url_for('pagina.menu_categoria', categoria='Hamburguesas') }}"
-              class="relative h-[500px] rounded-3xl overflow-hidden group shadow-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-300 block"
-            >
-              <img
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                src="{{ url_for('static', filename='img/categorias_pag/hamburguesa.png') }}"
-                alt="Ver Menú Completo"
-              />
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 dark:from-[#101828] dark:via-[#101828]/40 to-transparent flex flex-col justify-end p-10"
-              >
-                <span
-                  class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-300 border border-gray-300 dark:border-gray-600 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 uppercase tracking-widest"
-                  >Menú Completo</span
-                >
-                <h3
-                  class="text-white font-['Plus_Jakarta_Sans'] text-3xl font-extrabold mb-4 drop-shadow-lg"
-                >
-                  Ver todas las categorías
-                </h3>
-                <span
-                  class="bg-white text-gray-900 dark:bg-[#101828] dark:text-white border border-gray-200 dark:border-gray-600 px-8 py-3 rounded-xl font-bold font-['Plus_Jakarta_Sans'] hover:bg-gray-100 dark:hover:bg-[#FF6B00] dark:hover:border-[#FF6B00] transition-colors w-fit"
-                >
-                  Explorar
-                </span>
-              </div>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- FAQ Section -->
-
-      <section class="max-w-screen-xl mx-auto px-4 py-16">
-        <div class="text-center mb-12">
-          <h2
-            class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors"
-          >
-            ¿Necesitas alguna razón más?
-          </h2>
-        </div>
-        <div class="max-w-4xl mx-auto space-y-2">
-          <div
-            class="border-b border-gray-200 dark:border-gray-700 transition-colors"
-          >
-            <button
-              class="w-full flex items-center justify-between py-6 text-left group hover:text-[#FF6B00] transition-colors"
-            >
-              <span
-                class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
-                >¿Qué medios de pago acepta Monster Eats?</span
-              >
-              <svg
-                class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </button>
-          </div>
-          <div
-            class="border-b border-gray-200 dark:border-gray-700 transition-colors"
-          >
-            <button
-              class="w-full flex items-center justify-between py-6 text-left group hover:text-[#FF6B00] transition-colors"
-            >
-              <span
-                class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
-                >¿Cómo puedo cancelar mi pedido?</span
-              >
-              <svg
-                class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </button>
-          </div>
-          <div
-            class="border-b border-gray-200 dark:border-gray-700 transition-colors"
-          >
-            <button
-              class="w-full flex items-center justify-between py-6 text-left group hover:text-[#FF6B00] transition-colors"
-            >
-              <span
-                class="text-xl font-semibold font-['Plus_Jakarta_Sans'] text-gray-800 dark:text-white group-hover:text-[#FF6B00] transition-colors"
-                >Seguimiento del estado de mi pedido</span
-              >
-              <svg
-                class="w-6 h-6 inline-block text-gray-400 dark:text-gray-500 group-hover:text-[#FF6B00] transition-colors"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer Standalone -->
-    <footer
-      class="w-full bg-gray-100 dark:bg-[#020617] border-t border-gray-300 dark:border-gray-800 text-gray-600 dark:text-gray-400 py-16 transition-colors duration-300"
-    >
-      <div class="max-w-screen-2xl mx-auto px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-3">
-              <img
-                src="{{ url_for('static', filename='img/monster_logo.png') }}"
-                alt="Monster Eats Logo"
-                class="h-20 md:h-24 w-auto drop-shadow-md hover:scale-105 transition-transform"
-              />
-              <span
-                class="text-xl font-black text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] tracking-tight transition-colors"
-                >Monster Eats</span
-              >
-            </div>
-            <p class="text-sm leading-relaxed max-w-xs text-gray-500">
-              Hamburguesas monstruosas. Sabores increíbles. Experiencia
-              inigualable.
-            </p>
-          </div>
-          <div class="flex flex-col gap-4">
-            <h5
-              class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors"
-            >
-              Menú
-            </h5>
-            <ul class="flex flex-col gap-3 text-sm">
-              <li>
-                <a class="hover:text-[#FF6B00] transition-colors" href="#"
-                  >Hamburguesas</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Combos') }}"
-                  >Combos</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Bebidas') }}"
-                  >Bebidas</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Postres') }}"
-                  >Postres</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Desayunos') }}"
-                  >Desayunos</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Postres') }}"
-                  >Postres</a
-                >
-              </li>
-              <li>
-                <a
-                  class="hover:text-[#FF6B00] transition-colors"
-                  href="{{ url_for('pagina.menu_categoria', categoria='Hot Dogs') }}"
-                  >Hot Dogs</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div class="flex flex-col gap-4">
-            <h5
-              class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors"
-            >
-              Empresa
-            </h5>
-            <ul class="flex flex-col gap-3 text-sm">
-              <li>
-                <a class="hover:text-[#FF6B00] transition-colors" href="#"
-                  >Sobre nosotros</a
-                >
-              </li>
-              <li>
-                <a class="hover:text-[#FF6B00] transition-colors" href="#"
-                  >Sucursales</a
-                >
-              </li>
-              <li>
-                <a class="hover:text-[#FF6B00] transition-colors" href="/login"
-                  >Inicia sesión</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div class="flex flex-col gap-4">
-            <h5
-              class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors"
-            >
-              Redes Sociales
-            </h5>
-            <div class="flex gap-3">
-              <a
-                class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent flex items-center justify-center hover:bg-[#FF6B00] dark:hover:bg-[#FF6B00] hover:text-white transition-all text-gray-500 dark:text-gray-400"
-                href="#"
-              >
-                <svg
-                  class="w-5 h-5 inline-block"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  ></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div
-          class="pt-8 border-t border-gray-300 dark:border-gray-800 flex justify-center items-center transition-colors"
-        >
-          <p class="text-xs text-gray-500 dark:text-gray-600">
-            © 2026 Monster Eats. Todos los derechos reservados.
+          <p class="text-sm leading-relaxed max-w-xs text-gray-500">
+            Hamburguesas monstruosas. Sabores increíbles. Experiencia inigualable.
           </p>
         </div>
+        <div class="flex flex-col gap-4">
+          <h5
+            class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors">
+            Menú
+          </h5>
+          <ul class="flex flex-col gap-3 text-sm">
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors" href="#">Hamburguesas</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors"
+                href="{{ url_for('pagina.menu_categoria', categoria='Combos') }}">Combos</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors"
+                href="{{ url_for('pagina.menu_categoria', categoria='Bebidas') }}">Bebidas</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors"
+                href="{{ url_for('pagina.menu_categoria', categoria='Postres') }}">Postres</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors"
+                href="{{ url_for('pagina.menu_categoria', categoria='Desayunos') }}">Desayunos</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors"
+                href="{{ url_for('pagina.menu_categoria', categoria='Hot Dogs') }}">Hot Dogs</a>
+            </li>
+          </ul>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h5
+            class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors">
+            Empresa
+          </h5>
+          <ul class="flex flex-col gap-3 text-sm">
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors" href="#">Sobre nosotros</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors" href="#">Sucursales</a>
+            </li>
+            <li>
+              <a class="hover:text-[#FF6B00] transition-colors" href="/login">Inicia sesión</a>
+            </li>
+          </ul>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h5
+            class="text-gray-900 dark:text-white font-['Plus_Jakarta_Sans'] font-bold text-sm uppercase tracking-wider transition-colors">
+            Redes Sociales
+          </h5>
+          <div class="flex gap-3">
+            <a class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent flex items-center justify-center hover:bg-[#FF6B00] dark:hover:bg-[#FF6B00] hover:text-white transition-all text-gray-500 dark:text-gray-400"
+              href="#">
+              <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z">
+                </path>
+              </svg>
+            </a>
+          </div>
+        </div>
       </div>
-    </footer>
+      <div
+        class="pt-8 border-t border-gray-300 dark:border-gray-800 flex justify-center items-center transition-colors">
+        <p class="text-xs text-gray-500 dark:text-gray-600">
+          © 2026 Monster Eats. Todos los derechos reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
 
-    <script>
-      const menuToggle = document.getElementById("menu-toggle");
-      const mobileMenu = document.getElementById("mobile-menu");
-      menuToggle.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
+  <script>
+    // ==========================================
+    // LÓGICA PARA EL MENÚ MÓVIL 
+    // ==========================================
+    const menuToggle = document.getElementById("menu-toggle");
+    const closeMenu = document.getElementById("close-menu");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const menuOverlay = document.getElementById("menu-overlay");
+
+    function openSidebar() {
+      // Removemos clase que lo esconde y trasladamos a la vista
+      mobileMenu.classList.remove("-translate-x-full");
+      menuOverlay.classList.remove("hidden");
+
+      // Pequeño timeout para que se aplique la transición de opacidad
+      setTimeout(() => {
+        menuOverlay.classList.remove("opacity-0");
+      }, 10);
+
+      // Evita scroll en la página de fondo
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeSidebar() {
+      // Lo empujamos fuera de la pantalla
+      mobileMenu.classList.add("-translate-x-full");
+      menuOverlay.classList.add("opacity-0");
+
+      // Esperamos que termine la transición para esconder el overlay
+      setTimeout(() => {
+        menuOverlay.classList.add("hidden");
+      }, 300);
+
+      // Restauramos el scroll
+      document.body.style.overflow = "auto";
+    }
+
+    menuToggle.addEventListener("click", openSidebar);
+    closeMenu.addEventListener("click", closeSidebar);
+    menuOverlay.addEventListener("click", closeSidebar);
+
+    // ==========================================
+    // LÓGICA PARA EL ACORDEÓN (FAQ)
+    // ==========================================
+    const faqButtons = document.querySelectorAll('.faq-btn');
+
+    faqButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('.faq-icon');
+
+        // Comprobar si el que tocamos ya está abierto
+        const isOpen = content.classList.contains('max-h-96');
+
+        // Cerrar todos los demás primero (Opcional, si quieres que solo uno esté abierto a la vez)
+        document.querySelectorAll('.faq-content').forEach(el => {
+          el.classList.remove('max-h-96', 'opacity-100');
+          el.classList.add('max-h-0', 'opacity-0');
+        });
+        document.querySelectorAll('.faq-icon').forEach(el => {
+          el.classList.remove('-rotate-180');
+        });
+
+        // Si NO estaba abierto, lo abrimos
+        if (!isOpen) {
+          // Cambiamos clases de Tailwind para animar
+          content.classList.remove('max-h-0', 'opacity-0');
+          content.classList.add('max-h-96', 'opacity-100'); // max-h-96 es suficiente para textos medianos
+          icon.classList.add('-rotate-180'); // Gira la flechita
+        }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
