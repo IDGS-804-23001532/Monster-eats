@@ -39,39 +39,31 @@
     <div class="w-full max-w-[1168px] mx-auto bg-[#0B1D33] p-10 rounded-xl border border-[#ffffff] shadow-2xl mb-10">
         <div class="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
             <h3 class="text-xl font-black uppercase italic tracking-tighter">Rendimiento Semanal</h3>
+            <div class="text-right text-sm">
+                <div class="text-gray-300">Total semana (ganancia): <span class="text-white font-black">${{ "{:,.0f}".format(weekly_profit_total) }}</span></div>
+                <div class="text-gray-400">Promedio diario (ganancia): <span class="text-white">${{ "{:,.0f}".format(weekly_avg) }}</span></div>
+                <div class="text-gray-400">Crecimiento vs semana anterior: <span class="text-white">{% if week_growth is not none %}{{ "{:+.1f}%".format(week_growth) }}{% else %}N/A{% endif %}</span></div>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-orange-600 rounded-full border border-white/20"></span>
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ingresos</span>
+                    <span class="w-3 h-3 bg-emerald-500 rounded-full border border-white/20"></span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ganancias</span>
                 </div>
             </div>
         </div>
         
-        <!-- Contenedor de Barras CSS -->
-        <div class="flex items-end justify-between h-64 gap-2 md:gap-4 px-2">
-            {% if chart_data %}
-                {% set max_val = chart_data | max if chart_data | max > 0 else 1 %}
-                {% for i in range(chart_data|length) %}
-                    {% set height = (chart_data[i] / max_val * 100) | round | int %}
-                    <div class="flex-1 flex flex-col items-center group">
-                        <div class="w-full bg-gradient-to-t from-orange-600/20 to-orange-500 rounded-t-md relative transition-all duration-500 hover:to-orange-400 hover:shadow-glow-orange group border-x border-t border-white/10" 
-                             style="height: {{ height }}%;">
-                            <!-- Tooltip CSS -->
-                            <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-[#0B1D33] px-2 py-1 rounded text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl border border-[#0B1D33]">
-                                ${{ "{:,.0f}".format(chart_data[i]) }}
-                            </div>
-                        </div>
-                        <span class="text-[10px] font-bold text-gray-500 mt-4 uppercase tracking-tighter truncate w-full text-center">
-                            {{ chart_labels[i] }}
-                        </span>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="w-full flex items-center justify-center text-gray-700 font-black uppercase text-sm italic tracking-[0.3em]">
-                    Esperando datos...
-                </div>
-            {% endif %}
+        <!-- Gráfica semanal (Chart.js) -->
+        <div class="w-full h-64 px-2">
+            <canvas id="weeklyChart" style="width:100%; height:100%;"></canvas>
         </div>
+
+        <script>
+            // Data for external chart script
+            window._dashboardData = window._dashboardData || {};
+            window._dashboardData.weeklyLabels = {{ chart_labels|tojson }};
+            window._dashboardData.weeklyData = {{ chart_data|tojson }};
+        </script>
+        <script src="{{ url_for('static', filename='js/dashboard_charts.js') }}"></script>
     </div>
 
     <!-- SECCIÓN INFERIOR (Ranking de Productos) -->
