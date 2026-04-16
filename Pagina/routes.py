@@ -128,6 +128,59 @@ def menu_categoria(categoria):
     )
 
 
+@pagina_bp.route('/buscar', methods=['GET'])
+def buscar():
+    """Buscador global que busca en productos y combos por nombre.
+    Devuelve la misma plantilla de catálogo con resultados combinados.
+    """
+    q = request.args.get('q', '').strip()
+    if not q:
+        return redirect(url_for('pagina.menu_categoria', categoria='Hamburguesas'))
+
+    productos = []
+
+    # Buscar productos
+    prods = Producto.query.filter(Producto.nombre.ilike(f"%{q}%"), Producto.activo == True)
+    for p in prods.all():
+        inv = InventarioProducto.query.filter_by(id_producto=p.id_producto).first()
+        stock = inv.stock_actual if inv else 0
+        puede_producir = _tiene_ingredientes_suficientes(p.id_producto)
+        productos.append({
+            'nombre':       p.nombre,
+            'precio_venta': p.precio_venta,
+            'imagen':       p.imagen or 'default_product.png',
+            'es_combo':     False,
+            'id_combo':     None,
+            'id_producto':  p.id_producto,
+            'disponible':   True if stock > 0 or puede_producir else False,
+            'stock':        int(stock),
+            'puede_producir': puede_producir,
+        })
+
+    # Buscar combos
+    combos_qs = Combo.query.filter(Combo.nombre.ilike(f"%{q}%"), Combo.activo == True).all()
+    for c in combos_qs:
+        disponible = True
+        for det in c.detalles:
+            inv = InventarioProducto.query.filter_by(id_producto=det.id_producto).first()
+            stock = inv.stock_actual if inv else 0
+            if stock < det.cantidad:
+                disponible = False
+                break
+        productos.append({
+            'nombre':       c.nombre,
+            'precio_venta': c.precio_venta,
+            'imagen':       c.imagen or 'default_combo.png',
+            'es_combo':     True,
+            'id_combo':     c.id_combo,
+            'id_producto':  None,
+            'disponible':   disponible,
+        })
+
+    categoria_nombre = f'Resultados para "{q}"'
+    return render_template('Pagina/Productos.html', productos=productos, categoria_nombre=categoria_nombre, categoria_param='buscar', q=q)
+
+
 # ── Detalle de Producto ──────────────────────────────────────────────────────
 
 @pagina_bp.route('/producto/<int:id_producto>', methods=['GET'])

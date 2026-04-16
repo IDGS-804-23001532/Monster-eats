@@ -127,17 +127,8 @@
           class="text-white font-['Plus_Jakarta_Sans'] text-5xl md:text-7xl font-extrabold tracking-tight max-w-2xl mb-8 leading-tight drop-shadow-2xl">
           Empieza con tu pedido
         </h1>
-        <div
-          class="bg-gray-900/80 backdrop-blur-md p-2 rounded-full flex gap-2 mb-8 editorial-shadow border border-gray-700/50">
-          <button
-            class="px-6 py-3 rounded-full bg-[#FF6B00] text-white font-bold font-['Plus_Jakarta_Sans'] transition-all shadow-[0_0_15px_rgba(255,107,0,0.3)] cursor-default">
-            Pide en línea
-          </button>
-          <button class="px-6 py-3 rounded-full text-gray-300 font-bold font-['Plus_Jakarta_Sans'] cursor-default">
-            Recoge en sucursal
-          </button>
-        </div>
-        <div class="w-full max-w-3xl flex flex-col md:flex-row gap-4">
+      
+        <form method="GET" action="{{ url_for('pagina.buscar') }}" class="w-full max-w-3xl flex flex-col md:flex-row gap-4">
           <div
             class="flex-1 bg-gray-900/90 backdrop-blur-md rounded-xl flex items-center px-6 py-4 editorial-shadow border border-gray-700 focus-within:ring-2 ring-[#FF6B00]">
             <svg class="w-6 h-6 inline-block text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,14 +136,15 @@
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input
+              name="q"
               class="bg-transparent border-none outline-none w-full text-lg font-medium text-white focus:ring-0 placeholder-gray-500"
-              placeholder="Busca tu hamburguesa favorita..." type="text" />
+              placeholder="Busca tu hamburguesa favorita..." type="search" aria-label="Buscar productos" />
           </div>
-          <button
+          <button type="submit"
             class="bg-gradient-to-br from-[#FF6B00] to-[#E65A00] text-white px-10 py-4 rounded-xl text-xl font-bold font-['Plus_Jakarta_Sans'] editorial-shadow hover:scale-105 active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,107,0,0.5)]">
-            Comenzar
+            Buscar
           </button>
-        </div>
+        </form>
       </div>
     </section>
 
