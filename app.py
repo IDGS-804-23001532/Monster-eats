@@ -68,7 +68,7 @@ user_datastore = SQLAlchemyUserDatastore(db, Usuario, Rol)
 seguridad_app = Security(app, user_datastore)
 
 # Expiración por inactividad
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 60)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 10)
 app.config['SESSION_COOKIE_SECURE'] = False 
 app.config['SESSION_COOKIE_HTTPONLY'] = True # Evitar que el XSS robe la cookie
 

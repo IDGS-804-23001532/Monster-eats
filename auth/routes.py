@@ -264,14 +264,17 @@ def crear_cajero_demo():
         )
         db.session.commit()
 
-        nueva_persona = Persona(
-            nombre="Diego Alejandro",
-            apellido_pa="Gonzalez",
-            apellido_ma="Gaytan",
-            telefono="4771200987"
-        )
-        db.session.add(nueva_persona)
-        db.session.flush()
+        telefono_demo = "4771200987"
+        nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
+        if not nueva_persona:
+            nueva_persona = Persona(
+                nombre="Diego Alejandro",
+                apellido_pa="Gonzalez",
+                apellido_ma="Gaytan",
+                telefono=telefono_demo
+            )
+            db.session.add(nueva_persona)
+            db.session.flush()
 
         nuevo_usuario = user_datastore.create_user(
             id_persona=nueva_persona.id_persona,
@@ -310,14 +313,17 @@ def gerente_full():
         usuario = Usuario.query.filter_by(email=email).first()
         
         if not usuario:
-            nueva_persona = Persona(
-                nombre="Isaac",
-                apellido_pa="Rivera",
-                apellido_ma="Martinez",
-                telefono="4771800597"
-            )
-            db.session.add(nueva_persona)
-            db.session.flush()
+            telefono_demo = "4771800650"
+            nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
+            if not nueva_persona:
+                nueva_persona = Persona(
+                    nombre="Isaac",
+                    apellido_pa="Rivera",
+                    apellido_ma="Martinez",
+                    telefono=telefono_demo
+                )
+                db.session.add(nueva_persona)
+                db.session.flush()
 
             usuario = user_datastore.create_user(
                 id_persona=nueva_persona.id_persona,
@@ -332,16 +338,14 @@ def gerente_full():
             usuario.active = True
             usuario.password = generate_password_hash(password_plana)
             # Actualizamos el nombre para que sepa que es el nuevo
-            usuario.persona.nombre = "SUPER"
-            usuario.persona.apellido_pa = "GERENTE"
+            usuario.persona.nombre = "Isaac"
+            usuario.persona.apellido_pa = "Rivera"
+            usuario.persona.apellido_ma = "Martinez"
 
         # 2. Lista de roles EXACTOS según layout.html
         # Nota: 'Cajero' es con C mayúscula en layout.html
         roles_a_asignar = [
-            ("gerente", "Acceso total"),
-            ("cocina", "Cocina"),
-            ("cliente", "Cliente"),
-            ("Cajero", "Cajero")
+            ("gerente", "Acceso total")
         ]
 
         # Limpiamos roles actuales para evitar duplicados o conflictos
@@ -353,7 +357,7 @@ def gerente_full():
         
         db.session.commit()
 
-        flash(f"¡ÉXITO! Usuario '{email}' configurado como SUPER GERENTE con todos los roles. CIERRA SESIÓN Y ENTRA DE NUEVO.", "success")
+        flash(f"¡ÉXITO! Usuario '{email}' configurado con rol Gerente. CIERRA SESIÓN Y ENTRA DE NUEVO.", "success")
         return redirect(url_for("auth.login"))
 
     except Exception as error:
@@ -385,14 +389,17 @@ def crear_cocinero_demo():
         
         db.session.commit()
 
-        nueva_persona = Persona(
-            nombre="Demo",
-            apellido_pa="Demo",
-            apellido_ma="Demo",
-            telefono="2220009999" # Cambiamos el teléfono para evitar el error de duplicado
-        )
-        db.session.add(nueva_persona)
-        db.session.flush()
+        telefono_demo = "2220009999"
+        nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
+        if not nueva_persona:
+            nueva_persona = Persona(
+                nombre="Mariana",
+                apellido_pa="Lopez",
+                apellido_ma="Diaz",
+                telefono=telefono_demo
+            )
+            db.session.add(nueva_persona)
+            db.session.flush()
 
         nuevo_usuario = user_datastore.create_user(
             id_persona=nueva_persona.id_persona,
