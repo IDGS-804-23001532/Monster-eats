@@ -250,7 +250,7 @@ def crear_cajero_demo():
     from app import user_datastore
 
     try:
-        email = "alexgonzalezgaytan@gmail.com"
+        email = "riveravalderramachristopherisa@gmail.com"
         password_plana = "Diego123#"
 
         usuario_existente = Usuario.query.filter_by(email=email).first()
@@ -268,9 +268,9 @@ def crear_cajero_demo():
         nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
         if not nueva_persona:
             nueva_persona = Persona(
-                nombre="Diego Alejandro",
-                apellido_pa="Gonzalez",
-                apellido_ma="Gaytan",
+                nombre="Marquitos Roldan",
+                apellido_pa="Perez",
+                apellido_ma="Perez",
                 telefono=telefono_demo
             )
             db.session.add(nueva_persona)
@@ -317,9 +317,9 @@ def gerente_full():
             nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
             if not nueva_persona:
                 nueva_persona = Persona(
-                    nombre="Isaac",
-                    apellido_pa="Rivera",
-                    apellido_ma="Martinez",
+                    nombre="Christopher",
+                    apellido_pa="GALLEGOS",
+                    apellido_ma="PEREZ",
                     telefono=telefono_demo
                 )
                 db.session.add(nueva_persona)
@@ -338,9 +338,9 @@ def gerente_full():
             usuario.active = True
             usuario.password = generate_password_hash(password_plana)
             # Actualizamos el nombre para que sepa que es el nuevo
-            usuario.persona.nombre = "Isaac"
-            usuario.persona.apellido_pa = "Rivera"
-            usuario.persona.apellido_ma = "Martinez"
+            usuario.persona.nombre = "Christopher"
+            usuario.persona.apellido_pa = "GALLEGOS"
+            usuario.persona.apellido_ma = "PEREZ"
 
         # 2. Lista de roles EXACTOS según layout.html
         # Nota: 'Cajero' es con C mayúscula en layout.html
@@ -393,9 +393,9 @@ def crear_cocinero_demo():
         nueva_persona = Persona.query.filter_by(telefono=telefono_demo).first()
         if not nueva_persona:
             nueva_persona = Persona(
-                nombre="Mariana",
-                apellido_pa="Lopez",
-                apellido_ma="Diaz",
+                nombre="Demo",
+                apellido_pa="Demo",
+                apellido_ma="Demo",
                 telefono=telefono_demo
             )
             db.session.add(nueva_persona)
