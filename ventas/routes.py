@@ -14,7 +14,7 @@ from audit_logger import audit
 
 @venta.route('/ventas', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('Cajero', 'Gerente', 'gerente')
+@roles_accepted('cajero', 'Gerente', 'gerente')
 @limiter.limit('20 per minute') # 20 request por minuto
 def ventas():
     create_form = forms.VentasForm(request.form)
